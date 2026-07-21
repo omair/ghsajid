@@ -1,0 +1,12 @@
+---
+title: "پنجیا"
+slug: "panjia"
+language: "punjabi"
+script: "shahmukhi"
+published: 2020-05-09
+source: "youtube"
+url: "https://www.youtube.com/watch?v=0csAYaeSrU0"
+video_id: "0csAYaeSrU0"
+---
+
+

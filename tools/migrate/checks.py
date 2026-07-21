@@ -27,10 +27,14 @@ def normalized(text: str) -> str:
     return WHITESPACE.sub("", text)
 
 
-def fidelity_errors(post: Post, piece: Piece) -> list[str]:
-    """Confirm the author's words survived the conversion intact."""
+def fidelity_errors(post: Post, piece: Piece, extra_text: str = "") -> list[str]:
+    """Confirm the author's words survived the conversion intact.
+
+    `extra_text` carries text moved out of the body into frontmatter (or
+    deliberately dropped), so relocating a colophon still has to balance.
+    """
     source = normalized(strip_embeds(post.body))
-    emitted = normalized(piece.body)
+    emitted = normalized(piece.body + extra_text)
     if source != emitted:
         return [
             f"text mismatch in {piece.kind}/{piece.slug}: "

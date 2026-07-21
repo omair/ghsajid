@@ -13,7 +13,7 @@ from .models import Piece
 # Order matters: this is what a human sees at the top of every file.
 FIELD_ORDER = [
     "reviewed_book", "reviewed_author", "source", "url", "video_id",
-    "recorded", "description", "published_in", "part",
+    "recorded", "description", "written_note", "published_in", "part",
 ]
 
 

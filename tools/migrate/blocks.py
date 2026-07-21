@@ -37,6 +37,37 @@ def _clean(fragment: str) -> str:
     return "\n".join(ln for ln in lines if ln)
 
 
+AUTHOR_NAME = "غلام حسین ساجد"
+SEPARATOR = re.compile(r"^[-–—_=\s]{3,}$")
+
+
+def split_trailing_notes(markdown: str) -> tuple[str, list[str], list[str]]:
+    """Separate a ghazal's verse from trailing non-verse lines.
+
+    Some ghazals end with a colophon (date and place of composition), a
+    separator rule, or the poet's signature. WordPress rendered these as
+    ordinary paragraphs, so they arrive looking like a one-line sher.
+
+    Returns (verse, colophons, removed). `removed` holds every stripped line
+    in document order — including the colophons — so the fidelity check can
+    reassemble the original text exactly.
+    """
+    stanzas = [s for s in markdown.split("\n\n") if s.strip()]
+    colophons: list[str] = []
+    removed: list[str] = []
+
+    while stanzas and "\n" not in stanzas[-1]:
+        line = stanzas[-1].strip()
+        if not (SEPARATOR.match(line) or line == AUTHOR_NAME):
+            colophons.append(line)
+        removed.append(line)
+        stanzas.pop()
+
+    colophons.reverse()
+    removed.reverse()
+    return "\n\n".join(stanzas), colophons, removed
+
+
 def to_markdown(html: str, *, is_verse: bool) -> str:
     """Convert block HTML to markdown under the project's verse convention.
 

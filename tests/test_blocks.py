@@ -1,6 +1,10 @@
 import unittest
 
-from tools.migrate.blocks import strip_embeds, to_markdown
+from tools.migrate.blocks import (
+    split_trailing_notes,
+    strip_embeds,
+    to_markdown,
+)
 
 GHAZAL = """
 <!-- wp:paragraph {"align":"right"} -->
@@ -73,6 +77,29 @@ class TestTatweel(unittest.TestCase):
     def test_tatweel_is_stripped_from_body(self):
         self.assertEqual(to_markdown("<p>ســبز</p>", is_verse=True), "سبز")
 
+
+
+class TestTrailingNotes(unittest.TestCase):
+    def test_colophon_is_separated_from_the_verse(self):
+        verse, colophons, removed = split_trailing_notes(
+            "ایک\nدو\n\nتین\nچار\n\n٢١ مارچ ، بستی کبیر سنپال"
+        )
+        self.assertEqual(verse, "ایک\nدو\n\nتین\nچار")
+        self.assertEqual(colophons, ["٢١ مارچ ، بستی کبیر سنپال"])
+        self.assertEqual(removed, ["٢١ مارچ ، بستی کبیر سنپال"])
+
+    def test_separator_and_signature_are_discarded(self):
+        verse, colophons, removed = split_trailing_notes(
+            "ایک\nدو\n\n-----------\n\nغلام حسین ساجد"
+        )
+        self.assertEqual(verse, "ایک\nدو")
+        self.assertEqual(colophons, [])
+        self.assertEqual(removed, ["-----------", "غلام حسین ساجد"])
+
+    def test_verse_without_trailing_notes_is_untouched(self):
+        verse, colophons, removed = split_trailing_notes("ایک\nدو\n\nتین\nچار")
+        self.assertEqual(verse, "ایک\nدو\n\nتین\nچار")
+        self.assertEqual((colophons, removed), ([], []))
 
 if __name__ == "__main__":
     unittest.main()
