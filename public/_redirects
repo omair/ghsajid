@@ -1,0 +1,4 @@
+# Query-string permalinks (?p=N) are handled by functions/_middleware.ts —
+# _redirects cannot match query strings. The live WordPress site used no
+# pretty permalinks, so there are no post_name paths to map here.
+/index.php/* /:splat 301
