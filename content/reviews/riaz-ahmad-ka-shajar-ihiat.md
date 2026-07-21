@@ -1,5 +1,5 @@
 ---
-title: "ریاظ احمد کا"" شجر ِحیات"""
+title: "ریاظ احمد کا\" شجر ِحیات\""
 slug: "riaz-ahmad-ka-shajar-ihiat"
 language: "urdu"
 script: "nastaliq"

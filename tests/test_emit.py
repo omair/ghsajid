@@ -36,7 +36,16 @@ class TestFrontmatter(unittest.TestCase):
 
     def test_escapes_embedded_quotes(self):
         fm = frontmatter(piece(title='کتاب "شعور"'))
-        self.assertIn('title: "کتاب ""شعور"""', fm)
+        self.assertIn(r'title: "کتاب \"شعور\""', fm)
+
+    def test_quoted_values_are_parseable_scalars(self):
+        # YAML double-quoted scalars are JSON strings, so a valid emission
+        # must round-trip through json.loads. This catches escaping bugs that
+        # a substring assertion cannot.
+        for title in ['کتاب "شعور"', "back\\slash", "پہلا\tدوسرا", "plain"]:
+            line = frontmatter(piece(title=title)).splitlines()[0]
+            value = line[len("title: "):]
+            self.assertEqual(json.loads(value), title)
 
 
 class TestWrite(unittest.TestCase):

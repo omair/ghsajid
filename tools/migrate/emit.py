@@ -18,7 +18,13 @@ FIELD_ORDER = [
 
 
 def _quote(value) -> str:
-    return '"' + str(value).replace('"', '""') + '"'
+    """Render a YAML double-quoted scalar.
+
+    YAML double-quoted scalars use JSON string syntax — backslash escapes,
+    not the doubled quotes of the single-quoted style — so json.dumps is
+    exactly right and handles quotes, backslashes and control characters.
+    """
+    return json.dumps(str(value), ensure_ascii=False)
 
 
 def _render(key: str, value) -> str | None:
