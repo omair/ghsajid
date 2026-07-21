@@ -8,6 +8,9 @@
     "binding": "ASSETS",
     // The Worker must see "/?p=123" before static serving does — otherwise
     // "/" resolves to index.html and the redirect never runs.
-    "run_worker_first": true
+    "run_worker_first": true,
+    // Serve /dars-gah/1 directly instead of 307ing to /dars-gah/1/, so an old
+    // inbound link costs one redirect rather than two.
+    "html_handling": "drop-trailing-slash"
   }
 }
