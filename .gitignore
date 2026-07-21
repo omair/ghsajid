@@ -4,6 +4,9 @@ dist/
 media/video/
 .DS_Store
 .claude/
+data/
+.venv/
+__pycache__/
 
 # Local planning docs -- not published
 docs/superpowers/
