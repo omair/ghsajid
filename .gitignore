@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+media/video/
+.DS_Store
+.claude/
+
+# Local planning docs -- not published
+docs/superpowers/
