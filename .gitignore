@@ -10,3 +10,6 @@ __pycache__/
 
 # Local planning docs -- not published
 docs/superpowers/
+
+# Fetched tool binary, not source
+tools/bin/
