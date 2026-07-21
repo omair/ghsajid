@@ -38,7 +38,24 @@ def _clean(fragment: str) -> str:
 
 
 AUTHOR_NAME = "غلام حسین ساجد"
-SEPARATOR = re.compile(r"^[-–—_=\s]{3,}$")
+SEPARATOR = re.compile(r"^[-–—_=۔\s]{3,}$")
+# "تحریر: غلام حسین ساجد" or the bare name, as a standalone closing line.
+BYLINE = re.compile(rf"^(?:تحریر\s*[:؛]?\s*)?{AUTHOR_NAME}$")
+
+
+def strip_byline(markdown: str) -> tuple[str, list[str]]:
+    """Remove a trailing byline from prose.
+
+    Every review closes by naming its author, which is redundant on his own
+    site. Only exact byline matches are removed, so a genuine short closing
+    paragraph is never mistaken for one.
+    """
+    paragraphs = [p for p in markdown.split("\n\n") if p.strip()]
+    removed: list[str] = []
+    while paragraphs and BYLINE.match(paragraphs[-1].strip()):
+        removed.append(paragraphs.pop().strip())
+    removed.reverse()
+    return "\n\n".join(paragraphs), removed
 
 
 def split_trailing_notes(markdown: str) -> tuple[str, list[str], list[str]]:

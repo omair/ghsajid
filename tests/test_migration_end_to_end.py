@@ -13,7 +13,7 @@ class TestFullMigration(unittest.TestCase):
         cls.survivors, cls.redirects, cls.removed = build_pieces(parse_posts(EXPORT))
 
     def test_produces_the_expected_file_count(self):
-        self.assertEqual(len(self.survivors), 96)
+        self.assertEqual(len(self.survivors), 97)
 
     def test_kind_counts_match_the_spec(self):
         counts: dict[str, int] = {}
@@ -21,11 +21,12 @@ class TestFullMigration(unittest.TestCase):
             counts[p.kind] = counts.get(p.kind, 0) + 1
         self.assertEqual(
             counts,
-            {"memoir": 53, "ghazals": 21, "reviews": 9, "nazms": 4, "videos": 9},
+            {"memoir": 53, "ghazals": 21, "reviews": 9, "nazms": 4, "videos": 10},
         )
 
-    def test_both_duplicates_are_redirected(self):
-        self.assertEqual(len(self.redirects), 2)
+    def test_the_duplicated_ghazal_is_redirected(self):
+        # Only the twice-posted ghazal merges; the shared video does not.
+        self.assertEqual(len(self.redirects), 1)
 
     def test_memoir_parts_are_numbered_one_to_fiftythree(self):
         parts = sorted(p.extra["part"] for p in self.survivors if p.kind == "memoir")
@@ -39,7 +40,7 @@ class TestFullMigration(unittest.TestCase):
     def test_reviews_are_split_into_book_and_author(self):
         reviews = [p for p in self.survivors if p.kind == "reviews"]
         parsed = [r for r in reviews if r.extra.get("reviewed_author")]
-        self.assertEqual(len(parsed), 7)   # 2 titles do not match the pattern
+        self.assertEqual(len(parsed), 9)   # 7 by pattern, 2 by confirmed override
 
     def test_ghazal_colophons_move_to_frontmatter(self):
         noted = [
@@ -59,6 +60,12 @@ class TestFullMigration(unittest.TestCase):
                     all(len(s.split("\n")) % 2 == 0 for s in stanzas),
                     f"{p.slug} has an odd sher",
                 )
+
+    def test_reviews_do_not_end_with_a_byline(self):
+        for p in self.survivors:
+            if p.kind == "reviews":
+                self.assertNotIn("تحریر: غلام حسین ساجد", p.body)
+                self.assertFalse(p.body.strip().endswith("غلام حسین ساجد"))
 
     def test_no_slug_is_empty_or_duplicated(self):
         keys = [(p.kind, p.slug) for p in self.survivors]

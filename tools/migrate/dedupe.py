@@ -19,9 +19,12 @@ def piece_url(piece: Piece) -> str:
 
 
 def _identity(piece: Piece):
-    """What makes two pieces the same work."""
-    if piece.kind == "videos":
-        return ("videos", piece.extra.get("video_id"))
+    """What makes two pieces the same work.
+
+    Deliberately keyed on title, not on video id: one recording can hold two
+    distinct works (an Urdu and a Punjabi piece recited in the same sitting),
+    and merging on the shared video would erase one of them.
+    """
     return (piece.kind, piece.slug)
 
 

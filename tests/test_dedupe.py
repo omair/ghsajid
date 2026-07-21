@@ -30,15 +30,17 @@ class TestMergeDuplicates(unittest.TestCase):
         self.assertEqual(survivors[0].source_post_ids, [10, 20])
         self.assertEqual(redirects, {20: "/ghazal/same"})
 
-    def test_videos_merge_on_video_id_not_slug(self):
+    def test_one_recording_under_two_titles_stays_two_works(self):
+        # An Urdu and a Punjabi piece recited in the same sitting share a
+        # video file but are distinct works.
         survivors, redirects = merge_duplicates(
             [
                 piece("videos", "urdu-title", 30, video_id="AOl"),
                 piece("videos", "punjabi-title", 40, video_id="AOl"),
             ]
         )
-        self.assertEqual(len(survivors), 1)
-        self.assertEqual(redirects, {40: "/video/urdu-title"})
+        self.assertEqual(len(survivors), 2)
+        self.assertEqual(redirects, {})
 
     def test_distinct_pieces_are_untouched(self):
         survivors, redirects = merge_duplicates(

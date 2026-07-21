@@ -4,7 +4,7 @@ import re
 import sys
 from pathlib import Path
 
-from .blocks import split_trailing_notes, strip_embeds, to_markdown
+from .blocks import split_trailing_notes, strip_byline, strip_embeds, to_markdown
 from .checks import fidelity_errors, verse_errors
 from .classify import classify
 from .dedupe import merge_duplicates, piece_url
@@ -31,7 +31,21 @@ def _memoir_part(post: Post) -> int:
     return int(match.group(1))
 
 
+# Two review titles do not follow "Book / Author". Confirmed with Omair:
+# the first names an author whose books the piece never titles; the second
+# spells the name ریاظ in the source, corrected here to the conventional ریاض.
+REVIEW_OVERRIDES = {
+    "کاشف حسین غائر کی دو کتابیں": {"reviewed_author": "کاشف حسین غائر"},
+    'ریاظ احمد کا" شجر ِحیات"': {
+        "reviewed_author": "ریاض احمد",
+        "reviewed_book": "شجر ِحیات",
+    },
+}
+
+
 def _review_fields(title: str) -> dict:
+    if title in REVIEW_OVERRIDES:
+        return dict(REVIEW_OVERRIDES[title])
     match = REVIEW_TITLE.match(title)
     if not match:
         return {}
@@ -73,6 +87,9 @@ def build_pieces(
                 body, colophons, removed_lines = split_trailing_notes(body)
                 if colophons:
                     extra["written_note"] = " ".join(colophons)
+                removed[post.post_id] = "".join(removed_lines)
+            elif kind in ("reviews", "memoir"):
+                body, removed_lines = strip_byline(body)
                 removed[post.post_id] = "".join(removed_lines)
             published_in = extract_published_in(post.body)
             if published_in:

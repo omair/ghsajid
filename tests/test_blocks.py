@@ -2,6 +2,7 @@ import unittest
 
 from tools.migrate.blocks import (
     split_trailing_notes,
+    strip_byline,
     strip_embeds,
     to_markdown,
 )
@@ -100,6 +101,24 @@ class TestTrailingNotes(unittest.TestCase):
         verse, colophons, removed = split_trailing_notes("ایک\nدو\n\nتین\nچار")
         self.assertEqual(verse, "ایک\nدو\n\nتین\nچار")
         self.assertEqual((colophons, removed), ([], []))
+
+
+class TestByline(unittest.TestCase):
+    def test_trailing_byline_is_removed(self):
+        body, removed = strip_byline("نثر کا پیراگراف\n\nتحریر: غلام حسین ساجد")
+        self.assertEqual(body, "نثر کا پیراگراف")
+        self.assertEqual(removed, ["تحریر: غلام حسین ساجد"])
+
+    def test_bare_name_byline_is_removed(self):
+        body, removed = strip_byline("نثر\n\nغلام حسین ساجد")
+        self.assertEqual(body, "نثر")
+        self.assertEqual(removed, ["غلام حسین ساجد"])
+
+    def test_a_short_closing_paragraph_is_kept(self):
+        body, removed = strip_byline("نثر\n\nاور یہی بات ہے")
+        self.assertEqual(body, "نثر\n\nاور یہی بات ہے")
+        self.assertEqual(removed, [])
+
 
 if __name__ == "__main__":
     unittest.main()
