@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ghsajid",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // The Worker must see "/?p=123" before static serving does — otherwise
+    // "/" resolves to index.html and the redirect never runs.
+    "run_worker_first": true
+  }
+}

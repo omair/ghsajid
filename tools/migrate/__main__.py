@@ -1,4 +1,4 @@
-"""Run the full migration: data/export.xml -> content/ + functions/."""
+"""Run the full migration: data/export.xml -> content/ + worker/."""
 
 import re
 import sys
@@ -16,7 +16,7 @@ from .wxr import parse_posts
 
 EXPORT = Path("data/export.xml")
 CONTENT = Path("content")
-POSTMAP = Path("functions/_postmap.json")
+POSTMAP = Path("worker/postmap.json")
 
 VERSE_KINDS = {"ghazals", "nazms"}
 

@@ -2,7 +2,7 @@ import json
 import unittest
 from pathlib import Path
 
-MAP = Path("functions/_postmap.json")
+MAP = Path("worker/postmap.json")
 
 
 @unittest.skipUnless(MAP.exists(), "run: python3 -m tools.migrate")
