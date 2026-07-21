@@ -33,19 +33,23 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
 }
 
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: "IBM Plex Sans", system-ui, sans-serif;
   font-size: var(--step);
   line-height: 1.6;
 }
 
 /* Nastaliq cascades diagonally and descends far below the baseline; it needs
-   roughly double the leading of Latin type or the strokes collide. */
+   roughly double the leading of Latin type or the strokes collide.
+
+   This must land on the same element as the Latin default above, not below it:
+   a font-family on `body` would beat the value inherited from `html` and
+   silently strip Nastaliq from every descendant that doesn't restate it. */
 [dir="rtl"],
 .urdu {
   font-family: "Noto Nastaliq Urdu", serif;
@@ -251,8 +255,13 @@ a:hover {
   text-align: right;
 }
 
+/* Long-form Nastaliq needs far more leading than the 2.5 that suits a single
+   misra: prose wraps, so a descender from one line lands on the head of the
+   next. Provisional — the measure still wants revisiting in the design pass. */
 .prose p {
   margin: 0 0 1.5rem;
+  font-size: 1.05rem;
+  line-height: 3.1;
 }
 
 /* Signature: each sher carries its number hung in the margin, the way ashaar
@@ -271,7 +280,10 @@ a:hover {
 
 .verse p::before {
   counter-increment: sher;
-  content: counter(sher, extended-arabic-indic);
+  /* `extended-arabic-indic` is in the spec but unimplemented in Chromium, and
+     an unknown counter style falls back to `decimal` silently — it rendered
+     these as Latin 1, 2, 3. `urdu` is supported and gives ۱ ۲ ۳. */
+  content: counter(sher, urdu);
   position: absolute;
   inset-inline-end: calc(100% + 1.25rem);
   top: 0.35em;
