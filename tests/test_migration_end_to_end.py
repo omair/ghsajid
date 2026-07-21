@@ -13,7 +13,7 @@ class TestFullMigration(unittest.TestCase):
         cls.survivors, cls.redirects, cls.removed = build_pieces(parse_posts(EXPORT))
 
     def test_produces_the_expected_file_count(self):
-        self.assertEqual(len(self.survivors), 97)
+        self.assertEqual(len(self.survivors), 95)
 
     def test_kind_counts_match_the_spec(self):
         counts: dict[str, int] = {}
@@ -21,7 +21,7 @@ class TestFullMigration(unittest.TestCase):
             counts[p.kind] = counts.get(p.kind, 0) + 1
         self.assertEqual(
             counts,
-            {"memoir": 53, "ghazals": 21, "reviews": 9, "nazms": 4, "videos": 10},
+            {"memoir": 53, "ghazals": 21, "reviews": 9, "nazms": 4, "videos": 8},
         )
 
     def test_the_duplicated_ghazal_is_redirected(self):
@@ -31,6 +31,14 @@ class TestFullMigration(unittest.TestCase):
     def test_memoir_parts_are_numbered_one_to_fiftythree(self):
         parts = sorted(p.extra["part"] for p in self.survivors if p.kind == "memoir")
         self.assertEqual(parts, list(range(1, 54)))
+
+    def test_dead_recordings_are_dropped(self):
+        # Two YouTube videos were removed by their uploaders and never
+        # archived; a page embedding a dead player helps no one.
+        for piece in self.survivors:
+            self.assertNotIn(
+                piece.extra.get("video_id"), {"XH07MYuzuk4", "0csAYaeSrU0"}
+            )
 
     def test_punjabi_pieces_carry_shahmukhi_script(self):
         punjabi = [p for p in self.survivors if p.language == "punjabi"]

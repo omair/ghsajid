@@ -19,6 +19,15 @@ CONTENT = Path("content")
 POSTMAP = Path("functions/_postmap.json")
 
 VERSE_KINDS = {"ghazals", "nazms"}
+
+# Recordings removed by their uploaders and confirmed unrecoverable on
+# 2026-07-21 (yt-dlp: "Video unavailable"). No copy was archived in time, so
+# these posts would be pages embedding a dead player. Their old ?p= URLs fall
+# through to the home page rather than 301ing to a broken embed.
+DEAD_VIDEOS = {
+    "XH07MYuzuk4": "دھوپ آنگن میں اترنے سے مجھے خوف آیا",
+    "0csAYaeSrU0": "پنجیا",
+}
 # Part 53's title is punctuated "درس گاہ-  53"; tolerate any spacing.
 PART_NUMBER = re.compile(r"(\d+)")
 REVIEW_TITLE = re.compile(r"^(?P<book>[^/]+)/(?P<author>[^/]+)$")
@@ -76,6 +85,8 @@ def build_pieces(
             video = extract_video(post.body)
             if video is None:
                 raise ValueError(f"post {post.post_id} classified video, has none")
+            if video["video_id"] in DEAD_VIDEOS:
+                continue
             extra.update(video)
             slug = slugify(title) or f"video-{post.post_id}"
             body = ""
