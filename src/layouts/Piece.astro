@@ -1,0 +1,29 @@
+---
+import Base from "./Base.astro";
+
+interface Props {
+  title: string;
+  verse?: boolean;
+  publishedIn?: string[];
+  writtenNote?: string;
+}
+
+const { title, verse = false, publishedIn = [], writtenNote } = Astro.props;
+---
+
+<Base title={title}>
+  <article class={verse ? "verse" : ""}>
+    <h1>{title}</h1>
+    <slot />
+  </article>
+  {
+    (writtenNote || publishedIn.length > 0) && (
+      <footer>
+        {writtenNote && <p class="meta">{writtenNote}</p>}
+        {publishedIn.length > 0 && (
+          <p class="meta">پہلے شائع ہوا: {publishedIn.join("، ")}</p>
+        )}
+      </footer>
+    )
+  }
+</Base>

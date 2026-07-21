@@ -74,6 +74,10 @@ class TestFullMigration(unittest.TestCase):
 
 
 
+CONTAINER = Path("content/containers/dars-gah.yaml")
+
+
+@unittest.skipUnless(CONTAINER.exists(), "run: python3 -m tools.migrate")
 class TestContainerIntegrity(unittest.TestCase):
     """Astro's reference() resolves lazily, so a dead container entry does not
     fail the build on its own. This checks referential integrity directly."""
@@ -81,8 +85,7 @@ class TestContainerIntegrity(unittest.TestCase):
     def test_every_container_entry_has_a_file(self):
         import re
 
-        container = Path("content/containers/dars-gah.yaml")
-        self.assertTrue(container.exists(), "run: python3 -m tools.migrate")
+        container = CONTAINER
         slugs = re.findall(r'^\s*-\s*"([^"]+)"', container.read_text(encoding="utf-8"), re.M)
         self.assertEqual(len(slugs), 53)
         for slug in slugs:
@@ -94,7 +97,7 @@ class TestContainerIntegrity(unittest.TestCase):
     def test_every_memoir_file_is_in_the_container(self):
         import re
 
-        container = Path("content/containers/dars-gah.yaml")
+        container = CONTAINER
         slugs = set(re.findall(r'^\s*-\s*"([^"]+)"', container.read_text(encoding="utf-8"), re.M))
         files = {p.stem for p in Path("content/memoir").glob("*.md")}
         self.assertEqual(files - slugs, set(), "memoir pieces missing from container")

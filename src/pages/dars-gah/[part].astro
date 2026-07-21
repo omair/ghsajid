@@ -1,0 +1,42 @@
+---
+import { getEntry, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import Piece from "../../layouts/Piece.astro";
+
+export async function getStaticPaths() {
+  const container = await getEntry("containers", "dars-gah");
+  if (!container) throw new Error("missing container: dars-gah");
+  const refs = container.data.contents;
+
+  return Promise.all(
+    refs.map(async (ref, index) => {
+      const entry = (await getEntry(ref)) as CollectionEntry<"memoir"> | undefined;
+      // reference() resolves lazily, so an unresolvable id would otherwise
+      // become a silently missing chapter. Fail the build instead.
+      if (!entry) {
+        throw new Error(`dars-gah references a missing piece: ${ref.id}`);
+      }
+      return {
+        params: { part: String(entry.data.part) },
+        props: {
+          entry,
+          prev: index > 0 ? refs[index - 1].id : null,
+          next: index + 1 < refs.length ? refs[index + 1].id : null,
+        },
+      };
+    }),
+  );
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const partOf = (id: string) => id.replace("dars-gah-", "");
+---
+
+<Piece title={entry.data.title}>
+  <Content />
+  <footer>
+    {next && <a href={`/dars-gah/${partOf(next)}`}>اگلا حصہ ←</a>}
+    {prev && <a href={`/dars-gah/${partOf(prev)}`}>→ پچھلا حصہ</a>}
+  </footer>
+</Piece>

@@ -49,9 +49,11 @@ EXCEPTIONS = {
     "گاہ": "gah", "سبز": "sabz", "باغ": "bagh", "دیوار": "deewar",
 }
 
-# Keep the Arabic block (letters, diacritics, Urdu punctuation) and whitespace.
-# \w would strip combining marks, which carry the short vowels.
-NON_URDU = re.compile(r"[^؀-ۿ\s]")
+# Keep the Arabic block (letters, diacritics, Urdu punctuation), ASCII
+# alphanumerics, and whitespace. \w would strip combining marks, which carry
+# the short vowels. A few titles are written in English and must survive too.
+NON_URDU = re.compile(r"[^؀-ۿA-Za-z0-9\s]")
+LATIN_WORD = re.compile(r"^[A-Za-z0-9]+$")
 
 
 def strip_tatweel(text: str) -> str:
@@ -83,6 +85,9 @@ def transliterate_word(word: str) -> str:
     word = strip_tatweel(word)
     if word in EXCEPTIONS:
         return EXCEPTIONS[word]
+    if LATIN_WORD.match(word):
+        # A handful of titles are written in English; pass them through.
+        return word.lower()
 
     toks = _tokens(word)
     parts: list[str] = []

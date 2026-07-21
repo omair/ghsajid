@@ -44,6 +44,12 @@ class TestSlugify(unittest.TestCase):
     def test_strips_tatweel_first(self):
         self.assertEqual(slugify("ســبز"), slugify("سبز"))
 
+    def test_english_titles_survive(self):
+        self.assertEqual(slugify("Punjabi Poetry"), "punjabi-poetry")
+        self.assertEqual(
+            slugify("Interview - Subrang TV USA"), "interview-subrang-tv-usa"
+        )
+
     def test_drops_punctuation_and_collapses_hyphens(self):
         self.assertEqual(slugify("فیری میڈوز/ آغا"), slugify("فیری میڈوز آغا"))
         self.assertFalse(slugify("، غزل ،").startswith("-"))

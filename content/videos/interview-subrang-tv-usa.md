@@ -1,6 +1,6 @@
 ---
 title: "Interview - Subrang TV USA"
-slug: "video-331"
+slug: "interview-subrang-tv-usa"
 language: "urdu"
 script: "nastaliq"
 published: 2020-05-10

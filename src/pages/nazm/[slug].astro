@@ -1,0 +1,19 @@
+---
+import { getCollection, render } from "astro:content";
+import Piece from "../../layouts/Piece.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("nazms");
+  return entries.map((entry) => ({
+    params: { slug: entry.data.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Piece title={entry.data.title} verse publishedIn={entry.data.published_in}>
+  <Content />
+</Piece>

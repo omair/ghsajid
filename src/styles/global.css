@@ -1,0 +1,98 @@
+:root {
+  --measure: 36rem;
+  --ink: #1a1a1a;
+  --paper: #fbfaf7;
+  --muted: #6b6660;
+  --rule: #e2ded6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8e6e1;
+    --paper: #16161a;
+    --muted: #918b83;
+    --rule: #2c2c33;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2rem 1.25rem 6rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+main {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+/* Nastaliq is a steeply cascading script: it needs far more vertical room
+   than Latin type, and cramped line-height makes it genuinely unreadable. */
+[dir="rtl"] {
+  font-family: "Noto Nastaliq Urdu", serif;
+  line-height: 2.8;
+  text-align: right;
+}
+
+h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 2rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 2.5rem 0 0.75rem;
+  color: var(--muted);
+}
+
+/* Each sher is its own paragraph; the gap between them carries the form. */
+.verse p {
+  margin: 0 0 1.75rem;
+}
+
+nav {
+  max-width: var(--measure);
+  margin: 0 auto 2.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+nav a {
+  margin-inline-end: 1.25rem;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+ul,
+ol {
+  padding-inline-start: 1.5rem;
+}
+
+li {
+  margin-bottom: 0.4rem;
+}
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 0.95rem;
+}

@@ -1,6 +1,6 @@
 ---
 title: "Punjabi Poetry"
-slug: "video-241"
+slug: "punjabi-poetry"
 language: "punjabi"
 script: "shahmukhi"
 published: 2020-05-09

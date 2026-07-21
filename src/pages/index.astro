@@ -1,17 +1,33 @@
 ---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
 
+const sections = [
+  { title: "غزلیں", segment: "ghazal", entries: await getCollection("ghazals") },
+  { title: "نظمیں", segment: "nazm", entries: await getCollection("nazms") },
+  { title: "تبصرے", segment: "tabsira", entries: await getCollection("reviews") },
+  { title: "ویڈیو", segment: "video", entries: await getCollection("videos") },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base title="غلام حسین ساجد">
+  <h1>غلام حسین ساجد</h1>
+  <p><a href="/dars-gah/">درس گاہ — خودنوشت، ۵۳ حصے</a></p>
+
+  {
+    sections.map((section) => (
+      <section>
+        <h2>{section.title}</h2>
+        <ul>
+          {section.entries.map((entry) => (
+            <li>
+              <a href={`/${section.segment}/${entry.data.slug}`}>
+                {entry.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Base>

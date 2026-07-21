@@ -1,0 +1,18 @@
+---
+import { getEntry } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+const container = await getEntry("containers", "dars-gah");
+if (!container) throw new Error("missing container: dars-gah");
+const parts = container.data.contents.map((ref) =>
+  ref.id.replace("dars-gah-", ""),
+);
+---
+
+<Base title={container.data.title}>
+  <h1>{container.data.title}</h1>
+  <p class="meta">{container.data.description} — {parts.length} حصے</p>
+  <ol>
+    {parts.map((n) => <li><a href={`/dars-gah/${n}`}>حصہ {n}</a></li>)}
+  </ol>
+</Base>

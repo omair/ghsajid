@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from "astro:content";
+import Piece from "../../layouts/Piece.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("reviews");
+  return entries.map((entry) => ({
+    params: { slug: entry.data.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { reviewed_book, reviewed_author } = entry.data;
+---
+
+<Piece title={entry.data.title} publishedIn={entry.data.published_in}>
+  {
+    reviewed_author && (
+      <p class="meta">
+        زیرِ تبصرہ: {reviewed_book ? `${reviewed_book} — ` : ""}
+        {reviewed_author}
+      </p>
+    )
+  }
+  <Content />
+</Piece>
