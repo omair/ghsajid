@@ -17,6 +17,24 @@ PARAGRAPH = re.compile(r"<p[^>]*>(.*?)</p>", re.S)
 BR = re.compile(r"<br\s*/?>", re.I)
 TAG = re.compile(r"<[^>]+>")
 
+# A body is a sequence of paragraphs and photographs. Matching both in one
+# pass is what keeps them in document order — 13 memoir parts place a photo
+# against the paragraph that describes it, so position carries meaning.
+# `wp:image` and `wp:gallery` differ only in wrapping, and both bottom out in
+# <img src>, so matching the img directly handles each without special-casing.
+NODE = re.compile(r'<p[^>]*>(.*?)</p>|<img[^>]*\bsrc="([^"]+)"[^>]*>', re.S | re.I)
+
+# WordPress serves a downscaled copy ("…_o-1024x601.jpg") while the original
+# sits beside it. The archive keeps the original.
+WP_RESIZE = re.compile(r"-\d+x\d+(?=\.[A-Za-z0-9]+$)")
+MEDIA_ROOT = "/media/images/"
+
+
+def image_path(src: str) -> str:
+    """Map a WordPress upload URL to its local original."""
+    name = WP_RESIZE.sub("", src.rsplit("/", 1)[-1])
+    return f"{MEDIA_ROOT}{name}"
+
 
 def strip_embeds(html: str) -> str:
     """Remove embed containers and the third-party text inside them.
@@ -91,13 +109,20 @@ def to_markdown(html: str, *, is_verse: bool) -> str:
     Newline = new misra, blank line = new sher.
     """
     html = BLOCK_COMMENT.sub("", html)
-    paras = [_clean(p) for p in PARAGRAPH.findall(html)]
-    paras = [p for p in paras if p]
-    if not paras:
+    nodes: list[str] = []
+    for match in NODE.finditer(html):
+        paragraph, src = match.group(1), match.group(2)
+        if paragraph is not None:
+            text = _clean(paragraph)
+            if text:
+                nodes.append(text)
+        else:
+            nodes.append(f"![]({image_path(src)})")
+    if not nodes:
         return ""
 
-    if is_verse and not any("\n" in p for p in paras):
+    if is_verse and not any("\n" in n for n in nodes):
         # Punjabi shape: every paragraph holds a single line of one stanza.
-        return "\n".join(paras)
+        return "\n".join(nodes)
 
-    return "\n\n".join(paras)
+    return "\n\n".join(nodes)

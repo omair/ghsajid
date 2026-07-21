@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from .blocks import split_trailing_notes, strip_byline, strip_embeds, to_markdown
-from .checks import fidelity_errors, verse_errors
+from .checks import fidelity_errors, media_errors, verse_errors
 from .classify import classify
 from .dedupe import merge_duplicates, piece_url
 from .embeds import extract_published_in, extract_video
@@ -139,6 +139,7 @@ def main() -> int:
             errors += fidelity_errors(
                 by_id[source_id], piece, removed.get(source_id, "")
             )
+            errors += media_errors(by_id[source_id], piece)
 
     if errors:
         print(f"{len(errors)} verification failures — nothing written:", file=sys.stderr)

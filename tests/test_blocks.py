@@ -74,6 +74,69 @@ class TestEmbeds(unittest.TestCase):
         self.assertEqual(to_markdown(strip_embeds(FB), is_verse=False), "")
 
 
+IMAGE = """
+<!-- wp:paragraph -->
+<p>پہلا پیراگراف</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":15,"sizeSlug":"large"} -->
+<figure class="wp-block-image size-large"><img src="https://ghsajid.com/wp-content/uploads/2020/03/69907262_2502777496427829_9019422242039136256_o-1024x601.jpg" alt="" class="wp-image-15"/></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>دوسرا پیراگراف</p>
+<!-- /wp:paragraph -->
+"""
+
+GALLERY = """
+<!-- wp:paragraph -->
+<p>پیراگراف</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:gallery {"ids":[204,205]} -->
+<figure class="wp-block-gallery columns-2 is-cropped"><ul class="blocks-gallery-grid">
+<li class="blocks-gallery-item"><figure><img src="https://ghsajid.com/wp-content/uploads/2020/05/a.jpg" alt="" data-id="204" class="wp-image-204"/></figure></li>
+<li class="blocks-gallery-item"><figure><img src="https://ghsajid.com/wp-content/uploads/2020/05/b.jpg" alt="" data-id="205" class="wp-image-205"/></figure></li>
+</ul></figure>
+<!-- /wp:gallery -->
+"""
+
+
+class TestImages(unittest.TestCase):
+    """Photographs are content: 13 memoir parts are illustrated."""
+
+    def test_image_block_becomes_a_markdown_image(self):
+        self.assertIn(
+            "![](/media/images/69907262_2502777496427829_9019422242039136256_o.jpg)",
+            to_markdown(IMAGE, is_verse=False),
+        )
+
+    def test_wordpress_resize_suffix_is_dropped_for_the_original(self):
+        self.assertNotIn("1024x601", to_markdown(IMAGE, is_verse=False))
+
+    def test_image_keeps_its_position_between_paragraphs(self):
+        self.assertEqual(
+            to_markdown(IMAGE, is_verse=False),
+            "پہلا پیراگراف\n\n"
+            "![](/media/images/69907262_2502777496427829_9019422242039136256_o.jpg)\n\n"
+            "دوسرا پیراگراف",
+        )
+
+    def test_gallery_becomes_consecutive_images(self):
+        self.assertEqual(
+            to_markdown(GALLERY, is_verse=False),
+            "پیراگراف\n\n"
+            "![](/media/images/a.jpg)\n\n"
+            "![](/media/images/b.jpg)",
+        )
+
+    def test_prose_without_images_is_unchanged(self):
+        self.assertEqual(
+            to_markdown(PROSE, is_verse=False),
+            "پہلا پیراگراف\nدوسری سطر\n\nدوسرا پیراگراف",
+        )
+
+
 class TestTatweel(unittest.TestCase):
     def test_tatweel_is_stripped_from_body(self):
         self.assertEqual(to_markdown("<p>ســبز</p>", is_verse=True), "سبز")

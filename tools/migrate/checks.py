@@ -14,6 +14,8 @@ from .urdu import strip_tatweel
 TAG = re.compile(r"<[^>]+>")
 BLOCK_COMMENT = re.compile(r"<!--.*?-->", re.S)
 WHITESPACE = re.compile(r"\s+")
+MARKDOWN_IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+SOURCE_IMAGE = re.compile(r'<img[^>]*\bsrc="([^"]+)"', re.I)
 
 VERSE_KINDS = {"ghazals", "nazms"}
 
@@ -21,10 +23,30 @@ VERSE_KINDS = {"ghazals", "nazms"}
 def normalized(text: str) -> str:
     """Reduce text to comparable content: no markup, tatweel, or whitespace."""
     text = BLOCK_COMMENT.sub("", text)
+    text = MARKDOWN_IMAGE.sub(" ", text)
     text = TAG.sub(" ", text)
     text = htmllib.unescape(text).replace("\xa0", " ")
     text = strip_tatweel(text)
     return WHITESPACE.sub("", text)
+
+
+def media_errors(post: Post, piece: Piece) -> list[str]:
+    """Confirm every photograph in the source survived into the piece.
+
+    This gate exists because the fidelity check cannot see it: `normalized`
+    strips markup, and an <img> contributes no text characters, so dropping
+    every photograph in the corpus leaves the character counts identical.
+    That is exactly what happened — 22 photographs across 13 memoir parts
+    were silently discarded while all other checks reported success.
+    """
+    source = SOURCE_IMAGE.findall(strip_embeds(post.body))
+    emitted = MARKDOWN_IMAGE.findall(piece.body)
+    if len(source) != len(emitted):
+        return [
+            f"media mismatch in {piece.kind}/{piece.slug}: "
+            f"source has {len(source)} image(s), emitted {len(emitted)}"
+        ]
+    return []
 
 
 def fidelity_errors(post: Post, piece: Piece, extra_text: str = "") -> list[str]:

@@ -61,7 +61,11 @@ def write_piece(piece: Piece, root: Path) -> Path:
     path = root / piece.kind / f"{piece.slug}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     body = piece.body.strip()
-    path.write_text(f"---\n{frontmatter(piece)}\n---\n\n{body}\n", encoding="utf-8")
+    # newline="\n" so the corpus is byte-identical whichever OS regenerates it;
+    # without it Python rewrites every file with CRLF on Windows.
+    path.write_text(
+        f"---\n{frontmatter(piece)}\n---\n\n{body}\n", encoding="utf-8", newline="\n"
+    )
     return path
 
 
@@ -77,7 +81,7 @@ def write_container(pieces: list[Piece], root: Path) -> Path:
         "contents:",
     ]
     lines += [f'  - "{p.slug}"' for p in ordered]
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     return path
 
 
@@ -85,4 +89,6 @@ def write_postmap(redirects: dict[int, str], path: Path) -> None:
     """Write {post_id: url} as JSON for the Pages Function."""
     path.parent.mkdir(parents=True, exist_ok=True)
     data = {str(k): v for k, v in sorted(redirects.items())}
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n"
+    )

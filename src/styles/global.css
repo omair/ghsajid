@@ -264,6 +264,16 @@ a:hover {
   line-height: 3.1;
 }
 
+/* The memoir is illustrated: 13 of its 53 parts carry photographs, placed
+   against the paragraph that describes them. Provisional sizing — how these
+   should sit in the page is a design-pass question. */
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 2.5rem auto;
+}
+
 /* Signature: each sher carries its number hung in the margin, the way ashaar
    are numbered in critical editions. A ghazal is an ordered set of
    independent couplets, so the numeral encodes structure, not decoration. */

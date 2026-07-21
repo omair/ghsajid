@@ -1,6 +1,11 @@
 import unittest
 
-from tools.migrate.checks import fidelity_errors, normalized, verse_errors
+from tools.migrate.checks import (
+    fidelity_errors,
+    media_errors,
+    normalized,
+    verse_errors,
+)
 from tools.migrate.models import Piece, Post
 
 
@@ -18,6 +23,33 @@ def piece(body, kind="ghazals"):
 class TestNormalized(unittest.TestCase):
     def test_ignores_whitespace_and_tatweel(self):
         self.assertEqual(normalized("ســبز  مرا\n"), normalized("سبز مرا"))
+
+
+FIGURE = (
+    '<p>نثر</p><figure class="wp-block-image">'
+    '<img src="https://ghsajid.com/wp-content/uploads/2020/03/a-1024x601.jpg"/>'
+    "</figure>"
+)
+
+
+class TestMedia(unittest.TestCase):
+    def test_passes_when_the_photograph_survives(self):
+        self.assertEqual(
+            media_errors(post(FIGURE), piece("نثر\n\n![](/media/images/a.jpg)")), []
+        )
+
+    def test_fails_when_a_photograph_is_dropped(self):
+        """The regression that shipped: text intact, photograph gone."""
+        errors = media_errors(post(FIGURE), piece("نثر"))
+        self.assertEqual(len(errors), 1)
+        self.assertIn("source has 1 image(s), emitted 0", errors[0])
+
+    def test_fidelity_alone_does_not_notice_a_dropped_photograph(self):
+        """Why this gate has to exist: an <img> contributes no characters."""
+        self.assertEqual(fidelity_errors(post(FIGURE), piece("نثر")), [])
+
+    def test_a_piece_with_no_photographs_passes(self):
+        self.assertEqual(media_errors(post("<p>نثر</p>"), piece("نثر")), [])
 
 
 class TestFidelity(unittest.TestCase):
