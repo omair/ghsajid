@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+const entries = (await getCollection("reviews")).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title, "ur"),
+);
+---
+
+<Base title="تبصرے">
+  <h1 class="piece__title">تبصرے</h1>
+  <p class="piece__label">معاصر کتابوں پر</p>
+  <ul class="listing">
+    {
+      entries.map((entry) => (
+        <li>
+          <a href={`/tabsira/${entry.data.slug}`}>
+            {entry.data.title}
+            {entry.data.reviewed_author && (<span class="listing__meta">{entry.data.reviewed_author}</span>)}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

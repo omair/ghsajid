@@ -1,6 +1,7 @@
 ---
 import { getEntry } from "astro:content";
 import Base from "../../layouts/Base.astro";
+import { urduNumber } from "../../lib/urdu";
 
 const container = await getEntry("containers", "dars-gah");
 if (!container) throw new Error("missing container: dars-gah");
@@ -10,9 +11,13 @@ const parts = container.data.contents.map((ref) =>
 ---
 
 <Base title={container.data.title}>
-  <h1>{container.data.title}</h1>
-  <p class="meta">{container.data.description} — {parts.length} حصے</p>
-  <ol>
-    {parts.map((n) => <li><a href={`/dars-gah/${n}`}>حصہ {n}</a></li>)}
+  <h1 class="piece__title">{container.data.title}</h1>
+  <p class="piece__label">{urduNumber(parts.length)} حصے</p>
+  <p class="work__note" style="margin-bottom:2.5rem">
+    ایک خودنوشت ۔ بستی کبیر سنپال کے کچّے راستوں اور جراحی کے پرائمری سکول سے
+    شروع ہو کر لاہور کے ادبی حلقوں تک۔
+  </p>
+  <ol class="parts">
+    {parts.map((n) => <li><a href={`/dars-gah/${n}`}>{urduNumber(n)}</a></li>)}
   </ol>
 </Base>

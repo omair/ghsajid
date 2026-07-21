@@ -1,98 +1,331 @@
+/* Palette drawn from the archive's opening ghazal, which builds every sher
+   on سبز — باغِ سبز، چراغِ سبز، دماغِ سبز. Paper is a cool bone with a green
+   undertone; the accent is that green, held back for links and numerals. */
 :root {
-  --measure: 36rem;
-  --ink: #1a1a1a;
-  --paper: #fbfaf7;
-  --muted: #6b6660;
-  --rule: #e2ded6;
+  --paper: #eff1ea;
+  --raised: #e7eae1;
+  --ink: #1a1c16;
+  --sabz: #33552f;
+  --muted: #6b7064;
+  --rule: #dbdfd2;
+
+  --measure: 32rem;
+  --measure-wide: 46rem;
+  --step: clamp(1.05rem, 0.95rem + 0.5vw, 1.25rem);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ink: #e8e6e1;
-    --paper: #16161a;
-    --muted: #918b83;
-    --rule: #2c2c33;
+    --paper: #121410;
+    --raised: #191c15;
+    --ink: #e7e9df;
+    --sabz: #8fae87;
+    --muted: #8b9184;
+    --rule: #262a22;
   }
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  padding: 2rem 1.25rem 6rem;
   background: var(--paper);
   color: var(--ink);
-  font-family: system-ui, sans-serif;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: var(--step);
   line-height: 1.6;
 }
 
-main {
-  max-width: var(--measure);
-  margin: 0 auto;
-}
-
-/* Nastaliq is a steeply cascading script: it needs far more vertical room
-   than Latin type, and cramped line-height makes it genuinely unreadable. */
-[dir="rtl"] {
+/* Nastaliq cascades diagonally and descends far below the baseline; it needs
+   roughly double the leading of Latin type or the strokes collide. */
+[dir="rtl"],
+.urdu {
   font-family: "Noto Nastaliq Urdu", serif;
-  line-height: 2.8;
+  line-height: 2.5;
   text-align: right;
-}
-
-h1 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin: 0 0 2rem;
-}
-
-h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 2.5rem 0 0.75rem;
-  color: var(--muted);
-}
-
-/* Each sher is its own paragraph; the gap between them carries the form. */
-.verse p {
-  margin: 0 0 1.75rem;
-}
-
-nav {
-  max-width: var(--measure);
-  margin: 0 auto 2.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-nav a {
-  margin-inline-end: 1.25rem;
 }
 
 a {
   color: inherit;
-  text-underline-offset: 0.2em;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 0.25em;
 }
 
-ul,
-ol {
-  padding-inline-start: 1.5rem;
+a:hover {
+  text-decoration-color: var(--sabz);
 }
 
-li {
-  margin-bottom: 0.4rem;
+:focus-visible {
+  outline: 2px solid var(--sabz);
+  outline-offset: 3px;
 }
 
-footer {
-  margin-top: 3rem;
-  padding-top: 1rem;
+/* ---------- shell ---------- */
+
+.shell {
+  max-width: var(--measure-wide);
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 6rem;
+}
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 3.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.masthead__name {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.05rem;
+  line-height: 2.2;
+  text-decoration: none;
+}
+
+.masthead__nav {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.85rem;
+  font-family: "Noto Nastaliq Urdu", serif;
+  line-height: 2.2;
+}
+
+/* ---------- hero: a sher, not a name ---------- */
+
+.hero {
+  margin: 0 0 5rem;
+}
+
+.hero__sher {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: clamp(1.35rem, 1rem + 2.2vw, 2.15rem);
+  line-height: 2.35;
+  margin: 0 0 1.5rem;
+  text-align: right;
+}
+
+.colophon {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-family: "Noto Nastaliq Urdu", serif;
+  line-height: 2;
+  margin: 0;
+}
+
+/* ---------- work index ---------- */
+
+.work {
+  display: block;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--rule);
+  text-decoration: none;
+}
+
+.work:last-of-type {
+  border-bottom: 1px solid var(--rule);
+}
+
+.work__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.work__title {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.3rem;
+  line-height: 2.1;
+}
+
+.work:hover .work__title {
+  color: var(--sabz);
+}
+
+.work__count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.work__note {
+  color: var(--muted);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.9rem;
+  line-height: 2;
+  margin: 0.25rem 0 0;
+}
+
+/* ---------- listings ---------- */
+
+.listing {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.listing li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.listing a {
+  display: block;
+  padding: 0.9rem 0;
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.1rem;
+  line-height: 2.2;
+  text-decoration: none;
+}
+
+.listing a:hover {
+  color: var(--sabz);
+}
+
+.listing__meta {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+/* Memoir parts are a sequence: number them, in Urdu digits. */
+.parts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.parts a {
+  display: block;
+  padding: 0.85rem 0;
+  text-align: center;
+  background: var(--raised);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1rem;
+  line-height: 1.9;
+  text-decoration: none;
+}
+
+.parts a:hover {
+  color: var(--sabz);
+}
+
+/* ---------- the piece ---------- */
+
+.piece {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+.piece__title {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: clamp(1.15rem, 1rem + 0.9vw, 1.5rem);
+  font-weight: 400;
+  line-height: 2.3;
+  margin: 0 0 0.5rem;
+  text-align: right;
+}
+
+.piece__label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 2.75rem;
+  text-align: right;
+}
+
+.prose p {
+  margin: 0 0 1.5rem;
+}
+
+/* Signature: each sher carries its number hung in the margin, the way ashaar
+   are numbered in critical editions. A ghazal is an ordered set of
+   independent couplets, so the numeral encodes structure, not decoration. */
+.verse {
+  counter-reset: sher;
+}
+
+.verse p {
+  position: relative;
+  margin: 0 0 2.25rem;
+  font-size: 1.15rem;
+  line-height: 2.45;
+}
+
+.verse p::before {
+  counter-increment: sher;
+  content: counter(sher, extended-arabic-indic);
+  position: absolute;
+  inset-inline-end: calc(100% + 1.25rem);
+  top: 0.35em;
+  color: var(--muted);
+  opacity: 0.6;
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+/* No margin to hang numerals in on narrow screens. */
+@media (max-width: 46rem) {
+  .verse p::before {
+    display: none;
+  }
+}
+
+.piece__foot {
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+}
+
+.sequence {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.95rem;
+  line-height: 2.2;
+}
+
+.embed {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  background: var(--raised);
+}
+
+.pagefoot {
+  max-width: var(--measure-wide);
+  margin: 5rem auto 0;
+  padding: 1.25rem 1.5rem 0;
   border-top: 1px solid var(--rule);
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
-.meta {
-  color: var(--muted);
-  font-size: 0.95rem;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

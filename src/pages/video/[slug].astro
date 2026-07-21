@@ -14,28 +14,26 @@ const { entry } = Astro.props;
 const { source, video_id, url, description, recorded } = entry.data;
 ---
 
-<Piece title={entry.data.title}>
+<Piece title={entry.data.title} label="آواز">
   {
     source === "youtube" ? (
       <iframe
-        width="100%"
-        height="315"
+        class="embed"
         loading="lazy"
         src={`https://www.youtube-nocookie.com/embed/${video_id}`}
         title={entry.data.title}
-        frameborder="0"
         allowfullscreen
       />
     ) : (
       <p>
-        <a href={url}>فیس بک پر ویڈیو دیکھیں</a>
+        <a href={url}>فیس بک پر سنیے</a>
       </p>
     )
   }
-  {description && <p class="meta">{description}</p>}
+  {description && <p class="work__note">{description}</p>}
   {
     recorded && (
-      <p class="meta">ریکارڈنگ: {recorded.toISOString().slice(0, 10)}</p>
+      <p class="colophon">ریکارڈنگ ۔ {recorded.toISOString().slice(0, 10)}</p>
     )
   }
 </Piece>

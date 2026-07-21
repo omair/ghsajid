@@ -3,27 +3,39 @@ import Base from "./Base.astro";
 
 interface Props {
   title: string;
+  label?: string;
   verse?: boolean;
   publishedIn?: string[];
   writtenNote?: string;
 }
 
-const { title, verse = false, publishedIn = [], writtenNote } = Astro.props;
+const {
+  title,
+  label,
+  verse = false,
+  publishedIn = [],
+  writtenNote,
+} = Astro.props;
 ---
 
 <Base title={title}>
-  <article class={verse ? "verse" : ""}>
-    <h1>{title}</h1>
-    <slot />
+  <article class="piece">
+    <h1 class="piece__title">{title}</h1>
+    {label && <p class="piece__label">{label}</p>}
+    <div class={verse ? "verse" : "prose"}>
+      <slot />
+    </div>
+    {
+      (writtenNote || publishedIn.length > 0) && (
+        <footer class="piece__foot">
+          {/* The colophon convention his own manuscripts use: place and date. */}
+          {writtenNote && <p class="colophon">{writtenNote}</p>}
+          {publishedIn.length > 0 && (
+            <p class="colophon">اوّلین اشاعت ۔ {publishedIn.join("، ")}</p>
+          )}
+        </footer>
+      )
+    }
+    <slot name="after" />
   </article>
-  {
-    (writtenNote || publishedIn.length > 0) && (
-      <footer>
-        {writtenNote && <p class="meta">{writtenNote}</p>}
-        {publishedIn.length > 0 && (
-          <p class="meta">پہلے شائع ہوا: {publishedIn.join("، ")}</p>
-        )}
-      </footer>
-    )
-  }
 </Base>

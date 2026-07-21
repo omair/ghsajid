@@ -2,6 +2,7 @@
 import { getEntry, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Piece from "../../layouts/Piece.astro";
+import { urduNumber } from "../../lib/urdu";
 
 export async function getStaticPaths() {
   const container = await getEntry("containers", "dars-gah");
@@ -33,10 +34,13 @@ const { Content } = await render(entry);
 const partOf = (id: string) => id.replace("dars-gah-", "");
 ---
 
-<Piece title={entry.data.title}>
+<Piece
+  title={entry.data.title}
+  label={`درس گاہ ۔ حصہ ${urduNumber(entry.data.part)}`}
+>
   <Content />
-  <footer>
-    {next && <a href={`/dars-gah/${partOf(next)}`}>اگلا حصہ ←</a>}
-    {prev && <a href={`/dars-gah/${partOf(prev)}`}>→ پچھلا حصہ</a>}
-  </footer>
+  <nav class="sequence" slot="after">
+    {next ? <a href={`/dars-gah/${partOf(next)}`}>اگلا حصہ ←</a> : <span />}
+    {prev ? <a href={`/dars-gah/${partOf(prev)}`}>→ پچھلا حصہ</a> : <span />}
+  </nav>
 </Piece>

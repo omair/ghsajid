@@ -1,33 +1,56 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
+import { urduNumber } from "../lib/urdu";
 
-const sections = [
-  { title: "غزلیں", segment: "ghazal", entries: await getCollection("ghazals") },
-  { title: "نظمیں", segment: "nazm", entries: await getCollection("nazms") },
-  { title: "تبصرے", segment: "tabsira", entries: await getCollection("reviews") },
-  { title: "ویڈیو", segment: "video", entries: await getCollection("videos") },
+const [ghazals, nazms, reviews, videos, darsGah] = await Promise.all([
+  getCollection("ghazals"),
+  getCollection("nazms"),
+  getCollection("reviews"),
+  getCollection("videos"),
+  getEntry("containers", "dars-gah"),
+]);
+
+// The hero is a sher, not a nameplate: the most characteristic object in a
+// poet's world is a couplet. Taken from the archive's opening ghazal, whose
+// radeef gives the site its colour.
+const opening = await getEntry("ghazals", "kisi-nigah-ki-zad-par-hai-baghi-sabz-mira");
+const matla = opening?.body?.split("\n\n")[0]?.trim() ?? "";
+
+const works = [
+  { href: "/ghazal/", title: "غزلیں", count: ghazals.length },
+  { href: "/nazm/", title: "نظمیں", count: nazms.length },
+  { href: "/tabsira/", title: "تبصرے", count: reviews.length, note: "معاصر کتابوں پر" },
+  { href: "/video/", title: "آواز", count: videos.length, note: "اپنی زبانی" },
 ];
 ---
 
-<Base title="غلام حسین ساجد">
-  <h1>غلام حسین ساجد</h1>
-  <p><a href="/dars-gah/">درس گاہ — خودنوشت، ۵۳ حصے</a></p>
+<Base
+  title="غلام حسین ساجد"
+  description="اردو اور پنجابی شاعر و نقّاد غلام حسین ساجد کا کلام، تنقید اور خودنوشت"
+>
+  <section class="hero">
+    <p class="hero__sher" set:html={matla.replace(/\n/g, "<br>")} />
+    <p class="colophon">غلام حسین ساجد</p>
+  </section>
+
+  <a class="work" href="/dars-gah/">
+    <span class="work__row">
+      <span class="work__title">{darsGah?.data.title}</span>
+      <span class="work__count">{urduNumber(darsGah?.data.contents.length ?? 0)} حصے</span>
+    </span>
+    <p class="work__note">خودنوشت ۔ جراحی کے پرائمری سکول سے اورئینٹل کالج تک</p>
+  </a>
 
   {
-    sections.map((section) => (
-      <section>
-        <h2>{section.title}</h2>
-        <ul>
-          {section.entries.map((entry) => (
-            <li>
-              <a href={`/${section.segment}/${entry.data.slug}`}>
-                {entry.data.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+    works.map((work) => (
+      <a class="work" href={work.href}>
+        <span class="work__row">
+          <span class="work__title">{work.title}</span>
+          <span class="work__count">{urduNumber(work.count)}</span>
+        </span>
+        {work.note && <p class="work__note">{work.note}</p>}
+      </a>
     ))
   }
 </Base>

@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+const entries = (await getCollection("videos")).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title, "ur"),
+);
+---
+
+<Base title="آواز">
+  <h1 class="piece__title">آواز</h1>
+  <p class="piece__label">اپنی زبانی</p>
+  <ul class="listing">
+    {
+      entries.map((entry) => (
+        <li>
+          <a href={`/video/${entry.data.slug}`}>
+            {entry.data.title}
+            {entry.data.recorded && (<span class="listing__meta">{entry.data.recorded.toISOString().slice(0, 10)}</span>)}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

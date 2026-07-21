@@ -12,8 +12,14 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+const label = entry.data.language === "punjabi" ? "نظم ۔ پنجابی" : "نظم";
 ---
 
-<Piece title={entry.data.title} verse publishedIn={entry.data.published_in}>
+<Piece
+  title={entry.data.title}
+  label={label}
+  verse
+  publishedIn={entry.data.published_in}
+>
   <Content />
 </Piece>

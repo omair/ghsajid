@@ -13,16 +13,15 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const { reviewed_book, reviewed_author } = entry.data;
+const label = reviewed_author
+  ? `تبصرہ ۔ ${reviewed_book ? `${reviewed_book} ۔ ` : ""}${reviewed_author}`
+  : "تبصرہ";
 ---
 
-<Piece title={entry.data.title} publishedIn={entry.data.published_in}>
-  {
-    reviewed_author && (
-      <p class="meta">
-        زیرِ تبصرہ: {reviewed_book ? `${reviewed_book} — ` : ""}
-        {reviewed_author}
-      </p>
-    )
-  }
+<Piece
+  title={entry.data.title}
+  label={label}
+  publishedIn={entry.data.published_in}
+>
   <Content />
 </Piece>
