@@ -4,9 +4,10 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
+  wide?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, wide = false } = Astro.props;
 const isHome = Astro.url.pathname === "/";
 ---
 
@@ -26,7 +27,7 @@ const isHome = Astro.url.pathname === "/";
     />
   </head>
   <body>
-    <div class="shell">
+    <div class:list={["shell", { "shell--wide": wide }]}>
       <header class="masthead">
         {
           isHome ? (
@@ -47,8 +48,8 @@ const isHome = Astro.url.pathname === "/";
       </header>
       <main><slot /></main>
     </div>
-    <footer class="pagefoot">
-      <p>غلام حسین ساجد ۔ شاعر، نقّاد ۔ بستی کبیر سنپال</p>
+    <footer class:list={["pagefoot", { "pagefoot--wide": wide }]}>
+      <p>غلام حسین ساجد ۔ شاعر ، نقّاد ، استاد ۔ بستی کبیر سنپال</p>
     </footer>
   </body>
 </html>

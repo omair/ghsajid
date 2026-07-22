@@ -2,28 +2,25 @@
    on سبز — باغِ سبز، چراغِ سبز، دماغِ سبز. Paper is a cool bone with a green
    undertone; the accent is that green, held back for links and numerals. */
 :root {
-  --paper: #eff1ea;
-  --raised: #e7eae1;
-  --ink: #1a1c16;
+  /* Warm ivory paper with a green-leaning accent drawn from the opening
+     ghazal's سبز radeef. Gilt is reserved for the portrait mat and hairlines. */
+  --paper: #f4efe4;
+  --raised: #ebe5d6;
+  --ink: #1c1913;
   --sabz: #33552f;
-  --muted: #6b7064;
-  --rule: #dbdfd2;
+  --muted: #6d6656;
+  --rule: #e0d9c7;
+  --gold: #9a7636;
 
   --measure: 32rem;
   --measure-wide: 46rem;
+  --measure-home: 66rem;
   --step: clamp(1.05rem, 0.95rem + 0.5vw, 1.25rem);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #121410;
-    --raised: #191c15;
-    --ink: #e7e9df;
-    --sabz: #8fae87;
-    --muted: #8b9184;
-    --rule: #262a22;
-  }
-}
+/* Dark is deferred to a future alternate theme (the rejected dark-hero mood can
+   live there) over the same content. The site commits to one warm world for
+   now, so no half-built dark palette ships. */
 
 *,
 *::before,
@@ -105,71 +102,202 @@ a:hover {
   line-height: 2.2;
 }
 
-/* ---------- hero: a sher, not a name ---------- */
+/* ---------- home: portrait hero on one continuous ground ---------- */
 
-.hero {
-  margin: 0 0 5rem;
+/* The home escapes the reading measure for its two-column editorial body. */
+.shell--wide {
+  max-width: var(--measure-home);
+}
+.pagefoot--wide {
+  max-width: var(--measure-home);
 }
 
-.hero__sher {
+.home-hero {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr;
+  gap: 3.4rem;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+/* The portrait is mounted like a photograph in a book — a cream mat, a hairline,
+   a soft shadow — and shown whole. Never crop a head: height follows the image. */
+.portrait {
+  background: #fbf8f1;
+  padding: 0.7rem;
+  border: 1px solid var(--rule);
+  box-shadow: 0 18px 40px rgba(40, 32, 18, 0.14);
+}
+.portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.02) sepia(0.12);
+}
+
+.home-name {
   font-family: "Noto Nastaliq Urdu", serif;
-  font-size: clamp(1.35rem, 1rem + 2.2vw, 2.15rem);
-  line-height: 2.35;
-  margin: 0 0 1.5rem;
+  font-size: clamp(2.2rem, 1.4rem + 3vw, 3.3rem);
+  font-weight: 700;
+  line-height: 1.95;
+  margin: 0;
+  text-align: right;
+}
+.home-role {
+  color: var(--sabz);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.3rem;
+  line-height: 2;
+  margin: 0.1rem 0 0;
+  text-align: right;
+}
+.home-place {
+  color: var(--muted);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1rem;
+  line-height: 2;
+  margin: 0.7rem 0 0;
+  text-align: right;
+}
+/* A 3rem gilt hairline; width + RTL block flow keep it at the right edge. */
+.home-hairline {
+  width: 3rem;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.85;
+  margin: 1.5rem 0;
+}
+.home-matla {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.4rem;
+  line-height: 2.5;
+  margin: 0;
+  text-align: right;
+}
+.home-matla .l2 {
+  color: var(--muted);
+}
+
+/* The seam between "meet him" and "read him" is a rule, not a colour change. */
+.seam {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 3rem 0 3.4rem;
+}
+
+/* ---------- editorial body ---------- */
+
+.eyebrow {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sabz);
+  font-weight: 600;
+}
+
+.editorial {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 3.2rem;
+  align-items: start;
+}
+
+.feature__eyebrow {
+  display: block;
+  margin-bottom: 1rem;
+}
+.feature__title {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.05rem);
+  font-weight: 400;
+  line-height: 2.2;
+  margin: 0 0 2rem;
+  text-align: right;
+}
+.readmore {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--sabz);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.1rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--sabz);
+}
+
+.fahrist {
+  background: var(--raised);
+  padding: 1.7rem 1.6rem;
+  border-top: 3px solid var(--sabz);
+}
+.fahrist__eyebrow {
+  display: block;
+  margin-bottom: 0.9rem;
+}
+.fahrist__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.95rem 0.1rem;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  color: inherit;
+}
+.fahrist__item:first-of-type {
+  border-top: 1px solid var(--rule);
+}
+.fahrist__item:hover .fahrist__title {
+  color: var(--sabz);
+}
+.fahrist__left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.fahrist__title {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.4rem;
+  line-height: 2;
+}
+.fahrist__note {
+  color: var(--muted);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.85rem;
+}
+.fahrist__count {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+.fahrist__photo {
+  margin-top: 1.6rem;
+}
+.fahrist__photo img {
+  display: block;
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.02);
+}
+.fahrist__photo figcaption {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 0.74rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 0.5rem;
   text-align: right;
 }
 
-.colophon {
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-family: "Noto Nastaliq Urdu", serif;
-  line-height: 2;
-  margin: 0;
-}
-
-/* ---------- work index ---------- */
-
-.work {
-  display: block;
-  padding: 1.5rem 0;
-  border-top: 1px solid var(--rule);
-  text-decoration: none;
-}
-
-.work:last-of-type {
-  border-bottom: 1px solid var(--rule);
-}
-
-.work__row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.work__title {
-  font-family: "Noto Nastaliq Urdu", serif;
-  font-size: 1.3rem;
-  line-height: 2.1;
-}
-
-.work:hover .work__title {
-  color: var(--sabz);
-}
-
-.work__count {
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.work__note {
-  color: var(--muted);
-  font-family: "Noto Nastaliq Urdu", serif;
-  font-size: 0.9rem;
-  line-height: 2;
-  margin: 0.25rem 0 0;
+/* Stack on narrow screens. */
+@media (max-width: 48rem) {
+  .home-hero,
+  .editorial {
+    grid-template-columns: 1fr;
+    gap: 2.2rem;
+  }
+  .portrait {
+    max-width: 22rem;
+  }
 }
 
 /* ---------- listings ---------- */

@@ -11,16 +11,30 @@ const [ghazals, nazms, reviews, videos, darsGah] = await Promise.all([
   getEntry("containers", "dars-gah"),
 ]);
 
-// The hero is a sher, not a nameplate: the most characteristic object in a
-// poet's world is a couplet. Taken from the archive's opening ghazal, whose
-// radeef gives the site its colour.
-const opening = await getEntry("ghazals", "kisi-nigah-ki-zad-par-hai-baghi-sabz-mira");
-const matla = opening?.body?.split("\n\n")[0]?.trim() ?? "";
+// The featured ghazal is the archive's opening one, whose سبز radeef gives the
+// site its colour. Its matla doubles as the hero quote; the first ashaar are
+// offered to read directly.
+const opening = await getEntry(
+  "ghazals",
+  "kisi-nigah-ki-zad-par-hai-baghi-sabz-mira",
+);
+const ashaar = (opening?.body ?? "")
+  .split("\n\n")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const matla = ashaar[0] ?? "";
+const featuredAshaar = ashaar.slice(0, 3);
 
 const works = [
+  {
+    href: "/dars-gah/",
+    title: darsGah?.data.title ?? "درس گاہ",
+    count: darsGah?.data.contents.length ?? 0,
+    note: "خودنوشت",
+  },
   { href: "/ghazal/", title: "غزلیں", count: ghazals.length },
   { href: "/nazm/", title: "نظمیں", count: nazms.length },
-  { href: "/tabsira/", title: "تبصرے", count: reviews.length, note: "معاصر کتابوں پر" },
+  { href: "/tabsira/", title: "تبصرے", count: reviews.length },
   { href: "/video/", title: "آواز", count: videos.length, note: "اپنی زبانی" },
 ];
 ---
@@ -28,29 +42,64 @@ const works = [
 <Base
   title="غلام حسین ساجد"
   description="اردو اور پنجابی شاعر و نقّاد غلام حسین ساجد کا کلام، تنقید اور خودنوشت"
+  wide
 >
-  <section class="hero">
-    <p class="hero__sher" set:html={matla.replace(/\n/g, "<br>")} />
-    <p class="colophon">غلام حسین ساجد</p>
+  <section class="home-hero">
+    <figure class="portrait">
+      <img
+        src="/media/images/71053136_2535873549784890_2302056858103316480_o.jpg"
+        alt="غلام حسین ساجد"
+        width="1491"
+        height="2015"
+      />
+    </figure>
+    <div>
+      <h1 class="home-name">غلام حسین ساجد</h1>
+      <p class="home-role">شاعر ، نقّاد ، استاد</p>
+      <p class="home-place">بستی کبیر سنپال ۔ لاہور</p>
+      <hr class="home-hairline" />
+      <p class="home-matla">
+        <Fragment set:html={matla.replace(/\n/g, '<br><span class="l2">') + "</span>"} />
+      </p>
+    </div>
   </section>
 
-  <a class="work" href="/dars-gah/">
-    <span class="work__row">
-      <span class="work__title">{darsGah?.data.title}</span>
-      <span class="work__count">{urduNumber(darsGah?.data.contents.length ?? 0)} حصے</span>
-    </span>
-    <p class="work__note">خودنوشت ۔ جراحی کے پرائمری سکول سے اورئینٹل کالج تک</p>
-  </a>
+  <hr class="seam" />
 
-  {
-    works.map((work) => (
-      <a class="work" href={work.href}>
-        <span class="work__row">
-          <span class="work__title">{work.title}</span>
-          <span class="work__count">{urduNumber(work.count)}</span>
-        </span>
-        {work.note && <p class="work__note">{work.note}</p>}
-      </a>
-    ))
-  }
+  <div class="editorial">
+    <article class="feature">
+      <span class="eyebrow feature__eyebrow">منتخب غزل</span>
+      <h2 class="feature__title">{opening?.data.title}</h2>
+      <div class="verse">
+        {
+          featuredAshaar.map((sher) => (
+            <p set:html={sher.replace(/\n/g, "<br>")} />
+          ))
+        }
+      </div>
+      <a class="readmore" href={`/ghazal/${opening?.id}`}>پوری غزل پڑھیے ←</a>
+    </article>
+
+    <aside class="fahrist">
+      <span class="eyebrow fahrist__eyebrow">فہرست</span>
+      {
+        works.map((work) => (
+          <a class="fahrist__item" href={work.href}>
+            <span class="fahrist__left">
+              <span class="fahrist__title">{work.title}</span>
+              {work.note && <span class="fahrist__note">{work.note}</span>}
+            </span>
+            <span class="fahrist__count">{urduNumber(work.count)}</span>
+          </a>
+        ))
+      }
+      <figure class="fahrist__photo">
+        <img
+          src="/media/images/116016151_3213981008640804_6218243660421552257_n.jpg"
+          alt=""
+        />
+        <figcaption>درس گاہ کے ۵۳ حصوں میں پرانی تصویریں</figcaption>
+      </figure>
+    </aside>
+  </div>
 </Base>
