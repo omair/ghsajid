@@ -333,29 +333,63 @@ a:hover {
   font-family: "IBM Plex Sans", system-ui, sans-serif;
 }
 
-/* Memoir parts are a sequence: number them, in Urdu digits. */
-.parts {
+/* The memoir is an ordered, illustrated autobiography, not a bank of numbers.
+   Each part shows its number and the words it opens on; the 13 illustrated
+   parts carry a thumbnail, so the photographs pull you in. */
+.memoir {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
 }
-
-.parts a {
-  display: block;
-  padding: 0.85rem 0;
-  text-align: center;
-  background: var(--raised);
-  font-family: "Noto Nastaliq Urdu", serif;
-  font-size: 1rem;
-  line-height: 1.9;
+.memoir__part {
+  display: flex;
+  gap: 1.1rem;
+  align-items: flex-start;
+  padding: 1.3rem 1.4rem;
+  background: var(--paper);
   text-decoration: none;
+  color: inherit;
+}
+.memoir__part:hover {
+  background: var(--raised);
+}
+.memoir__n {
+  font-family: "Noto Nastaliq Urdu", serif;
+  color: var(--gold);
+  font-size: 1.4rem;
+  line-height: 1.6;
+  min-width: 1.8rem;
+  text-align: center;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.memoir__incipit {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.05rem;
+  line-height: 2.15;
+  margin: 0;
+  flex: 1;
+}
+.memoir__part:hover .memoir__incipit {
+  color: var(--sabz);
+}
+.memoir__thumb {
+  width: 66px;
+  height: 66px;
+  object-fit: cover;
+  flex: none;
+  filter: grayscale(1) contrast(1.02) sepia(0.12);
 }
 
-.parts a:hover {
-  color: var(--sabz);
+@media (max-width: 48rem) {
+  .memoir {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- the piece ---------- */
@@ -380,6 +414,26 @@ a:hover {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin: 0 0 2.75rem;
+  text-align: right;
+}
+
+/* The colophon convention his own manuscripts use — place and date, and by
+   extension first-publication and recording credits. Small, muted, right-set. */
+.colophon {
+  color: var(--muted);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.85rem;
+  line-height: 2;
+  margin: 0;
+  text-align: right;
+}
+
+/* A muted Nastaliq note: a video's description, an index's opening blurb. */
+.piece-note {
+  color: var(--muted);
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.95rem;
+  line-height: 2;
   text-align: right;
 }
 

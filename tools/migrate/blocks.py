@@ -27,12 +27,21 @@ NODE = re.compile(r'<p[^>]*>(.*?)</p>|<img[^>]*\bsrc="([^"]+)"[^>]*>', re.S | re
 # WordPress serves a downscaled copy ("…_o-1024x601.jpg") while the original
 # sits beside it. The archive keeps the original.
 WP_RESIZE = re.compile(r"-\d+x\d+(?=\.[A-Za-z0-9]+$)")
+# When the same filename is uploaded twice, WordPress appends "-1", "-2" … to
+# the second. Some posts reference that re-upload ("…_o-1.jpg") while only the
+# original ("…_o.jpg") was archived. They are the same photograph — every image
+# in this corpus is a Facebook export named "<ids>_o.jpg" / "…_n.jpg", so a
+# trailing "-<n>" before the extension is always a re-upload counter, never
+# part of the name — so drop it and resolve to the archived original.
+WP_REUPLOAD = re.compile(r"-\d+(?=\.[A-Za-z0-9]+$)")
 MEDIA_ROOT = "/media/images/"
 
 
 def image_path(src: str) -> str:
     """Map a WordPress upload URL to its local original."""
-    name = WP_RESIZE.sub("", src.rsplit("/", 1)[-1])
+    name = src.rsplit("/", 1)[-1]
+    name = WP_RESIZE.sub("", name)
+    name = WP_REUPLOAD.sub("", name)
     return f"{MEDIA_ROOT}{name}"
 
 

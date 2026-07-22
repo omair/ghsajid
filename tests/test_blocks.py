@@ -114,6 +114,15 @@ class TestImages(unittest.TestCase):
     def test_wordpress_resize_suffix_is_dropped_for_the_original(self):
         self.assertNotIn("1024x601", to_markdown(IMAGE, is_verse=False))
 
+    def test_wordpress_reupload_counter_resolves_to_the_original(self):
+        # "…_o-1-1024x879.jpg" is a resized re-upload; only "…_o.jpg" is on disk.
+        html = (
+            '<figure class="wp-block-image">'
+            '<img src="https://ghsajid.com/wp-content/uploads/2020/07/'
+            'x_o-1-1024x879.jpg"/></figure>'
+        )
+        self.assertIn("![](/media/images/x_o.jpg)", to_markdown(html, is_verse=False))
+
     def test_image_keeps_its_position_between_paragraphs(self):
         self.assertEqual(
             to_markdown(IMAGE, is_verse=False),

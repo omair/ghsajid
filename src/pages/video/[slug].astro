@@ -30,7 +30,7 @@ const { source, video_id, url, description, recorded } = entry.data;
       </p>
     )
   }
-  {description && <p class="work__note">{description}</p>}
+  {description && <p class="piece-note">{description}</p>}
   {
     recorded && (
       <p class="colophon">ریکارڈنگ ۔ {recorded.toISOString().slice(0, 10)}</p>
