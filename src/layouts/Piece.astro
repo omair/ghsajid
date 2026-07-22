@@ -7,6 +7,9 @@ interface Props {
   verse?: boolean;
   publishedIn?: string[];
   writtenNote?: string;
+  backHref?: string;
+  backLabel?: string;
+  hideTitle?: boolean;
 }
 
 const {
@@ -15,12 +18,16 @@ const {
   verse = false,
   publishedIn = [],
   writtenNote,
+  backHref,
+  backLabel,
+  hideTitle = false,
 } = Astro.props;
 ---
 
 <Base title={title}>
-  <article class="piece">
-    <h1 class="piece__title">{title}</h1>
+  <article class:list={["piece", { "piece--verse": verse }]}>
+    {backHref && <a class="piece__back" href={backHref}>→ {backLabel}</a>}
+    {!hideTitle && <h1 class="piece__title">{title}</h1>}
     {label && <p class="piece__label">{label}</p>}
     <div class={verse ? "verse" : "prose"}>
       <slot />

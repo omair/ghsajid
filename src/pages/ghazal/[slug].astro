@@ -3,23 +3,40 @@ import { getCollection, render } from "astro:content";
 import Piece from "../../layouts/Piece.astro";
 
 export async function getStaticPaths() {
-  const entries = await getCollection("ghazals");
-  return entries.map((entry) => ({
+  // Same order as the index, so the sequence nav agrees with the browse order.
+  const entries = (await getCollection("ghazals")).sort((a, b) =>
+    a.data.title.localeCompare(b.data.title, "ur"),
+  );
+  const n = entries.length;
+  return entries.map((entry, i) => ({
     params: { slug: entry.data.slug },
-    props: { entry },
+    props: {
+      entry,
+      // The set has no inherent sequence, so wrap — both arrows always lead
+      // somewhere, the way the design shows them.
+      prev: entries[(i - 1 + n) % n],
+      next: entries[(i + 1) % n],
+    },
   }));
 }
 
-const { entry } = Astro.props;
+const { entry, prev, next } = Astro.props;
 const { Content } = await render(entry);
 ---
 
 <Piece
-  title={entry.data.title}
   label="غزل"
+  title={entry.data.title}
+  hideTitle
+  backHref="/ghazal/"
+  backLabel="غزلیں"
   verse
   publishedIn={entry.data.published_in}
   writtenNote={entry.data.written_note}
 >
   <Content />
+  <nav class="sequence" slot="after">
+    <a href={`/ghazal/${prev.data.slug}`}>→ {prev.data.title}</a>
+    <a href={`/ghazal/${next.data.slug}`}>{next.data.title} ←</a>
+  </nav>
 </Piece>

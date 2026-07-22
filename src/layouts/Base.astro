@@ -4,10 +4,10 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
-  wide?: boolean;
+  measure?: "wide" | "index";
 }
 
-const { title, description, wide = false } = Astro.props;
+const { title, description, measure } = Astro.props;
 const isHome = Astro.url.pathname === "/";
 ---
 
@@ -27,17 +27,25 @@ const isHome = Astro.url.pathname === "/";
     />
   </head>
   <body>
-    <div class:list={["shell", { "shell--wide": wide }]}>
+    <div
+      class:list={[
+        "shell",
+        { "shell--wide": measure === "wide", "shell--index": measure === "index" },
+      ]}
+    >
       <header class="masthead">
-        {
-          isHome ? (
-            <span class="masthead__name">غلام حسین ساجد</span>
-          ) : (
-            <a class="masthead__name" href="/">
-              غلام حسین ساجد
-            </a>
-          )
-        }
+        <div class="masthead__brand">
+          {
+            isHome ? (
+              <span class="masthead__name">غلام حسین ساجد</span>
+            ) : (
+              <a class="masthead__name" href="/">
+                غلام حسین ساجد
+              </a>
+            )
+          }
+          <span class="masthead__latin" dir="ltr">Ghulam Hussain Sajid</span>
+        </div>
         <nav class="masthead__nav">
           <a href="/dars-gah/">درس گاہ</a>
           <a href="/ghazal/">غزلیں</a>
@@ -48,8 +56,19 @@ const isHome = Astro.url.pathname === "/";
       </header>
       <main><slot /></main>
     </div>
-    <footer class:list={["pagefoot", { "pagefoot--wide": wide }]}>
-      <p>غلام حسین ساجد ۔ شاعر ، نقّاد ، استاد ۔ بستی کبیر سنپال ۔ لاہور</p>
+    <footer
+      class:list={[
+        "pagefoot",
+        {
+          "pagefoot--wide": measure === "wide",
+          "pagefoot--index": measure === "index",
+        },
+      ]}
+    >
+      <p>غلام حسین ساجد ۔ شاعر ، نقّاد ، استاد ۔ بستی کبیر سنپال ، لاہور</p>
+      <span class="pagefoot__latin" dir="ltr">
+        Ghulam Hussain Sajid · Poet · Critic · Teacher
+      </span>
     </footer>
   </body>
 </html>

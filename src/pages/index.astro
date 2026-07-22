@@ -12,18 +12,15 @@ const [ghazals, nazms, reviews, videos, darsGah] = await Promise.all([
 ]);
 
 // The featured ghazal is the archive's opening one, whose سبز radeef gives the
-// site its colour. Its matla doubles as the hero quote; the first ashaar are
-// offered to read directly.
+// site its colour. Its matla is the site's signature couplet: it stands beside
+// the portrait as identity, and again below as the piece offered to read.
 const opening = await getEntry(
   "ghazals",
   "kisi-nigah-ki-zad-par-hai-baghi-sabz-mira",
 );
-const ashaar = (opening?.body ?? "")
-  .split("\n\n")
-  .map((s) => s.trim())
-  .filter(Boolean);
-const matla = ashaar[0] ?? "";
-const featuredAshaar = ashaar.slice(0, 3);
+const matla = ((opening?.body ?? "").split("\n\n")[0] ?? "").trim();
+// Render both misras: first plain, second muted, the way a matla is set.
+const matlaHtml = matla.replace(/\n/, '<br><span class="l2">') + "</span>";
 
 const works = [
   {
@@ -32,9 +29,9 @@ const works = [
     count: darsGah?.data.contents.length ?? 0,
     note: "خودنوشت",
   },
-  { href: "/ghazal/", title: "غزلیں", count: ghazals.length },
-  { href: "/nazm/", title: "نظمیں", count: nazms.length },
-  { href: "/tabsira/", title: "تبصرے", count: reviews.length },
+  { href: "/ghazal/", title: "غزلیں", count: ghazals.length, note: "کلام" },
+  { href: "/nazm/", title: "نظمیں", count: nazms.length, note: "کلام" },
+  { href: "/tabsira/", title: "تبصرے", count: reviews.length, note: "تنقید" },
   { href: "/video/", title: "آواز", count: videos.length, note: "اپنی زبانی" },
 ];
 ---
@@ -42,7 +39,7 @@ const works = [
 <Base
   title="غلام حسین ساجد"
   description="اردو اور پنجابی شاعر و نقّاد غلام حسین ساجد کا کلام، تنقید اور خودنوشت"
-  wide
+  measure="wide"
 >
   <section class="home-hero">
     <figure class="portrait">
@@ -58,9 +55,7 @@ const works = [
       <p class="home-role">شاعر ، نقّاد ، استاد</p>
       <p class="home-place">بستی کبیر سنپال ۔ لاہور</p>
       <hr class="home-hairline" />
-      <p class="home-matla">
-        <Fragment set:html={matla.replace(/\n/g, '<br><span class="l2">') + "</span>"} />
-      </p>
+      <p class="home-matla"><Fragment set:html={matlaHtml} /></p>
     </div>
   </section>
 
@@ -69,15 +64,8 @@ const works = [
   <div class="editorial">
     <article class="feature">
       <span class="eyebrow feature__eyebrow">منتخب غزل</span>
-      <h2 class="feature__title">{opening?.data.title}</h2>
-      <div class="verse">
-        {
-          featuredAshaar.map((sher) => (
-            <p set:html={sher.replace(/\n/g, "<br>")} />
-          ))
-        }
-      </div>
-      <a class="readmore" href={`/ghazal/${opening?.id}`}>پوری غزل پڑھیے ←</a>
+      <p class="feature__matla"><Fragment set:html={matlaHtml} /></p>
+      <a class="readmore" href={`/ghazal/${opening?.data.slug}`}>پوری غزل پڑھیے ←</a>
     </article>
 
     <aside class="fahrist">
@@ -98,7 +86,7 @@ const works = [
           src="/media/images/116016151_3213981008640804_6218243660421552257_n.jpg"
           alt=""
         />
-        <figcaption>درس گاہ کے ۵۳ حصوں میں پرانی تصویریں</figcaption>
+        <figcaption>درس گاہ کے حصوں میں پرانی تصویریں</figcaption>
       </figure>
     </aside>
   </div>

@@ -69,12 +69,37 @@ a:hover {
   outline-offset: 3px;
 }
 
+/* A soft entrance on each page's main content. Killed by the
+   prefers-reduced-motion block at the foot of this file. */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ---------- shell ---------- */
 
 .shell {
   max-width: var(--measure-wide);
   margin: 0 auto;
   padding: 1.5rem 1.5rem 6rem;
+}
+
+.shell > main {
+  animation: fadeUp 0.5s ease both;
+}
+
+/* Ghazal index sits between the reading measure and the wide home. */
+.shell--index {
+  max-width: 43rem;
+}
+.pagefoot--index {
+  max-width: 43rem;
 }
 
 .masthead {
@@ -87,11 +112,32 @@ a:hover {
   border-bottom: 1px solid var(--rule);
 }
 
+.masthead__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
 .masthead__name {
   font-family: "Noto Nastaliq Urdu", serif;
   font-size: 1.05rem;
   line-height: 2.2;
   text-decoration: none;
+}
+
+/* A small Latin nameplate beside the Nastaliq masthead, and its footer echo:
+   the one place the archive states his name in the Latin alphabet. */
+.masthead__latin,
+.pagefoot__latin {
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pagefoot__latin {
+  display: block;
+  margin-top: 0.4rem;
+  opacity: 0.7;
 }
 
 .masthead__nav {
@@ -207,17 +253,22 @@ a:hover {
   display: block;
   margin-bottom: 1rem;
 }
-.feature__title {
+/* The feature shows the matla itself — both misras — not a linked title. The
+   second misra is muted, the way a matla is set on the page. */
+.feature__matla {
   font-family: "Noto Nastaliq Urdu", serif;
-  font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.05rem);
+  font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2rem);
   font-weight: 400;
-  line-height: 2.2;
-  margin: 0 0 2rem;
+  line-height: 2.35;
+  margin: 0;
   text-align: right;
+}
+.feature__matla .l2 {
+  color: var(--muted);
 }
 .readmore {
   display: inline-block;
-  margin-top: 1rem;
+  margin-top: 1.6rem;
   color: var(--sabz);
   font-family: "Noto Nastaliq Urdu", serif;
   font-size: 1.1rem;
@@ -242,9 +293,14 @@ a:hover {
   border-bottom: 1px solid var(--rule);
   text-decoration: none;
   color: inherit;
+  transition: padding-inline-start 0.2s ease;
 }
 .fahrist__item:first-of-type {
   border-top: 1px solid var(--rule);
+}
+/* Hover nudges the row off its leading (right, in RTL) edge. */
+.fahrist__item:hover {
+  padding-inline-start: 0.5rem;
 }
 .fahrist__item:hover .fahrist__title {
   color: var(--sabz);
@@ -319,10 +375,12 @@ a:hover {
   font-size: 1.1rem;
   line-height: 2.2;
   text-decoration: none;
+  transition: padding-inline-start 0.2s ease;
 }
 
 .listing a:hover {
   color: var(--sabz);
+  padding-inline-start: 0.5rem;
 }
 
 .listing__meta {
@@ -331,6 +389,74 @@ a:hover {
   font-size: 0.8rem;
   line-height: 1.5;
   font-family: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+/* Ghazal index: each row shows both misras of the matla, numbered in gilt —
+   a couplet you can read, not just a title to click. */
+.ghazal-index__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+.ghazal-index__head h1 {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 2;
+  margin: 0;
+}
+.ghazal-index__count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.ghazal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ghazal-list li {
+  border-bottom: 1px solid var(--rule);
+}
+.ghazal-row {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1rem 0.1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: padding-inline-start 0.2s ease;
+}
+.ghazal-row:hover {
+  padding-inline-start: 0.5rem;
+}
+.ghazal-row__n {
+  font-family: "Noto Nastaliq Urdu", serif;
+  color: var(--gold);
+  font-size: 1rem;
+  min-width: 1.8rem;
+  text-align: center;
+  flex: none;
+}
+.ghazal-row__lines {
+  flex: 1;
+}
+.ghazal-row__a {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1.2rem;
+  line-height: 2.1;
+}
+.ghazal-row:hover .ghazal-row__a {
+  color: var(--sabz);
+}
+.ghazal-row__b {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1rem;
+  line-height: 2;
+  color: var(--muted);
 }
 
 /* The memoir is an ordered, illustrated autobiography, not a bank of numbers.
@@ -399,6 +525,25 @@ a:hover {
   margin: 0 auto;
 }
 
+/* A ghazal is single misras — it wants a tighter measure than wrapping prose. */
+.piece--verse {
+  max-width: 34rem;
+}
+
+/* Back to the section index, set above the reading column. */
+.piece__back {
+  display: inline-block;
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 1rem;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 2rem;
+  transition: color 0.2s ease;
+}
+.piece__back:hover {
+  color: var(--sabz);
+}
+
 .piece__title {
   font-family: "Noto Nastaliq Urdu", serif;
   font-size: clamp(1.15rem, 1rem + 0.9vw, 1.5rem);
@@ -463,11 +608,18 @@ a:hover {
   counter-reset: sher;
 }
 
+/* Each sher is a two-column grid: the number in a narrow margin column, the
+   couplet centred in the reading column. The numeral is a real grid cell (the
+   ::before), not absolutely positioned, so it never collides on any width. */
 .verse p {
-  position: relative;
-  margin: 0 0 2.25rem;
-  font-size: 1.15rem;
-  line-height: 2.45;
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  margin: 0 0 2.1rem;
+  font-size: 1.18rem;
+  line-height: 2.5;
+  text-align: center;
 }
 
 .verse p::before {
@@ -476,18 +628,19 @@ a:hover {
      an unknown counter style falls back to `decimal` silently — it rendered
      these as Latin 1, 2, 3. `urdu` is supported and gives ۱ ۲ ۳. */
   content: counter(sher, urdu);
-  position: absolute;
-  inset-inline-end: calc(100% + 1.25rem);
-  top: 0.35em;
+  grid-column: 1;
   color: var(--muted);
   opacity: 0.6;
   font-family: "Noto Nastaliq Urdu", serif;
-  font-size: 0.75rem;
-  line-height: 1;
+  font-size: 0.72rem;
+  line-height: 2.9;
 }
 
-/* No margin to hang numerals in on narrow screens. */
+/* No margin to hang numerals in on narrow screens: drop the column, hide it. */
 @media (max-width: 46rem) {
+  .verse p {
+    grid-template-columns: 1fr;
+  }
   .verse p::before {
     display: none;
   }
@@ -499,16 +652,39 @@ a:hover {
   border-top: 1px solid var(--rule);
 }
 
+/* On a ghazal the colophon sits quietly under the verse, centred and without
+   its own rule — the only rule below the couplets belongs to the sequence nav. */
+.piece--verse .piece__foot {
+  margin-top: 1rem;
+  padding-top: 0;
+  border-top: 0;
+}
+.piece--verse .colophon {
+  text-align: center;
+}
+
 .sequence {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 3.5rem;
-  padding-top: 1.25rem;
+  margin-top: 2.5rem;
+  padding-top: 1.15rem;
   border-top: 1px solid var(--rule);
   font-family: "Noto Nastaliq Urdu", serif;
   font-size: 0.95rem;
   line-height: 2.2;
+}
+.sequence a {
+  max-width: 45%;
+  color: var(--muted);
+  text-decoration: none;
+}
+.sequence a:hover {
+  color: var(--sabz);
+}
+/* The forward (next) link sits at the left edge and reads toward it. */
+.sequence a + a {
+  text-align: left;
 }
 
 .embed {

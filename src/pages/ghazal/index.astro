@@ -1,22 +1,39 @@
 ---
 import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
+import { urduNumber } from "../../lib/urdu";
 
+// One shared order for the index and the reading page's prev/next, so browsing
+// forward here and paging through a ghazal agree.
 const entries = (await getCollection("ghazals")).sort((a, b) =>
   a.data.title.localeCompare(b.data.title, "ur"),
 );
+
+// The matla is the first two lines of the body; show both misras.
+const rows = entries.map((entry, i) => {
+  const lines = (entry.body ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  return { slug: entry.data.slug, n: urduNumber(i + 1), a: lines[0] ?? "", b: lines[1] ?? "" };
+});
 ---
 
-<Base title="غزلیں">
-  <h1 class="piece__title">غزلیں</h1>
-  <p class="piece__label">مطلع کے مطابق</p>
-  <ul class="listing">
+<Base title="غزلیں" measure="index">
+  <div class="ghazal-index__head">
+    <h1>غزلیں</h1>
+    <span class="ghazal-index__count">{urduNumber(entries.length)}</span>
+  </div>
+  <ul class="ghazal-list">
     {
-      entries.map((entry) => (
+      rows.map((r) => (
         <li>
-          <a href={`/ghazal/${entry.data.slug}`}>
-            {entry.data.title}
-            
+          <a class="ghazal-row" href={`/ghazal/${r.slug}`}>
+            <span class="ghazal-row__n">{r.n}</span>
+            <div class="ghazal-row__lines">
+              <div class="ghazal-row__a">{r.a}</div>
+              <div class="ghazal-row__b">{r.b}</div>
+            </div>
           </a>
         </li>
       ))
