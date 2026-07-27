@@ -27,9 +27,6 @@ SECTION_HEADINGS = frozenset({
 # SECTION_HEADINGS rather than whatever spelling the source happened to use.
 _NORMALISED_HEADINGS = {skeleton(heading): heading for heading in SECTION_HEADINGS}
 
-# A heading sits high on the page; verse lines march down it.
-PAGE_TOP = 40
-
 # A real ghazal's matlaa is a line of verse, not a paragraph. When the
 # boundary heuristic fails to find a break inside a large prose block (front
 # matter, a foreword), the whole block becomes one "title" — one real pilot

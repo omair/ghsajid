@@ -119,6 +119,9 @@ class TestDecode(unittest.TestCase):
         data = _pairs([0x81, 0x82]) + _para_mark(10)
         self.assertEqual(excluded_report(data), (0, 0))
 
+    def test_decodes_empty_input_to_no_paragraphs(self):
+        self.assertEqual(decode(b""), [])
+
     def test_drops_control_codes_from_codes_entirely(self):
         # Codes below 0x20 are stream control bytes, never characters, so they
         # must not reach `codes` either — gate B compares `raw` against

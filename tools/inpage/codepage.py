@@ -195,8 +195,21 @@ _DIGIT_EVIDENCE = (
     "date and is inferred from contiguity with the rest of the block, not "
     "from a direct occurrence"
 )
-for _d, _digit in enumerate("۰۱۲۳۴۵۶۷۸۹"):
-    CODEPAGE[0xD0 + _d] = (_digit, _DIGIT_EVIDENCE)
+def _add_digit_block() -> None:
+    """Assign 0xD0-0xD9 to the digits, asserting no key is already present.
+
+    A loop indexing into CODEPAGE would silently clobber a pre-existing key
+    if one ever collided with this range; an explicit assert makes that
+    impossible instead of merely unlikely. Loop temporaries stay local to
+    this function rather than leaking into the module namespace.
+    """
+    for offset, digit in enumerate("۰۱۲۳۴۵۶۷۸۹"):
+        code = 0xD0 + offset
+        assert code not in CODEPAGE, f"{code:#04x} already mapped, refusing to clobber it"
+        CODEPAGE[code] = (digit, _DIGIT_EVIDENCE)
+
+
+_add_digit_block()
 
 # Genuine duplicate codes, if any are discovered: alias -> canonical code.
 # Declared explicitly so the injectivity test stays meaningful.

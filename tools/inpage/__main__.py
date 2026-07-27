@@ -10,6 +10,7 @@ after approval.
 """
 
 import json
+import shutil
 import sys
 from dataclasses import asdict
 from pathlib import Path
@@ -103,11 +104,21 @@ def cmd_segment(book_slug: str) -> None:
                            + ", ".join(outliers[:20]))
 
     out = STAGING / book_slug
+    # Clear this book's staging directory before writing, not just create it:
+    # otherwise a piece from a previous run that this run's segmentation no
+    # longer produces (renamed, merged, dropped) survives as an orphan file
+    # that `promote` could later copy despite never being described by the
+    # approved segments.json. Scoped to exactly out/staging/<book_slug>/, so
+    # nothing outside this one book's staging is ever touched, and re-running
+    # is still safe — the directory is simply rebuilt from scratch each time.
+    if out.exists():
+        shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
-    _, problems = write_segments(segments, book_slug, out)
+    _, slugs, problems = write_segments(segments, book_slug, out)
     gate_output.extend(problems)
     write_book(
         Book(title=TITLES[book_slug], slug=book_slug, contents=segments),
+        slugs,
         out,
     )
     (out / "segments.json").write_text(
@@ -126,6 +137,8 @@ def cmd_promote(book_slug: str) -> None:
     for problem in problems:
         print(f"  {problem}")
     print(f"{len(written)} files written to content/")
+    if problems:
+        sys.exit(1)
 
 
 def main() -> None:

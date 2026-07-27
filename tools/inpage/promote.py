@@ -10,6 +10,7 @@ import json
 import shutil
 from pathlib import Path
 
+from .emit import resolve_slugs
 from .groundtruth import skeleton
 from .models import Segment
 from .report import is_approved
@@ -47,19 +48,31 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
     if not is_approved(report_text, segments):
         return [], [f"{report_path} is not approved, or was re-segmented after approval"]
 
+    # Drive the copy loop from segments.json — the thing the approval gate
+    # actually bound its hash to — never from whatever files happen to sit
+    # in staging. A book re-segmented after a first pass (2 pieces staged,
+    # then re-run down to 1) leaves the first run's orphan .md file on disk;
+    # rglob would promote it even though no approved report ever described
+    # it. Only a piece this segmentation names may be copied, and only if it
+    # is actually present — its absence is a problem, not a silent skip.
+    slugs, _ = resolve_slugs(segments)
+
     written: list[Path] = []
     problems: list[str] = []
-    for source in sorted(book_staging.rglob("*.md")):
-        if source.name == "report.md":
-            continue
-        kind = source.parent.name
-        if kind not in KNOWN_KINDS:
+    for segment, slug in zip(segments, slugs):
+        if segment.kind not in KNOWN_KINDS:
             problems.append(
-                f"unexpected staging directory {kind!r} for {source}, skipped "
+                f"unexpected kind {segment.kind!r} for piece {slug!r}, skipped "
                 f"(expected one of {sorted(KNOWN_KINDS)})"
             )
             continue
-        target = content / kind / source.name
+        source = book_staging / segment.kind / f"{slug}.md"
+        if not source.exists():
+            problems.append(
+                f"named in segments.json but missing from staging: {source}"
+            )
+            continue
+        target = content / segment.kind / f"{slug}.md"
         if target.exists():
             try:
                 existing_body = _existing_body(target)

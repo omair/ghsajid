@@ -45,7 +45,7 @@ def _piece(segment: Segment, book_slug: str) -> Piece:
         title=segment.title,
         language="urdu",
         script="nastaliq",
-        published="",                     # unknown for book-sourced pieces
+        published=None,                    # unknown for book-sourced pieces
         body=segment.body,
         extra={"source_book": book_slug, "book_order": segment.order},
     )
@@ -67,43 +67,72 @@ def write_segment(segment: Segment, book_slug: str, root: Path) -> Path:
     return _write_piece(piece, root)
 
 
-def write_segments(
-    segments: list[Segment], book_slug: str, root: Path
-) -> tuple[list[Path], list[str]]:
-    """Write every segment to <root>/<kind>/<slug>.md.
+def resolve_slugs(segments: list[Segment]) -> tuple[list[str], list[str]]:
+    """Resolve the on-disk slug for every segment, in order.
 
     Two segments whose titles slugify to the same string would otherwise
     overwrite each other in staging, silently dropping a poem before
-    `promote` ever sees it. Both are written here: the first under its
-    natural slug, later collisions under a disambiguated `<slug>-N.md`, with
-    a problem naming the colliding titles so a human can resolve it. Order
-    is taken from the input list, so re-running on a fresh staging
-    directory is deterministic.
+    `promote` ever sees it. The first keeps its natural slug; later
+    collisions are disambiguated to `<slug>-N`, with a problem naming the
+    colliding titles so a human can resolve it. Order is taken from the
+    input list, so re-running on the same segments is deterministic.
+
+    This is the single source of truth for "what slug does segment i get" —
+    `write_segments` uses it to name the files it writes, `write_book` uses
+    it to name the same pieces in the book record, and `promote` uses it to
+    find those files again in staging. Any of those recomputing the slug
+    independently could silently disagree with the others on a collision.
     """
-    written: list[Path] = []
     problems: list[str] = []
+    slugs: list[str] = []
     slug_counts: dict[str, int] = {}
     first_title_for_slug: dict[str, str] = {}
     for segment in segments:
         base_slug = _cap_slug(slugify(segment.title))
         count = slug_counts.get(base_slug, 0)
         slug_counts[base_slug] = count + 1
-        piece = _piece(segment, book_slug)
         if count == 0:
             first_title_for_slug[base_slug] = segment.title
+            slugs.append(base_slug)
         else:
-            piece.slug = f"{base_slug}-{count + 1}"
+            slug = f"{base_slug}-{count + 1}"
             problems.append(
                 f'slug collision: "{first_title_for_slug[base_slug]}" and '
                 f'"{segment.title}" both slugify to "{base_slug}" — wrote the '
-                f'second as {piece.slug}.md'
+                f'second as {slug}.md'
             )
+            slugs.append(slug)
+    return slugs, problems
+
+
+def write_segments(
+    segments: list[Segment], book_slug: str, root: Path
+) -> tuple[list[Path], list[str], list[str]]:
+    """Write every segment to <root>/<kind>/<slug>.md.
+
+    Returns (written paths, resolved slugs, problems) — the slugs are
+    positional, parallel to `segments`, so a caller (`write_book`, `promote`)
+    can pair each segment with the slug it actually got on disk instead of
+    re-deriving one independently. See `resolve_slugs`.
+    """
+    slugs, problems = resolve_slugs(segments)
+    written: list[Path] = []
+    for segment, slug in zip(segments, slugs):
+        piece = _piece(segment, book_slug)
+        piece.slug = slug
         written.append(_write_piece(piece, root))
-    return written, problems
+    return written, slugs, problems
 
 
-def write_book(book: Book, root: Path) -> Path:
-    """Write one book record to <root>/books/<slug>.yaml."""
+def write_book(book: Book, slugs: list[str], root: Path) -> Path:
+    """Write one book record to <root>/books/<slug>.yaml.
+
+    `slugs` must be the resolved slugs for `book.contents`, positional and
+    in the same order (as returned by `write_segments`) — recomputing them
+    here independently would silently disagree with `write_segments` on a
+    slug collision, listing one slug twice and orphaning the other from the
+    book record.
+    """
     directory = root / "books"
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / f"{book.slug}.yaml"
@@ -115,10 +144,10 @@ def write_book(book: Book, root: Path) -> Path:
     if book.volume_of:
         lines.append(f'volume_of: "{book.volume_of}"')
     lines.append("contents:")
-    for segment in book.contents:
+    for segment, slug in zip(book.contents, slugs):
         section = f' section: "{segment.section}",' if segment.section else ""
         lines.append(
-            f'  - {{{section} kind: "{segment.kind}", slug: "{_cap_slug(slugify(segment.title))}" }}'
+            f'  - {{{section} kind: "{segment.kind}", slug: "{slug}" }}'
         )
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write("\n".join(lines) + "\n")

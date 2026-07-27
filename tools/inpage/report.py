@@ -38,7 +38,7 @@ def render(book_slug: str, segments: list[Segment], gate_output: list[str]) -> s
         "## Gate output",
         "",
     ]
-    lines.extend(f"- {line}" for line in gate_output or ["all gates clean"])
+    lines.extend(f"- {_sanitise(line)}" for line in gate_output or ["all gates clean"])
     lines.extend(["", "## Pieces", ""])
     for s in segments:
         sher = len([b for b in s.body.split("\n\n") if b.strip()])

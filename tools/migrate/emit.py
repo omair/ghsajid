@@ -47,8 +47,12 @@ def frontmatter(piece: Piece) -> str:
         f"script: {_quote(piece.script)}",
     ]
     # Book-sourced pieces have no publication date of their own — only the
-    # book's year, which is a different fact. Omit rather than invent one.
-    if piece.published:
+    # book's year, which is a different fact — and set published=None to say
+    # so; that case is omitted. A WordPress-sourced piece with published=""
+    # is a different situation (the export had no date in a field that
+    # normally has one) and must still render, loudly failing the Astro
+    # build rather than silently shipping a dateless piece.
+    if piece.published is not None:
         lines.append(f"published: {piece.published}")
     tags = _render("tags", piece.tags)
     if tags:

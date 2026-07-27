@@ -64,11 +64,12 @@ class TestWriteSegments(unittest.TestCase):
         # are stripped — same underlying string here, forced for the test.
         first = Segment(kind="ghazals", title="رات اک لہر رُکی پانی میں", body="اول", order=1)
         second = Segment(kind="ghazals", title="رات اک لہر رُکی پانی میں", body="دوم", order=2)
-        paths, problems = write_segments([first, second], "tajawuz", self.root)
+        paths, slugs, problems = write_segments([first, second], "tajawuz", self.root)
 
         self.assertEqual(len(paths), 2)
         self.assertEqual(paths[0].name, "raat-ak-lehar-ruki-pani-mein.md")
         self.assertEqual(paths[1].name, "raat-ak-lehar-ruki-pani-mein-2.md")
+        self.assertEqual(slugs, ["raat-ak-lehar-ruki-pani-mein", "raat-ak-lehar-ruki-pani-mein-2"])
         self.assertIn("اول", paths[0].read_text(encoding="utf-8"))
         self.assertIn("دوم", paths[1].read_text(encoding="utf-8"))
         self.assertTrue(problems)
@@ -77,8 +78,11 @@ class TestWriteSegments(unittest.TestCase):
     def test_no_collision_no_problems(self):
         first = Segment(kind="ghazals", title="پہلی نظم", body="اول", order=1)
         second = Segment(kind="nazms", title="دوسری نظم", body="دوم", order=2)
-        paths, problems = write_segments([first, second], "tajawuz", self.root)
+        paths, slugs, problems = write_segments([first, second], "tajawuz", self.root)
         self.assertEqual(len(paths), 2)
+        self.assertEqual(slugs[0], "pahli-nazm")
+        self.assertEqual(len(slugs), 2)
+        self.assertNotEqual(slugs[0], slugs[1])
         self.assertEqual(problems, [])
 
     def test_deterministic_on_a_fresh_root(self):
@@ -105,8 +109,34 @@ class TestWriteBook(unittest.TestCase):
 
     def test_omits_an_unknown_year(self):
         book = Book(title="تجاوز", slug="tajawuz", publisher="رنگ ادب")
-        text = write_book(book, self.root).read_text(encoding="utf-8")
+        text = write_book(book, [], self.root).read_text(encoding="utf-8")
         self.assertNotIn("year:", text)
+
+    def test_uses_the_slugs_write_segments_resolved_on_collision(self):
+        # write_segments disambiguates a collision to <slug>-2; write_book
+        # must record that same resolved slug rather than re-deriving its
+        # own (independently unaware of the counter) and listing the base
+        # slug twice, which would make one contents row point at the wrong
+        # poem and orphan the "-2" file from the book record entirely.
+        first = Segment(kind="ghazals", title="رات اک لہر رُکی پانی میں", body="اول", order=1)
+        second = Segment(kind="ghazals", title="رات اک لہر رُکی پانی میں", body="دوم", order=2)
+        staging_root = Path(tempfile.mkdtemp())
+        try:
+            _, slugs, _ = write_segments([first, second], "tajawuz", staging_root)
+            book = Book(title="تجاوز", slug="tajawuz", contents=[first, second])
+            text = write_book(book, slugs, self.root).read_text(encoding="utf-8")
+        finally:
+            shutil.rmtree(staging_root)
+
+        self.assertEqual(slugs, [
+            "raat-ak-lehar-ruki-pani-mein",
+            "raat-ak-lehar-ruki-pani-mein-2",
+        ])
+        lines = [line for line in text.splitlines() if "slug:" in line and "  - {" in line]
+        self.assertEqual(len(lines), 2)
+        self.assertIn('slug: "raat-ak-lehar-ruki-pani-mein"', lines[0])
+        self.assertIn('slug: "raat-ak-lehar-ruki-pani-mein-2"', lines[1])
+        self.assertNotIn(lines[0], lines[1])
 
 
 class TestPromote(unittest.TestCase):
@@ -171,7 +201,7 @@ class TestPromote(unittest.TestCase):
         segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
         book_staging = self._stage_approved("tajawuz", [segment])
         book = Book(title="تجاوز", slug="tajawuz", contents=[segment])
-        write_book(book, book_staging)
+        write_book(book, ["pahli-nazm"], book_staging)
 
         written, problems = promote("tajawuz", self.staging, self.content)
 
@@ -184,7 +214,7 @@ class TestPromote(unittest.TestCase):
         segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
         book_staging = self._stage_approved("tajawuz", [segment])
         book = Book(title="تجاوز", slug="tajawuz", contents=[segment])
-        write_book(book, book_staging)
+        write_book(book, ["pahli-nazm"], book_staging)
 
         target = self.content / "books" / "tajawuz.yaml"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -201,7 +231,7 @@ class TestPromote(unittest.TestCase):
         first = Segment(kind="ghazals", title="پہلی نظم", body="اول", order=1)
         second = Segment(kind="ghazals", title="پہلی نظم", body="دوم", order=2)
         book_staging = self.staging / "tajawuz"
-        _, staging_problems = write_segments([first, second], "tajawuz", book_staging)
+        _, _, staging_problems = write_segments([first, second], "tajawuz", book_staging)
         self.assertTrue(any("collision" in p for p in staging_problems))
 
         segments_path = book_staging / "segments.json"
@@ -218,6 +248,51 @@ class TestPromote(unittest.TestCase):
         names = sorted(p.name for p in written)
         self.assertEqual(names, ["pahli-nazm-2.md", "pahli-nazm.md"])
         self.assertEqual(problems, [])
+
+    def test_orphaned_staging_file_from_a_prior_run_is_not_promoted(self):
+        # Regression for the stale-orphan bug: a book is segmented (2 pieces),
+        # then re-segmented after a fix down to 1 piece. The approval gate
+        # binds to segments.json, but promote must ALSO refuse to copy
+        # whatever .md files are still sitting in staging from the first run
+        # — it may only copy what the approved segments.json names.
+        first = Segment(kind="ghazals", title="پہلی نظم", body="اول", order=1)
+        second = Segment(kind="ghazals", title="دوسری نظم", body="دوم", order=2)
+        book_staging = self.staging / "tajawuz"
+        write_segments([first, second], "tajawuz", book_staging)  # first run: 2 pieces
+
+        # Re-segment down to just `first` — `second`'s .md is now an orphan.
+        segments_path = book_staging / "segments.json"
+        segments_path.write_text(
+            json.dumps([asdict(first)]), encoding="utf-8"
+        )
+        report_text = render("tajawuz", [first], []).replace(
+            "approved: false", "approved: true"
+        )
+        (book_staging / "report.md").write_text(report_text, encoding="utf-8")
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        names = sorted(p.name for p in written)
+        self.assertEqual(names, ["pahli-nazm.md"])
+        self.assertFalse((self.content / "ghazals" / "dosri-nazm.md").exists())
+        self.assertFalse(any("dosri" in p for p in problems))
+
+    def test_piece_named_in_segments_json_but_missing_from_disk_is_reported(self):
+        segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
+        book_staging = self.staging / "tajawuz"
+        book_staging.mkdir(parents=True)
+        segments_path = book_staging / "segments.json"
+        segments_path.write_text(json.dumps([asdict(segment)]), encoding="utf-8")
+        report_text = render("tajawuz", [segment], []).replace(
+            "approved: false", "approved: true"
+        )
+        (book_staging / "report.md").write_text(report_text, encoding="utf-8")
+        # Deliberately never wrote pahli-nazm.md into staging.
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [])
+        self.assertTrue(any("missing" in p and "pahli-nazm" in p for p in problems))
 
 
 if __name__ == "__main__":
