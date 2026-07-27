@@ -115,19 +115,30 @@ def lexicon_report(paragraphs: list[Paragraph], lexicon: set[str]) -> list[str]:
 def toc_count_errors(
     paragraphs: list[Paragraph], segments: list[Segment]
 ) -> list[str]:
-    """The piece count must equal what the book's own فہرست declares.
+    """The POEM count must equal what the book's own فہرست declares.
 
     تجاوز's فہرست is numbered 1-100 and باغِ نشاط's 1-85, so the expected
     count is read from the file rather than judged. This turns "866 pieces
     looks wrong" into arithmetic.
+
+    Counted against the poems, not every piece. Read in the source, each
+    فہرست sits under the heading غزلیں and its numbering ends before the
+    critical foreword that follows it — تجاوز's numbers run out at paragraph
+    65 and Dr Saadat Saeed's essay starts at 67, signed and dated at 83. That
+    essay is what becomes the `reviews` pieces (5 in تجاوز, 10 in
+    باغِ نشاط), and it is not a numbered entry in either book. Comparing
+    total pieces instead made the gate fail by exactly the review count in
+    both books — +5 and +10 — while the poems matched the declared 100 and 85
+    exactly. So the basis is the poems; the reviews are carried by the
+    conservation gate and the report, not counted here.
     """
     expected = toc_count(paragraphs)
     if expected is None:
         return ["no فہرست found: the piece-count gate could not run"]
-    actual = len(segments)
+    actual = sum(1 for segment in segments if segment.kind in VERSE_KINDS)
     if actual != expected:
         return [
-            f"piece count {actual} does not match the فہرست's {expected} "
+            f"poem count {actual} does not match the فہرست's {expected} "
             f"(delta {actual - expected:+d})"
         ]
     return []
@@ -138,22 +149,48 @@ def conservation_errors(
 ) -> list[str]:
     """Every verse paragraph must land in exactly one piece.
 
-    Lines in equals lines out. This is what makes losing a poem impossible
-    rather than merely unlikely.
+    Checked by matching the lines themselves, not by counting them. A plain
+    count of emitted lines cannot express "exactly one piece": it is off by
+    the prose a `reviews` piece legitimately carries (+7 lines in تجاوز, +11
+    in باغِ نشاط, all of them the foreword's paragraphs), and it would let a
+    line dropped in one place be masked by a line duplicated in another.
+    Comparing multisets of the text says what the gate means — nothing lost,
+    nothing emitted twice — and stays blind to the prose either way.
     """
-    expected = sum(1 for kind in classify(paragraphs) if kind == VERSE)
-    actual = sum(
-        1
+    kinds = classify(paragraphs)
+    expected = collections.Counter(
+        para.text.strip()
+        for para, kind in zip(paragraphs, kinds)
+        if kind == VERSE and para.text.strip()
+    )
+    emitted = collections.Counter(
+        line.strip()
         for segment in segments
         for line in segment.body.split("\n")
         if line.strip()
     )
-    if actual != expected:
-        return [
-            f"verse conservation failed: {expected} verse paragraphs in, "
-            f"{actual} lines out (delta {actual - expected:+d})"
-        ]
-    return []
+    errors = []
+    lost = expected - emitted
+    if lost:
+        total = sum(lost.values())
+        sample = ", ".join(repr(text[:40]) for text in list(lost)[:3])
+        errors.append(
+            f"verse conservation failed: {total} of {sum(expected.values())} "
+            f"verse paragraphs did not reach a piece: {sample}"
+        )
+    doubled = collections.Counter({
+        text: emitted[text] - count
+        for text, count in expected.items()
+        if emitted[text] > count
+    })
+    if doubled:
+        total = sum(doubled.values())
+        sample = ", ".join(repr(text[:40]) for text in list(doubled)[:3])
+        errors.append(
+            f"verse conservation failed: {total} verse paragraph(s) reached "
+            f"more than one piece: {sample}"
+        )
+    return errors
 
 
 def verse_errors(segments: list[Segment]) -> list[str]:

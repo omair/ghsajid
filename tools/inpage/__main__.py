@@ -17,8 +17,10 @@ from pathlib import Path
 
 from .checks import (
     completeness_errors,
+    conservation_errors,
     lexicon_report,
     roundtrip_errors,
+    toc_count_errors,
     verse_errors,
 )
 from .decode import decode, excluded_report
@@ -97,6 +99,8 @@ def cmd_segment(book_slug: str) -> None:
             f"{isolated_mapped} of which decoded to a character"
         ]
         + verse_errors(segments)
+        + toc_count_errors(paragraphs, segments)
+        + conservation_errors(paragraphs, segments)
     )
     outliers = lexicon_report(paragraphs, corpus_lexicon())
     if outliers:

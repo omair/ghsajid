@@ -9,6 +9,8 @@ This is heuristic by construction. Nothing here writes to content/: the output
 goes to staging with a report, and a human resolves every flag.
 """
 
+import re
+
 from .classify import (
     COLOPHON, HEADING, NORMALISED_HEADINGS, PROSE, SECOND_MISRA_GEOMETRY,
     UNKNOWN, VERSE, classify,
@@ -24,9 +26,32 @@ from .models import Paragraph, Segment
 # reviewing the report can see it.
 MAX_TITLE_LENGTH = 200
 
-# A ghazal's radif can be one word (الگ) or several (بچھی ہوئی). Test longest
-# first: a 3-word match is far stronger evidence of a matlaa than a 1-word one.
-RADIF_LENGTHS = (3, 2, 1)
+# Rhyme in Urdu is heard, not spelled, so the two orthographic differences that
+# never change the sound are folded before any tail is compared. Both were
+# measured as real missed matlaa in the pilot: تجاوز's ...اُتر آئی against a
+# run rhyming گویائی/پسپائی/شہنائی (آ vs ا), and باغِ نشاط's ...ہالہ کہاں سے
+# آتا ہے against اُجالا/والا/سنبھالا (word-final ہ vs ا). Each miss silently
+# welded two ghazals into one piece.
+RHYME_FOLD = str.maketrans({"آ": "ا", "ۂ": "ہ", "ۃ": "ہ", "ؤ": "و", "ۓ": "ے"})
+FINAL_HE = re.compile(r"ہ(?=\s|$)")
+
+# A rhyme is compared as characters, not words: the qafia is a *partial* word
+# (نگ سے across سنگ/رنگ/ترنگ, یں تھا across زمیں/مبیں/یقیں), and it is exactly
+# the part a word-tail comparison cannot see. Two characters is the floor —
+# a bare ہے or سے is not evidence of anything.
+MIN_RHYME = 2
+
+# How many shers of the prospective new ghazal establish its rhyme. One sher
+# cannot: its own tail carries accidental letters (سنگ سے alone yields
+# "سنگ سے", not the qafia). Measured, the piece count is identical at 3, 4 and
+# 5 for both pilot books, so this is a plateau rather than a fitted constant.
+RHYME_WINDOW = 4
+
+# The poet's takhallus. A sher carrying it is the maqtaa, the closing sher, so
+# the ghazal after it is a new ghazal even when it happens to rhyme alike —
+# this is what separates باغِ نشاط's ...بنامِ وصال ghazal from the ...خدّ و خال
+# ghazal that follows it in the same "-ال" family.
+TAKHALLUS = "ساجد"
 
 
 GHAZAL_SHAPE_THRESHOLD = 0.9
@@ -180,38 +205,125 @@ def pair_shers(run: list[Paragraph]) -> list[tuple[str, str]]:
     return shers
 
 
-def _tail(text: str, words: int) -> str:
-    parts = skeleton(text).split()
-    return " ".join(parts[-words:]) if len(parts) >= words else ""
+def _rhyme_key(text: str) -> str:
+    """The form a rhyme is compared in: letters only, sound-folded."""
+    return FINAL_HE.sub("ا", skeleton(text).translate(RHYME_FOLD))
 
 
-def is_matla(first: str, second: str) -> bool:
-    """True when both misras end alike — the opening sher of a ghazal.
+def _common_suffix(left: str, right: str) -> str:
+    count = 0
+    while (
+        count < len(left)
+        and count < len(right)
+        and left[-1 - count] == right[-1 - count]
+    ):
+        count += 1
+    return left[len(left) - count:] if count else ""
+
+
+def _shared_rhyme(lines: list[str]) -> str:
+    if not lines:
+        return ""
+    rhyme = lines[0]
+    for line in lines[1:]:
+        rhyme = _common_suffix(rhyme, line)
+    return rhyme.lstrip()
+
+
+def run_rhyme(shers: list[tuple[str, str]], index: int) -> str:
+    """The qafia+radif the run starting at `index` shares, or "".
+
+    Read from the SECOND misras — the only lines every sher of a ghazal
+    rhymes on — of this sher and the few that follow it. Established forward
+    like this, the rhyme belongs to the ghazal being opened rather than to the
+    candidate sher alone, which is what stops an ordinary sher whose first
+    misra happens to end on a common word (ہے, سے, تھا) from reading as an
+    opening.
+
+    At the end of a run there is nothing to look ahead to. There the sher's
+    own two misras are used, which is the self-contained test — measured as
+    changing no piece count in either pilot book, since it can apply at most
+    once per verse run.
+    """
+    seconds = [
+        _rhyme_key(second) for _, second in shers[index:index + RHYME_WINDOW]
+        if second
+    ]
+    if len(seconds) >= 2:
+        return _shared_rhyme(seconds)
+    first, second = shers[index]
+    return _common_suffix(_rhyme_key(first), _rhyme_key(second)).lstrip()
+
+
+def is_matla(first: str, second: str, rhyme: str | None = None) -> bool:
+    """True when the first misra ends in the ghazal's rhyme — a matlaa.
 
     Only the matlaa rhymes across both its lines; every later sher rhymes on
-    the second line alone. Compared on the skeleton so a diacritic or comma
-    between two printings of the same radif does not break the match.
+    the second line alone. `rhyme` is the run's established qafia+radif (see
+    `run_rhyme`); passing None falls back to whatever the pair itself shares,
+    which is the older self-contained reading.
     """
     if not first or not second:
         return False
-    for words in RADIF_LENGTHS:
-        head, tail = _tail(first, words), _tail(second, words)
-        if head and head == tail:
-            return True
-    return False
+    if rhyme is None:
+        rhyme = _common_suffix(_rhyme_key(first), _rhyme_key(second)).lstrip()
+    if len(rhyme) < MIN_RHYME:
+        return False
+    return _rhyme_key(first).endswith(rhyme)
+
+
+def _same_zameen(established: str, opening: str) -> bool:
+    """True when two rhymes are the same zameen, one merely stated longer.
+
+    A group of one or two shers has not yet worn its accidental letters away,
+    so its rhyme reads longer than the ghazal's real one (a lone سنگ سے before
+    ترنگ سے and انگ سے reduce it to نگ سے). Either being a suffix of the other
+    means they are the same rhyme seen at two resolutions.
+    """
+    return bool(established) and bool(opening) and (
+        established.endswith(opening) or opening.endswith(established)
+    )
+
+
+def _is_maqta(sher: tuple[str, str]) -> bool:
+    return any(TAKHALLUS in _rhyme_key(misra) for misra in sher if misra)
 
 
 def split_ghazals(
     shers: list[tuple[str, str]],
 ) -> list[list[tuple[str, str]]]:
-    """Group shers into ghazals, starting a new one at each matlaa."""
+    """Group shers into ghazals, starting a new one at each matlaa.
+
+    A matlaa alone is not enough to break the run. Two further readings of
+    the same evidence decide whether the break is real:
+
+    * A sher that opens on the rhyme the current ghazal is already in is its
+      husn-e-matlaa — a second opening sher, which belongs to the same
+      ghazal — not the start of a new one. تجاوز has one
+      (وحشت ہے / محبّت ہے inside the قیامت ہے ghazal).
+    * Unless the sher before it is the maqtaa, in which case the previous
+      ghazal has closed and a like-rhymed opening really is a new poem.
+    """
     groups: list[list[tuple[str, str]]] = []
     current: list[tuple[str, str]] = []
-    for first, second in shers:
-        if is_matla(first, second) and current:
-            groups.append(current)
-            current = []
+    matla_before = False
+    for index, (first, second) in enumerate(shers):
+        rhyme = run_rhyme(shers, index)
+        opens = is_matla(first, second, rhyme)
+        if opens and current:
+            established = _shared_rhyme(
+                [_rhyme_key(s) for _, s in current if s]
+            )
+            husn = (
+                _same_zameen(established, rhyme)
+                and (len(current) > 1 or matla_before)
+                and not _is_maqta(current[-1])
+            )
+            if not husn:
+                groups.append(current)
+                current = []
         current.append((first, second))
+        matla_before = opens
     if current:
         groups.append(current)
     return groups

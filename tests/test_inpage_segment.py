@@ -2,7 +2,7 @@ import unittest
 
 from tools.inpage.models import Paragraph
 from tools.inpage.segment import (
-    _is_ghazal_shaped, is_matla, pair_shers, segment, split_ghazals,
+    _is_ghazal_shaped, is_matla, pair_shers, run_rhyme, segment, split_ghazals,
 )
 
 
@@ -91,6 +91,103 @@ class TestSplitGhazals(unittest.TestCase):
 
     def test_no_sher_is_lost(self):
         shers = [("a الگ", "b الگ"), ("c", "d"), ("e ہوئی", "f ہوئی"), ("g", "h")]
+        self.assertEqual(sum(len(g) for g in split_ghazals(shers)), len(shers))
+
+
+class TestRadifAwareMatla(unittest.TestCase):
+    """The false-opening cases measured in the pilot books.
+
+    Every fixture here is real text. Each one was a piece boundary the
+    self-contained matlaa test invented, and each invented boundary truncated
+    a real ghazal and left a 1-2 sher runt behind it: تجاوز over-split to 114
+    ghazals against a فہرست of 100, باغِ نشاط to 96 against 85.
+    """
+
+    def test_a_first_misra_ending_on_the_bare_radif_is_not_an_opening(self):
+        # The ghazal's radif is "ضروری ہے"; this sher's first misra ends
+        # "گریزاں ہے". Sharing only the ubiquitous "ہے" is not a rhyme, and
+        # reading it as one cut this ghazal into three pieces.
+        shers = [
+            ("یہ آئنہ ہے تو کیوں عکس سے گریزاں ہے", "یہ باغ ہے تو یہاں خار و خس ضروری ہے"),
+            ("جو ہو سکے تو میاں نثر پر توجّہ دو", "اگرچہ شاعری بھی اس برس ضروری ہے"),
+            ("بدن کے اپنے تقاضے ہیں، روح کے اپنے", "ورائے عشق ذرا سی ہوس ضروری ہے"),
+        ]
+        self.assertFalse(is_matla(shers[0][0], shers[0][1], run_rhyme(shers, 0)))
+
+    def test_a_first_misra_ending_on_the_whole_rhyme_is_an_opening(self):
+        # Same ghazal, its real matlaa: "مَس ضروری ہے" against "دسترس ضروری ہے".
+        shers = [
+            ("بدن کی سیر نہ گردن کا مَس ضروری ہے", "مگر وجود پہ کچھ دسترس ضروری ہے"),
+            ("یہ آئنہ ہے تو کیوں عکس سے گریزاں ہے", "یہ باغ ہے تو یہاں خار و خس ضروری ہے"),
+            ("جو ہو سکے تو میاں نثر پر توجّہ دو", "اگرچہ شاعری بھی اس برس ضروری ہے"),
+        ]
+        self.assertTrue(is_matla(shers[0][0], shers[0][1], run_rhyme(shers, 0)))
+
+    def test_the_rhyme_is_read_as_characters_not_words(self):
+        # The qafia is part of a word: نگ سے across سنگ/ترنگ/انگ. A word-tail
+        # comparison sees only "سے" and then accepts "نیند سے" as an opening.
+        shers = [
+            ("مَیں نے چراغِ خلق کیا اُس کی نیند سے", "اُس نے خرام لے لیا میری ترنگ سے"),
+            ("ماتھے پہ اُس کے مُہر لگانے کی دیر تھی", "ظاہر ہوئی شگفتہ دلی انگ انگ سے"),
+            ("دیکھا مجھے تو شرم سے خود میں سمٹ گئی", "پَل میں کشادہ ہو گئے کپڑے وہ تنگ سے"),
+        ]
+        self.assertEqual(run_rhyme(shers, 0), "نگ سے")
+        self.assertFalse(is_matla(shers[0][0], shers[0][1], run_rhyme(shers, 0)))
+
+    def test_alif_madda_rhymes_with_alif(self):
+        # آیا against سایا/لایا/پایا. Spelled differently, heard the same; not
+        # folding it welded two تجاوز ghazals into one 17-sher piece.
+        shers = [
+            ("جبیں سے ہوتے ہوئے نقشِ پا تک آیا ہوں", "یہ اور بات کہ مَیں دھوپ ہوں نہ سایا ہوں"),
+            ("خدا کرے کہ حقیقت کا سامنا کر پائے", "اسے مَیں خواب سے باہر تو کھینچ لایا ہوں"),
+            ("تجھے تلاش کروں تو کہاں تلاش کروں", "مَیں اپنے آپ کو مشکل سے ڈھونڈ پایا ہوں"),
+        ]
+        self.assertTrue(is_matla(shers[0][0], shers[0][1], run_rhyme(shers, 0)))
+
+    def test_a_word_final_he_rhymes_with_alif(self):
+        # ہالہ against اجالا/والا/سنبھالا — the same miss in باغِ نشاط.
+        shers = [
+            ("گھروں میں نور کا ہالہ کہاں سے آتا ہے", "مِری گلی کا اُجالا کہاں سے آتا ہے"),
+            ("تمام شہر اگر بند ہے چراغوں پر", "یہ سوم رس کا اُجالا کہاں سے آتا ہے"),
+            ("عیاں ہے حالِ دلِ زار کے بتانے سے", "کسی کو دیکھنے والا کہاں سے آتا ہے"),
+        ]
+        self.assertTrue(is_matla(shers[0][0], shers[0][1], run_rhyme(shers, 0)))
+
+
+class TestSplitGhazalsOnRealText(unittest.TestCase):
+    def test_a_husn_e_matla_stays_inside_its_ghazal(self):
+        # تجاوز's قیامت ہے ghazal opens twice — a matlaa and a husn-e-matlaa,
+        # both rhyming across both lines. That is one ghazal, and the فہرست
+        # counts it once.
+        shers = [
+            ("فشارِ ذات ہے اور جاگنا قیامت ہے", "اگر یہ عشق نہیں ہے تو کیا مصیبت ہے"),
+            ("یہ اور بات مجھے آدمی سے وحشت ہے", "یہ اور بات مجھے آپ سے محبّت ہے"),
+            ("ترے بغیر مِری روشنی ادھوری ہے", "ترے مدار میں رہنا مِری ضرورت ہے"),
+            ("ہمیں یقین نہیں اپنی بے گناہی پر", "ہمارے دامنِ دل میں فقط ندامت ہے"),
+        ]
+        self.assertEqual(len(split_ghazals(shers)), 1)
+
+    def test_a_maqta_closes_the_ghazal_even_when_the_next_rhymes_alike(self):
+        # باغِ نشاط: a "-امِ وصال" ghazal followed by a "-ال" ghazal. The
+        # rhymes look compatible, so only the takhallus in the sher before
+        # shows that the first ghazal has already closed.
+        shers = [
+            ("مَیں اُتر آئوں گا تجاوز پر", "اور بچھائے گا وہ بھی دامِ وصال"),
+            ("آپ ہیں کس قدر خفا ساجدؔ", "کیجیے کچھ تو احترامِ وصال"),
+            ("رُوپ کی دھوپ، آئنے کا جمال", "وضع کرتے ہیں اُس کے خدّ و خال"),
+            ("اپنی تذلیل کا سبب ہوں مَیں", "ہو رہا ہے مجھے ذرا سا ملال"),
+            ("وصل کی رات کے تعیّن کو", "مَیں ہی دیتا ہوں اگلے روز پہ ٹال"),
+        ]
+        groups = split_ghazals(shers)
+        self.assertEqual(len(groups), 2)
+        self.assertEqual(groups[1][0][0], "رُوپ کی دھوپ، آئنے کا جمال")
+
+    def test_no_sher_is_lost_on_real_text(self):
+        shers = [
+            ("فشارِ ذات ہے اور جاگنا قیامت ہے", "اگر یہ عشق نہیں ہے تو کیا مصیبت ہے"),
+            ("یہ اور بات مجھے آدمی سے وحشت ہے", "یہ اور بات مجھے آپ سے محبّت ہے"),
+            ("رُوپ کی دھوپ، آئنے کا جمال", "وضع کرتے ہیں اُس کے خدّ و خال"),
+        ]
         self.assertEqual(sum(len(g) for g in split_ghazals(shers)), len(shers))
 
 

@@ -118,6 +118,17 @@ class TestTocCountGate(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("no فہرست", errors[0])
 
+    def test_counts_poems_not_the_critical_prose_beside_them(self):
+        # Both pilot books print a critic's foreword after the فہرست, and
+        # neither book gives it a numbered entry. Counting it would fail the
+        # gate by exactly the number of review pieces.
+        segments = [
+            Segment(kind="ghazals", title="t", body="b", order=1),
+            Segment(kind="ghazals", title="t", body="b", order=2),
+            Segment(kind="reviews", title="t", body="b", order=3),
+        ]
+        self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
+
 
 class TestConservationGate(unittest.TestCase):
     def test_silent_when_every_verse_line_survives(self):
@@ -135,6 +146,31 @@ class TestConservationGate(unittest.TestCase):
         errors = conservation_errors(TOC_AND_GHAZAL, segments)
         self.assertEqual(len(errors), 1)
         self.assertIn("4", errors[0])
+
+    def test_prose_carried_by_a_review_is_not_counted_as_a_surplus_line(self):
+        # A `reviews` piece legitimately holds the foreword's prose. Counting
+        # emitted lines instead of matching them failed by exactly that prose
+        # (+7 lines in تجاوز, +11 in باغِ نشاط).
+        segments = [
+            Segment(
+                kind="ghazals", title="t", order=1,
+                body="جسم کی خوشبو الگ\nمیرے دل کا جادو الگ\n\nچاٹ لیتی ہے یہ فکر\nہو نہ جائے تو الگ",
+            ),
+            Segment(kind="reviews", title="t", order=2, body="ا" * 300),
+        ]
+        self.assertEqual(conservation_errors(TOC_AND_GHAZAL, segments), [])
+
+    def test_reports_a_line_that_reached_two_pieces(self):
+        # A count-only gate let a drop in one place hide behind a duplicate
+        # in another; "exactly one piece" has to see both.
+        piece = Segment(
+            kind="ghazals", title="t", order=1,
+            body="جسم کی خوشبو الگ\nمیرے دل کا جادو الگ\n\nچاٹ لیتی ہے یہ فکر\nہو نہ جائے تو الگ",
+        )
+        twice = Segment(kind="ghazals", title="t", order=2, body="جسم کی خوشبو الگ")
+        errors = conservation_errors(TOC_AND_GHAZAL, [piece, twice])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("more than one piece", errors[0])
 
 
 if __name__ == "__main__":
