@@ -26,9 +26,7 @@ def _piece(segment: Segment, book_slug: str) -> Piece:
     )
 
 
-def write_segment(segment: Segment, book_slug: str, root: Path) -> Path:
-    """Write one segment to <root>/<kind>/<slug>.md."""
-    piece = _piece(segment, book_slug)
+def _write_piece(piece: Piece, root: Path) -> Path:
     directory = root / piece.kind
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / f"{piece.slug}.md"
@@ -36,6 +34,47 @@ def write_segment(segment: Segment, book_slug: str, root: Path) -> Path:
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(body)
     return path
+
+
+def write_segment(segment: Segment, book_slug: str, root: Path) -> Path:
+    """Write one segment to <root>/<kind>/<slug>.md."""
+    piece = _piece(segment, book_slug)
+    return _write_piece(piece, root)
+
+
+def write_segments(
+    segments: list[Segment], book_slug: str, root: Path
+) -> tuple[list[Path], list[str]]:
+    """Write every segment to <root>/<kind>/<slug>.md.
+
+    Two segments whose titles slugify to the same string would otherwise
+    overwrite each other in staging, silently dropping a poem before
+    `promote` ever sees it. Both are written here: the first under its
+    natural slug, later collisions under a disambiguated `<slug>-N.md`, with
+    a problem naming the colliding titles so a human can resolve it. Order
+    is taken from the input list, so re-running on a fresh staging
+    directory is deterministic.
+    """
+    written: list[Path] = []
+    problems: list[str] = []
+    slug_counts: dict[str, int] = {}
+    first_title_for_slug: dict[str, str] = {}
+    for segment in segments:
+        base_slug = slugify(segment.title)
+        count = slug_counts.get(base_slug, 0)
+        slug_counts[base_slug] = count + 1
+        piece = _piece(segment, book_slug)
+        if count == 0:
+            first_title_for_slug[base_slug] = segment.title
+        else:
+            piece.slug = f"{base_slug}-{count + 1}"
+            problems.append(
+                f'slug collision: "{first_title_for_slug[base_slug]}" and '
+                f'"{segment.title}" both slugify to "{base_slug}" — wrote the '
+                f'second as {piece.slug}.md'
+            )
+        written.append(_write_piece(piece, root))
+    return written, problems
 
 
 def write_book(book: Book, root: Path) -> Path:

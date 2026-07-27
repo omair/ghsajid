@@ -15,8 +15,18 @@ from .models import Segment
 from .report import is_approved
 
 
+KNOWN_KINDS = {"ghazals", "nazms"}
+
+
+class _MalformedFrontmatter(Exception):
+    """Raised internally when a file lacks the `---` frontmatter fences."""
+
+
 def _existing_body(path: Path) -> str:
-    return path.read_text(encoding="utf-8").split("---", 2)[2]
+    parts = path.read_text(encoding="utf-8").split("---", 2)
+    if len(parts) < 3:
+        raise _MalformedFrontmatter(f"malformed frontmatter, cannot compare: {path}")
+    return parts[2]
 
 
 def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], list[str]]:
@@ -42,12 +52,25 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
     for source in sorted(book_staging.rglob("*.md")):
         if source.name == "report.md":
             continue
-        target = content / source.parent.name / source.name
+        kind = source.parent.name
+        if kind not in KNOWN_KINDS:
+            problems.append(
+                f"unexpected staging directory {kind!r} for {source}, skipped "
+                f"(expected one of {sorted(KNOWN_KINDS)})"
+            )
+            continue
+        target = content / kind / source.name
         if target.exists():
-            if skeleton(_existing_body(target)) != skeleton(_existing_body(source)):
+            try:
+                existing_body = _existing_body(target)
+                staged_body = _existing_body(source)
+            except _MalformedFrontmatter as exc:
+                problems.append(str(exc))
+                continue
+            if skeleton(existing_body) != skeleton(staged_body):
                 problems.append(
                     f"text differs from the archive: {target.relative_to(content)} "
-                    f"— book and site disagree, decide by hand"
+                    "— book and site disagree, decide by hand"
                 )
             else:
                 problems.append(f"already in the archive, skipped: {target.relative_to(content)}")
@@ -56,10 +79,15 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
         shutil.copyfile(source, target)
         written.append(target)
 
-    books_staging = book_staging.parent / "books"
+    books_staging = book_staging / "books"
     if books_staging.exists():
-        for source in books_staging.glob("*.yaml"):
+        for source in sorted(books_staging.glob("*.yaml")):
             target = content / "books" / source.name
+            if target.exists():
+                problems.append(
+                    f"book record already in the archive, skipped: {target.relative_to(content)}"
+                )
+                continue
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
             written.append(target)
