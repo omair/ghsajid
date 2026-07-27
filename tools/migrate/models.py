@@ -24,7 +24,9 @@ class Piece:
     title: str
     language: str                   # urdu | punjabi | english
     script: str                     # nastaliq | shahmukhi | latin
-    published: str
+    published: str | None            # "" is a real, present-but-empty WordPress
+                                      # date and must still render loudly; None
+                                      # means no date exists at all (book-sourced)
     body: str = ""
     tags: list[str] = field(default_factory=list)
     source_post_ids: list[int] = field(default_factory=list)

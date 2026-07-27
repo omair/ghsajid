@@ -1,0 +1,33 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { urduNumber } from "../../lib/urdu";
+
+const books = (await getCollection("books")).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title, "ur"),
+);
+---
+
+<Base title="کتابیں" measure="index">
+  <div class="ghazal-index__head">
+    <h1>کتابیں</h1>
+    <span class="ghazal-index__count">{urduNumber(books.length)}</span>
+  </div>
+  <ul class="ghazal-list">
+    {
+      books.map((book) => (
+        <li>
+          <a class="ghazal-row" href={`/kitab/${book.data.slug}`}>
+            <div class="ghazal-row__lines">
+              <div class="ghazal-row__a">{book.data.title}</div>
+              <div class="ghazal-row__b">
+                {book.data.publisher}
+                {book.data.year ? ` ۔ ${urduNumber(book.data.year)}` : ""}
+              </div>
+            </div>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

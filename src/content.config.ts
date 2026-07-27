@@ -16,9 +16,13 @@ const pieceFields = {
   slug: z.string(),
   language,
   script,
-  published: z.coerce.date(),
+  // Book-sourced pieces have no publication date of their own, only the
+  // book's year — a different fact. Nothing in src/ reads this value.
+  published: z.coerce.date().optional(),
   tags: z.array(z.string()).default([]),
   published_in: z.array(z.string()).default([]),
+  source_book: z.string().optional(),
+  book_order: z.number().int().positive().optional(),
 };
 
 const piece = (dir: string, extra: Record<string, z.ZodTypeAny> = {}) =>
@@ -54,6 +58,24 @@ export const collections = {
       // A dead reference here fails the build rather than shipping a dead
       // chapter into the middle of the memoir.
       contents: z.array(reference("memoir")),
+    }),
+  }),
+  books: defineCollection({
+    loader: glob({ pattern: "**/*.yaml", base: "./content/books" }),
+    schema: z.object({
+      title: z.string(),
+      slug: z.string(),
+      publisher: z.string().optional(),
+      // Omitted until the InPage digit codes are mapped; never guessed.
+      year: z.number().int().optional(),
+      volume_of: z.string().optional(),
+      contents: z.array(
+        z.object({
+          section: z.string().optional(),
+          kind: z.enum(["ghazals", "nazms"]),
+          slug: z.string(),
+        }),
+      ),
     }),
   }),
 };
