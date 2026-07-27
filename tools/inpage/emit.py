@@ -8,6 +8,31 @@ from tools.migrate.urdu import slugify
 
 from .models import Book, Segment
 
+# A filesystem-safe ceiling on the generated slug. An over-long "title" (a
+# misdetected paragraph run with no line break — see segment.MAX_TITLE_LENGTH)
+# slugifies into a filename component long enough to raise OSError on write,
+# crashing the CLI before any report is produced. Capped well under common
+# filename limits (255 bytes), and short enough that ordinary titles never
+# come close to it.
+MAX_SLUG_LENGTH = 80
+
+
+def _cap_slug(slug: str) -> str:
+    """Truncate `slug` to MAX_SLUG_LENGTH, cutting at a `-` boundary.
+
+    Cutting mid-word would produce an unreadable, possibly misleading
+    fragment; cutting at the last `-` at or before the limit keeps every
+    remaining word whole. Slugs already at or under the limit are returned
+    unchanged, byte-identical to today's output.
+    """
+    if len(slug) <= MAX_SLUG_LENGTH:
+        return slug
+    truncated = slug[:MAX_SLUG_LENGTH]
+    boundary = truncated.rfind("-")
+    if boundary > 0:
+        truncated = truncated[:boundary]
+    return truncated.strip("-")
+
 
 def _piece(segment: Segment, book_slug: str) -> Piece:
     # Language is NOT auto-detected. Punjabi in Shahmukhi uses the same letters
@@ -16,7 +41,7 @@ def _piece(segment: Segment, book_slug: str) -> Piece:
     # lists every piece.
     return Piece(
         kind=segment.kind,
-        slug=slugify(segment.title),
+        slug=_cap_slug(slugify(segment.title)),
         title=segment.title,
         language="urdu",
         script="nastaliq",
@@ -60,7 +85,7 @@ def write_segments(
     slug_counts: dict[str, int] = {}
     first_title_for_slug: dict[str, str] = {}
     for segment in segments:
-        base_slug = slugify(segment.title)
+        base_slug = _cap_slug(slugify(segment.title))
         count = slug_counts.get(base_slug, 0)
         slug_counts[base_slug] = count + 1
         piece = _piece(segment, book_slug)
@@ -93,7 +118,7 @@ def write_book(book: Book, root: Path) -> Path:
     for segment in book.contents:
         section = f' section: "{segment.section}",' if segment.section else ""
         lines.append(
-            f'  - {{{section} kind: "{segment.kind}", slug: "{slugify(segment.title)}" }}'
+            f'  - {{{section} kind: "{segment.kind}", slug: "{_cap_slug(slugify(segment.title))}" }}'
         )
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write("\n".join(lines) + "\n")

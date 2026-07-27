@@ -30,6 +30,14 @@ _NORMALISED_HEADINGS = {skeleton(heading): heading for heading in SECTION_HEADIN
 # A heading sits high on the page; verse lines march down it.
 PAGE_TOP = 40
 
+# A real ghazal's matlaa is a line of verse, not a paragraph. When the
+# boundary heuristic fails to find a break inside a large prose block (front
+# matter, a foreword), the whole block becomes one "title" — one real pilot
+# run produced a ~1400-character title that then crashed slugify()'s output
+# path. The piece is never dropped for this; it is only flagged so a human
+# reviewing the report can see it.
+MAX_TITLE_LENGTH = 200
+
 
 def _body(lines: list[str]) -> str:
     """Join lines into couplets separated by a blank line."""
@@ -51,6 +59,8 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
         if not lines:
             return
         flags = ["odd-line-count"] if len(lines) % 2 else []
+        if len(lines[0]) > MAX_TITLE_LENGTH:
+            flags.append("over-long-title")
         segments.append(Segment(
             kind="ghazals",
             title=lines[0],

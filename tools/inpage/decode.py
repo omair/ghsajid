@@ -5,11 +5,19 @@ The stream interleaves text with layout records. Text is a run of
 little-endian bytes of geometry. Everything else is a layout record and is
 stepped over two bytes at a time, matching the pair alignment of the stream.
 
-Each paragraph's text is NFC-normalized (InPage writes bearer and combining
-mark as separate codes; NFC folds them into the single precomposed
-character) and has its digit runs reversed (see `_reverse_digit_runs`), and
-is dropped entirely if none of its codes maps to a character (a layout
-record wrongly admitted as a text run).
+Each paragraph's digit runs are reversed (see `_reverse_digit_runs`), and the
+paragraph is dropped entirely if none of its codes maps to a character (a
+layout record wrongly admitted as a text run).
+
+Two fields serve two different purposes and must not be conflated:
+`Paragraph.raw` holds exactly what `codes` decodes to, with NO normalization
+— it exists solely so gate B (`checks.roundtrip_errors`) can re-encode it and
+compare against `codes` byte-for-byte. `Paragraph.text` is NFC-normalized
+(InPage writes bearer and combining mark as separate codes; NFC folds them
+into the single precomposed character, e.g. آ) and then stripped — it is what
+everything else compares and displays. NFC-normalizing `raw` would compose
+sequences `codes` cannot re-produce (the composed character has no single
+code of its own), making gate B fail on every such paragraph.
 """
 
 import struct
@@ -72,12 +80,17 @@ def decode(data: bytes) -> list[Paragraph]:
 
         _reverse_digit_runs(chars, codes)
 
+        # `raw` is exactly what `codes` decodes to — gate B round-trips
+        # against this, so it must stay unnormalized.
+        raw = "".join(chars)
         # InPage writes a combining mark after its bearer — alef then madda for
         # آ, gol he then hamza for ۂ. NFC folds those canonical sequences into
-        # the single characters the rest of the archive is written in.
-        raw = unicodedata.normalize("NFC", "".join(chars))
+        # the single characters the rest of the archive is written in. Only
+        # `text` gets this treatment; `raw` must not, or gate B could never
+        # round-trip a composed sequence.
+        text = unicodedata.normalize("NFC", raw).strip()
         paragraphs.append(Paragraph(
-            text=raw.strip(), geometry=geometry, raw=raw, codes=list(codes),
+            text=text, geometry=geometry, raw=raw, codes=list(codes),
         ))
         chars.clear()
         codes.clear()

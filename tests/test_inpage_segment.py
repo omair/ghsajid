@@ -38,6 +38,21 @@ class TestSegment(unittest.TestCase):
         paras = [para("الف", 63), para("ب", 65), para("ج", 67), para("د", 69)]
         self.assertEqual(segment(paras)[0].body, "الف\nب\n\nج\nد")
 
+    def test_an_over_long_title_is_flagged_but_not_dropped(self):
+        # A misdetected paragraph run with no line break produces a "title"
+        # long enough that slugify()'s output crashed file writes in the
+        # پہلا pilot run. The piece must survive, only flagged.
+        long_title = "غلام حسین ساجد " * 20  # well over 200 characters
+        paras = [para(long_title, 63), para("دوسرا مصرع", 65)]
+        segments = segment(paras)
+        self.assertEqual(len(segments), 1)
+        self.assertIn("over-long-title", segments[0].flags)
+        self.assertEqual(segments[0].title, long_title)
+
+    def test_a_normal_title_is_not_flagged_over_long(self):
+        paras = [para("جسم کی خوشبو الگ ہے", 63), para("خواب کی دنیا الگ ہے", 65)]
+        self.assertNotIn("over-long-title", segment(paras)[0].flags)
+
     def test_a_heading_with_a_diacritic_is_still_recognised(self):
         # گُل سیمیا carries a pesh on the گ; skeleton() strips it before
         # comparison, so this must still open the گل سیمیا section.

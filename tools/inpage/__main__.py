@@ -16,14 +16,18 @@ from pathlib import Path
 
 from .checks import (
     completeness_errors,
-    groundtruth_errors,
     lexicon_report,
     roundtrip_errors,
     verse_errors,
 )
 from .decode import decode
 from .emit import write_book, write_segments
-from .groundtruth import corpus_lexicon
+from .groundtruth import (
+    EXPECTED_LINES_TOTAL,
+    MIN_LINES_MATCHED,
+    MIN_WHOLE_GHAZALS,
+    corpus_lexicon,
+)
 from .models import Book
 from .ole import read_text_stream
 from .promote import promote
@@ -71,10 +75,21 @@ def cmd_segment(book_slug: str) -> None:
     paragraphs = decode(data)
     segments = segment_paragraphs(paragraphs)
 
+    # Gate C (ground truth) is a property of the codepage, not of any one
+    # book: the 11 ground-truth ghazals exist only in the کلیات volumes, so
+    # running groundtruth_errors() against any other book is a guaranteed
+    # false alarm (0/N matched). It is enforced across both کلیات volumes by
+    # tests/test_inpage_groundtruth.py instead; the report states that
+    # baseline rather than re-running the check per book.
     gate_output = (
         completeness_errors(data)
         + roundtrip_errors(paragraphs)[:20]
-        + groundtruth_errors(paragraphs)
+        + [
+            f"ground truth (gate C) is enforced by the test suite across both "
+            f"کلیات volumes, not per book: baseline is {MIN_LINES_MATCHED}/"
+            f"{EXPECTED_LINES_TOTAL} lines and {MIN_WHOLE_GHAZALS} whole "
+            f"ghazal(s) (see tests/test_inpage_groundtruth.py)."
+        ]
         + verse_errors(segments)
     )
     outliers = lexicon_report(paragraphs, corpus_lexicon())

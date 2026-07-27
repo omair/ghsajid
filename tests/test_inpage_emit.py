@@ -31,6 +31,26 @@ class TestWriteSegment(unittest.TestCase):
         path = write_segment(segment, "tajawuz", self.root)
         self.assertEqual(path.name, "raat-ak-lehar-ruki-pani-mein.md")
 
+    def test_a_normal_titles_slug_is_unchanged_by_the_cap(self):
+        # A title short enough to be unaffected by MAX_SLUG_LENGTH must
+        # produce the byte-identical slug it always has.
+        segment = Segment(kind="ghazals", title="رات اک لہر رُکی پانی میں", body="الف\nب", order=1)
+        path = write_segment(segment, "tajawuz", self.root)
+        self.assertEqual(path.name, "raat-ak-lehar-ruki-pani-mein.md")
+
+    def test_an_over_long_title_produces_a_capped_slug(self):
+        # A misdetected paragraph run with no line break produced a "title"
+        # ~1400 characters long in the پہلا pilot run; its slug was long
+        # enough to raise OSError on write. The slug must be capped at
+        # MAX_SLUG_LENGTH (80), truncated at a `-` boundary.
+        long_title = "غلام حسین ساجد " * 100
+        segment = Segment(kind="ghazals", title=long_title, body="الف\nب", order=1)
+        path = write_segment(segment, "tajawuz", self.root)
+        slug = path.stem
+        self.assertLessEqual(len(slug), 80)
+        self.assertNotIn("--", slug)
+        self.assertFalse(slug.endswith("-"))
+
 
 class TestWriteSegments(unittest.TestCase):
     def setUp(self):
