@@ -13,6 +13,7 @@ against the committed baseline, not verbatim reproduction of every ghazal
 import collections
 import re
 
+from .classify import VERSE, classify, toc_count
 from .codepage import decode_byte, encode_char, unmapped
 from .decode import all_codes
 from .groundtruth import (
@@ -109,6 +110,50 @@ def lexicon_report(paragraphs: list[Paragraph], lexicon: set[str]) -> list[str]:
         if word not in lexicon
     )
     return [f"{word} ({n}x)" for word, n in counts.most_common(50)]
+
+
+def toc_count_errors(
+    paragraphs: list[Paragraph], segments: list[Segment]
+) -> list[str]:
+    """The piece count must equal what the book's own فہرست declares.
+
+    تجاوز's فہرست is numbered 1-100 and باغِ نشاط's 1-85, so the expected
+    count is read from the file rather than judged. This turns "866 pieces
+    looks wrong" into arithmetic.
+    """
+    expected = toc_count(paragraphs)
+    if expected is None:
+        return ["no فہرست found: the piece-count gate could not run"]
+    actual = len(segments)
+    if actual != expected:
+        return [
+            f"piece count {actual} does not match the فہرست's {expected} "
+            f"(delta {actual - expected:+d})"
+        ]
+    return []
+
+
+def conservation_errors(
+    paragraphs: list[Paragraph], segments: list[Segment]
+) -> list[str]:
+    """Every verse paragraph must land in exactly one piece.
+
+    Lines in equals lines out. This is what makes losing a poem impossible
+    rather than merely unlikely.
+    """
+    expected = sum(1 for kind in classify(paragraphs) if kind == VERSE)
+    actual = sum(
+        1
+        for segment in segments
+        for line in segment.body.split("\n")
+        if line.strip()
+    )
+    if actual != expected:
+        return [
+            f"verse conservation failed: {expected} verse paragraphs in, "
+            f"{actual} lines out (delta {actual - expected:+d})"
+        ]
+    return []
 
 
 def verse_errors(segments: list[Segment]) -> list[str]:

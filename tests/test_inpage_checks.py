@@ -1,8 +1,25 @@
 import unittest
 
 from tools.inpage import checks
+from tools.inpage.checks import conservation_errors, toc_count_errors
 from tools.inpage.groundtruth import EXPECTED_LINES_TOTAL, MIN_LINES_MATCHED, MIN_WHOLE_GHAZALS
 from tools.inpage.models import Paragraph, Segment
+
+
+def vpara(text, geometry):
+    return Paragraph(text=text, geometry=geometry, raw=text, codes=[])
+
+
+TOC_AND_GHAZAL = [
+    vpara("۱۔۲۔", 80),
+    # The second misra is lengthened from the brief's literal "کا جادو الگ"
+    # (11 chars) to clear classify.VERSE_MIN (15) — below that floor, classify()
+    # marks the line UNKNOWN rather than VERSE, body_start_index never finds
+    # its run of 4, and every gate here would silently see zero verse
+    # paragraphs. Same fix as tests/test_inpage_segment.py's GHAZAL fixture.
+    vpara("جسم کی خوشبو الگ", 73), vpara("میرے دل کا جادو الگ", 1),
+    vpara("چاٹ لیتی ہے یہ فکر", 89), vpara("ہو نہ جائے تو الگ", 1),
+]
 
 
 class TestCompleteness(unittest.TestCase):
@@ -87,6 +104,37 @@ class TestLexicon(unittest.TestCase):
         report = checks.lexicon_report([para], {"دل"})
         self.assertEqual(len(report), 1)
         self.assertIn("قققق", report[0])
+
+
+class TestTocCountGate(unittest.TestCase):
+    def test_reports_a_mismatch_with_the_delta(self):
+        segments = [Segment(kind="ghazals", title="t", body="b", order=1)]
+        errors = toc_count_errors(TOC_AND_GHAZAL, segments)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("2", errors[0])
+
+    def test_reports_when_it_cannot_run(self):
+        errors = toc_count_errors([vpara("ا" * 36, 73)], [])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("no فہرست", errors[0])
+
+
+class TestConservationGate(unittest.TestCase):
+    def test_silent_when_every_verse_line_survives(self):
+        segments = [Segment(
+            kind="ghazals", title="t", order=1,
+            body="جسم کی خوشبو الگ\nمیرے دل کا جادو الگ\n\nچاٹ لیتی ہے یہ فکر\nہو نہ جائے تو الگ",
+        )]
+        self.assertEqual(conservation_errors(TOC_AND_GHAZAL, segments), [])
+
+    def test_reports_a_dropped_line(self):
+        segments = [Segment(
+            kind="ghazals", title="t", order=1,
+            body="جسم کی خوشبو الگ\nمیرے دل کا جادو الگ",
+        )]
+        errors = conservation_errors(TOC_AND_GHAZAL, segments)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("4", errors[0])
 
 
 if __name__ == "__main__":
