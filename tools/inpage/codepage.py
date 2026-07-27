@@ -111,6 +111,74 @@ CODEPAGE.update({
     ),
 })
 
+# --- Punctuation that occurs only in TAJAWUZ and the MAZAMEER volumes, so the
+# کلیات-only pass that produced the block above never saw it.
+
+CODEPAGE.update({
+    0xDA: (
+        "!",
+        "exclamation mark. Direct alignment vote: the site nazm taqtib.md "
+        "line دو قدم اُس سے زیادہ چل سکوں! matches a decoded MAZAMEER "
+        "paragraph letter-for-letter with 0xDA sitting exactly under the ! "
+        "(the site text reached the archive through the WordPress migration, "
+        "not through this decoder). Corroborated by its 88 non-final "
+        "occurrences, every one after an exclamatory phrase or a vocative — "
+        "شہزادی!/میاں!/دوستو! ناراض نہ ہونا, مَیں کیا کروں گا! مجھے خود پتا "
+        "نہیں — and by 517 line-final occurrences, largely on the radeef "
+        "کیا کہنے!. 605 occurrences and no other code in the table is !",
+    ),
+    0xE9: (
+        ":",
+        "colon. Its 16 non-final occurrences are all a colon introducing what "
+        "follows and nothing else can stand there: غزل پر دواعتراض ہمیشہ کیے "
+        "گئے: ایک قافیے ردیف کی قید، دوسرا ریزہ خیالی, ساجد کے ہاں دو "
+        "استعارے بار بار اُبھرتے ہیں: ایک آئینہ دوسرا شمشیر, بہت کچھ لکھا "
+        "ہے: افسانہ، تنقید، نظم…, کسی نے کہا تھا: غزل کے لیے تغزل شرط ہے, "
+        "کچھ مزید اشعار دیکھیے:. This settles the colon-vs-tab ambiguity "
+        "left open earlier: a tab cannot introduce an enumeration. The "
+        "colophon labels شاعر:/ناشر:/قیمت:/پرنٹر:/ترجمہ: are the same code",
+    ),
+    0xE2: (
+        "(",
+        "opening parenthesis. Written before its content, 0xE1 after it "
+        "(same logical-order convention as 0xFE/0xFD): حمدِ بہار(بیس غزلیں), "
+        "حمدِ قدیم(تیس غزلیں), (جلد اوّل), (کلیاتِ غلام حسین ساجدؔ), "
+        "(پروفیسر امریطس), (ترجمہ: محمد سلیم الرحمن), (موسم، عناصر، کتابِ "
+        "صبح، آیندہ، معاملہ اور رُوداد). Every one of the 197 occurrences is "
+        "a parenthetical gloss — a count, a volume number, a title, a "
+        "byline — never a quotation, which the book spells 0xFE/0xFD",
+    ),
+    0xE1: (
+        ")",
+        "closing parenthesis, the partner of 0xE2: it closes every run 0xE2 "
+        "opens, 201 occurrences against 197 (the surplus are runs whose "
+        "opener sits in a preceding paragraph)",
+    ),
+    0xDF: (
+        "-",
+        "dash separating two items. Role established by all 14 occurrences: "
+        "the acknowledgements list pairs a critic with the book he wrote "
+        "about — مرزا حامد بیگ- ‘‘موسم’’, خالد اقبال یاسر- ‘‘عناصر’’, شمس "
+        "الرحمن فاروقی- ‘‘آیندہ’’, بیدل حیدری- ‘‘معاملہ’’, صابر ظفر- "
+        "‘‘رُوداد’’ — and it also spans a month range inside running prose, "
+        "جولائی- اگست میں ایک ہی تخلیقی لہر کے تحت, which rules out a line "
+        "break, plus dated signature lines ۵-مئی ۲۰۲۳ء and سنِ اشاعت-پہلی "
+        "بار. The exact codepoint is the hyphen-minus an InPage typist's `-` "
+        "key produces; like 0xFE/0xFD the role is observed and the codepoint "
+        "is convention. It never enters the skeleton tier",
+    ),
+    0xBD: (
+        "ٰ",
+        "dagger alef (superscript alef), written after its bearer like the "
+        "madda 0xB3 and the hamza 0xBF. Every one of its 47 occurrences "
+        "completes a word that is only spelt with U+0670 and is not a word "
+        "without it: دعوی+0xBD = دعویٰ (کس کو دعویٰ ہے سرفروشی کا), "
+        "اعلی+0xBD = اعلیٰ, ادنی+0xBD = ادنیٰ, ہیولی+0xBD = ہیولیٰ, "
+        "ال+0xBD+ہ آباد = الٰہ آباد. All five spellings occur in the site "
+        "corpus written with U+0670",
+    ),
+})
+
 # Digits, keyed off dates in the کلیات colophons. The stream stores a number
 # in visual (left-to-right) order, so the run reads reversed: 0xD5 0xD8 0xD9
 # 0xD1 after نومبر is 1985, 0xD3 0xD0 0xD0 0xD2 after مارچ is 2003. The nine

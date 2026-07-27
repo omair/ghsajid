@@ -5,6 +5,12 @@ The stream interleaves text with layout records. Text is a run of
 little-endian bytes of geometry. Everything else is a layout record and is
 stepped over two bytes at a time, matching the pair alignment of the stream.
 
+Stepping blindly over layout records means the walker also lands on any 0x04
+byte that happens to sit at pair alignment *inside* a record — a field id, a
+count, half a 32-bit offset — and reads the byte after it as a character.
+`_text_codes` throws those away; see its docstring for the measurements that
+identify them.
+
 Each paragraph's digit runs are reversed (see `_reverse_digit_runs`), and the
 paragraph is dropped entirely if none of its codes maps to a character (a
 layout record wrongly admitted as a text run).
@@ -30,7 +36,53 @@ TEXT_FONT = 0x04
 PARA_MARK = 0x0D
 GEOMETRY_WIDTH = 4
 
+# A real text run is two or more (0x04, code) pairs at consecutive 2-byte
+# offsets. A lone pair is an accidental 0x04 inside a layout record. Measured
+# over all four books: 27530 codes sit in runs of length 1 and only 2.0% of
+# them decode to anything, while 1.07M codes sit in runs of length >= 2 and
+# 99.8% of them decode — two orders of magnitude apart, with nothing in
+# between. The surviving short runs are real content (`کتاب`, `شاعر`,
+# `ناشر`, `غزلیں`, `مزامیر`, the `۱۔` `۲۔` of a table of contents), which is
+# why the cut is at 2 and not higher.
+#
+# The cut is not free: 556 of the 27530 isolated codes do decode, and a
+# handful are real — the `:` after each colophon label sits alone in its own
+# table cell, so `شاعر: …` comes out as `شاعر …`. That is 556 characters in
+# 1.07 million against 27 thousand records of pure noise, and an isolated pair
+# is indistinguishable from a layout byte by construction. Colons inside
+# running prose are unaffected; they sit in the same run as their sentence.
+MIN_TEXT_RUN = 2
+
+# InPage's character codes start at 0x20 (the space). Anything below that is a
+# stream control byte the walker mistook for a character: 0x0D is the paragraph
+# mark and 0x04 the font selector, and the rest (0x00, 0x01, 0x03, 0x08, 0x1E)
+# occur only inside the scrambled scratch region at the tail of a file, never in
+# a paragraph of readable Urdu.
+FIRST_CHAR_CODE = 0x20
+
 DIGITS = set("۰۱۲۳۴۵۶۷۸۹")
+
+
+def _text_codes(pairs: list[tuple[int, int]]) -> list[int]:
+    """Keep only the codes that belong to a genuine text run.
+
+    `pairs` is (byte offset, char code) for every 0x04-led pair the walker saw
+    since the last paragraph mark. Drops runs shorter than `MIN_TEXT_RUN` and
+    codes below `FIRST_CHAR_CODE`; both are layout bytes, not characters.
+    """
+    kept: list[int] = []
+    run: list[int] = []
+    previous: int | None = None
+    for offset, code in pairs:
+        if previous is not None and offset != previous + 2:
+            if len(run) >= MIN_TEXT_RUN:
+                kept.extend(run)
+            run = []
+        run.append(code)
+        previous = offset
+    if len(run) >= MIN_TEXT_RUN:
+        kept.extend(run)
+    return [code for code in kept if code >= FIRST_CHAR_CODE]
 
 
 def _reverse_digit_runs(chars: list[str], codes: list[int]) -> None:
@@ -64,18 +116,18 @@ def _reverse_digit_runs(chars: list[str], codes: list[int]) -> None:
 def decode(data: bytes) -> list[Paragraph]:
     """Decode `data` into paragraphs, dropping empty ones."""
     paragraphs: list[Paragraph] = []
-    chars: list[str] = []
-    codes: list[int] = []
+    pairs: list[tuple[int, int]] = []
     index = 0
 
     def flush(geometry: int) -> None:
+        codes = _text_codes(pairs)
+        pairs.clear()
+        chars = [decode_byte(code) or "" for code in codes]
         if not any(decode_byte(code) is not None for code in codes):
             # Nothing in this run maps to a character at all — a layout
             # record the walker admitted as text, not real content. A
             # paragraph with even one mapped code is real text and is kept
             # below, however sparse.
-            chars.clear()
-            codes.clear()
             return
 
         _reverse_digit_runs(chars, codes)
@@ -90,17 +142,13 @@ def decode(data: bytes) -> list[Paragraph]:
         # round-trip a composed sequence.
         text = unicodedata.normalize("NFC", raw).strip()
         paragraphs.append(Paragraph(
-            text=text, geometry=geometry, raw=raw, codes=list(codes),
+            text=text, geometry=geometry, raw=raw, codes=codes,
         ))
-        chars.clear()
-        codes.clear()
 
     while index < len(data) - 1:
         lead = data[index]
         if lead == TEXT_FONT:
-            code = data[index + 1]
-            codes.append(code)
-            chars.append(decode_byte(code) or "")
+            pairs.append((index, data[index + 1]))
             index += 2
         elif lead == PARA_MARK:
             end = index + 1 + GEOMETRY_WIDTH

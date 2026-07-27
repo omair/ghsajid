@@ -7,13 +7,16 @@ from tools.inpage.models import Paragraph, Segment
 
 class TestCompleteness(unittest.TestCase):
     def test_reports_unmapped_codes(self):
-        data = bytes([0x04, 0x81, 0x04, 0x02])
+        # 0xE0 is a real character code the table cannot yet name. A byte below
+        # 0x20 would not do here: decode() classifies those as stream control
+        # bytes and drops them, so they never reach this gate.
+        data = bytes([0x04, 0x81, 0x04, 0xE0])
         errors = checks.completeness_errors(data)
         self.assertEqual(len(errors), 1)
-        self.assertIn("0x02", errors[0])
+        self.assertIn("0xe0", errors[0])
 
     def test_silent_when_every_code_is_mapped(self):
-        self.assertEqual(checks.completeness_errors(bytes([0x04, 0x81])), [])
+        self.assertEqual(checks.completeness_errors(bytes([0x04, 0x81, 0x04, 0x82])), [])
 
 
 class TestRoundTrip(unittest.TestCase):

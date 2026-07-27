@@ -24,11 +24,12 @@ class TestDecode(unittest.TestCase):
         self.assertEqual(paras[0].text, "ا ب")
 
     def test_carries_the_geometry_of_the_paragraph_mark(self):
-        data = _pairs([0x81]) + _para_mark(67)
+        data = _pairs([0x81, 0x20]) + _para_mark(67)
         self.assertEqual(decode(data)[0].geometry, 67)
 
     def test_splits_on_every_paragraph_mark(self):
-        data = _pairs([0x81]) + _para_mark(63) + _pairs([0x82]) + _para_mark(65)
+        data = (_pairs([0x81, 0x20]) + _para_mark(63)
+                + _pairs([0x82, 0x20]) + _para_mark(65))
         self.assertEqual([p.text for p in decode(data)], ["ا", "ب"])
 
     def test_keeps_raw_codes_for_the_round_trip_gate(self):
@@ -42,13 +43,15 @@ class TestDecode(unittest.TestCase):
         self.assertEqual(para.raw, " ا ")
 
     def test_unmapped_code_becomes_empty_text_but_is_kept_in_codes(self):
-        data = _pairs([0x81, 0x02]) + _para_mark(63)
+        # 0xE0 is a real but still-unidentified character code, not a control
+        # byte: it must survive into `codes` so gate B can round-trip it.
+        data = _pairs([0x81, 0xE0]) + _para_mark(63)
         para = decode(data)[0]
         self.assertEqual(para.text, "ا")
-        self.assertEqual(para.codes, [0x81, 0x02])
+        self.assertEqual(para.codes, [0x81, 0xE0])
 
     def test_trailing_text_without_a_final_mark_still_emits(self):
-        self.assertEqual([p.text for p in decode(_pairs([0x81]))], ["ا"])
+        self.assertEqual([p.text for p in decode(_pairs([0x81, 0x20]))], ["ا"])
 
     def test_reverses_a_ltr_digit_run(self):
         # 0xD5 0xD8 0xD9 0xD1 stores 1985 left-to-right, so it must come out
@@ -76,16 +79,39 @@ class TestDecode(unittest.TestCase):
 
     def test_drops_paragraph_with_no_mapped_codes(self):
         # A pure layout record: every code is unmapped, so nothing decodes.
-        data = _pairs([0x02, 0x03]) + _para_mark(10)
+        data = _pairs([0xE0, 0xE8]) + _para_mark(10)
         self.assertEqual(decode(data), [])
 
     def test_keeps_paragraph_with_one_mapped_code_among_unmapped(self):
         # Real text with rare unmapped punctuation must survive — never drop
         # on a ratio or threshold, only when nothing at all maps.
-        data = _pairs([0x02, 0x81, 0x03]) + _para_mark(10)
+        data = _pairs([0xE0, 0x81, 0xE8]) + _para_mark(10)
         paras = decode(data)
         self.assertEqual(len(paras), 1)
         self.assertEqual(paras[0].text, "ا")
+
+    def test_drops_an_isolated_pair_as_a_layout_record(self):
+        # A lone (0x04, code) pair with no adjacent pair is a 0x04 byte the
+        # walker met inside a layout record, not a character. Here the 0x04
+        # sits in the middle of a four-byte record, so only the two-pair run
+        # that follows is text.
+        data = b"\xff\xff\x04\x81\xff\xff" + _pairs([0x82, 0x83]) + _para_mark(10)
+        self.assertEqual([p.text for p in decode(data)], ["بپ"])
+
+    def test_keeps_a_run_of_two_pairs(self):
+        # Two contiguous pairs are the shortest genuine text run: the corpus
+        # spells `ے `, `اب` and the `۱۔` of a table of contents that way.
+        data = _pairs([0x81, 0x82]) + _para_mark(10)
+        self.assertEqual([p.text for p in decode(data)], ["اب"])
+
+    def test_drops_control_codes_from_codes_entirely(self):
+        # Codes below 0x20 are stream control bytes, never characters, so they
+        # must not reach `codes` either — gate B compares `raw` against
+        # `codes`, and an excluded byte decodes to nothing on both sides.
+        data = _pairs([0x81, 0x00, 0x82]) + _para_mark(10)
+        para = decode(data)[0]
+        self.assertEqual(para.text, "اب")
+        self.assertEqual(para.codes, [0x81, 0x82])
 
 
 @unittest.skipUnless(TAJAWUZ.exists(), "inp/ sources not present")
