@@ -29,7 +29,15 @@ WORD = re.compile(r"[^\s]+")
 
 
 def completeness_errors(data: bytes) -> list[str]:
-    """Gate A — every char code in the stream must be in the table."""
+    """Gate A — every char code in the stream must be in the table.
+
+    Blind spot: `all_codes` iterates `decode()`'s output, so a code that
+    `decode.py`'s run-length or control-byte filters exclude never reaches
+    this gate at all — not reported unmapped, not reported anything. 0xE8
+    (an ornamental divider) is the known instance: it appears only as an
+    isolated pair, so gate A can never see it. See `decode.excluded_report`
+    for the count of what these filters discard.
+    """
     missing = unmapped(all_codes(data))
     if not missing:
         return []

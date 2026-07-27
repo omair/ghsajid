@@ -63,25 +63,37 @@ FIRST_CHAR_CODE = 0x20
 DIGITS = set("۰۱۲۳۴۵۶۷۸۹")
 
 
-def _text_codes(pairs: list[tuple[int, int]]) -> list[int]:
-    """Keep only the codes that belong to a genuine text run.
+def _split_by_run(pairs: list[tuple[int, int]]) -> tuple[list[int], list[int]]:
+    """Split pair codes into (kept, excluded) by run length.
 
     `pairs` is (byte offset, char code) for every 0x04-led pair the walker saw
-    since the last paragraph mark. Drops runs shorter than `MIN_TEXT_RUN` and
-    codes below `FIRST_CHAR_CODE`; both are layout bytes, not characters.
+    since the last paragraph mark. A code is kept if its run has at least
+    `MIN_TEXT_RUN` consecutive pairs, excluded otherwise. Shared by
+    `_text_codes` (which keeps the survivors) and `excluded_report` (which
+    counts what was thrown away), so the two can never disagree about where a
+    run boundary falls.
     """
     kept: list[int] = []
+    excluded: list[int] = []
     run: list[int] = []
     previous: int | None = None
     for offset, code in pairs:
         if previous is not None and offset != previous + 2:
-            if len(run) >= MIN_TEXT_RUN:
-                kept.extend(run)
+            (kept if len(run) >= MIN_TEXT_RUN else excluded).extend(run)
             run = []
         run.append(code)
         previous = offset
-    if len(run) >= MIN_TEXT_RUN:
-        kept.extend(run)
+    (kept if len(run) >= MIN_TEXT_RUN else excluded).extend(run)
+    return kept, excluded
+
+
+def _text_codes(pairs: list[tuple[int, int]]) -> list[int]:
+    """Keep only the codes that belong to a genuine text run.
+
+    Drops runs shorter than `MIN_TEXT_RUN` and codes below `FIRST_CHAR_CODE`;
+    both are layout bytes, not characters.
+    """
+    kept, _ = _split_by_run(pairs)
     return [code for code in kept if code >= FIRST_CHAR_CODE]
 
 
@@ -113,22 +125,47 @@ def _reverse_digit_runs(chars: list[str], codes: list[int]) -> None:
             i += 1
 
 
+def _walk(data: bytes):
+    """Yield (geometry, pairs) once per paragraph boundary in `data`.
+
+    A boundary is a 0x0D mark (whose four trailing bytes are the geometry)
+    or the end of the stream (geometry 0, for trailing text with no closing
+    mark). `pairs` accumulates every 0x04-led pair seen since the previous
+    boundary. `decode` and `excluded_report` both walk through this so they
+    see exactly the same run boundaries — they must never diverge, or a
+    count of what was excluded could describe a different split than the one
+    that actually happened.
+    """
+    pairs: list[tuple[int, int]] = []
+    index = 0
+    while index < len(data) - 1:
+        lead = data[index]
+        if lead == TEXT_FONT:
+            pairs.append((index, data[index + 1]))
+            index += 2
+        elif lead == PARA_MARK:
+            end = index + 1 + GEOMETRY_WIDTH
+            geometry = struct.unpack("<I", data[index + 1:end])[0] if end <= len(data) else 0
+            yield geometry, pairs
+            pairs = []
+            index = end
+        else:
+            index += 2
+    yield 0, pairs
+
+
 def decode(data: bytes) -> list[Paragraph]:
     """Decode `data` into paragraphs, dropping empty ones."""
     paragraphs: list[Paragraph] = []
-    pairs: list[tuple[int, int]] = []
-    index = 0
-
-    def flush(geometry: int) -> None:
+    for geometry, pairs in _walk(data):
         codes = _text_codes(pairs)
-        pairs.clear()
         chars = [decode_byte(code) or "" for code in codes]
         if not any(decode_byte(code) is not None for code in codes):
             # Nothing in this run maps to a character at all — a layout
             # record the walker admitted as text, not real content. A
             # paragraph with even one mapped code is real text and is kept
             # below, however sparse.
-            return
+            continue
 
         _reverse_digit_runs(chars, codes)
 
@@ -145,23 +182,30 @@ def decode(data: bytes) -> list[Paragraph]:
             text=text, geometry=geometry, raw=raw, codes=codes,
         ))
 
-    while index < len(data) - 1:
-        lead = data[index]
-        if lead == TEXT_FONT:
-            pairs.append((index, data[index + 1]))
-            index += 2
-        elif lead == PARA_MARK:
-            end = index + 1 + GEOMETRY_WIDTH
-            geometry = struct.unpack("<I", data[index + 1:end])[0] if end <= len(data) else 0
-            flush(geometry)
-            index = end
-        else:
-            index += 2
-
-    flush(0)
     return [p for p in paragraphs if p.text]
 
 
 def all_codes(data: bytes) -> list[int]:
     """Every text char code in the stream, in order."""
     return [code for para in decode(data) for code in para.codes]
+
+
+def excluded_report(data: bytes) -> tuple[int, int]:
+    """Count what `decode`'s run-length filter throws away, and how much of
+    it was a character.
+
+    Returns `(isolated_pairs_excluded, decoded_to_a_character)`: the total
+    number of (0x04, code) pairs dropped for sitting in a run shorter than
+    `MIN_TEXT_RUN`, and how many of those codes `decode_byte` maps to a real
+    character rather than being unmapped noise. The exclusion itself is
+    correct (see `MIN_TEXT_RUN`'s comment) — this exists so a book whose
+    layout happens to split genuine text into short runs shows up as a
+    growing second number instead of losing text with no signal anywhere.
+    """
+    isolated = 0
+    mapped = 0
+    for _, pairs in _walk(data):
+        _, excluded = _split_by_run(pairs)
+        isolated += len(excluded)
+        mapped += sum(1 for code in excluded if decode_byte(code) is not None)
+    return isolated, mapped

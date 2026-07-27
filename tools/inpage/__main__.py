@@ -20,7 +20,7 @@ from .checks import (
     roundtrip_errors,
     verse_errors,
 )
-from .decode import decode
+from .decode import decode, excluded_report
 from .emit import write_book, write_segments
 from .groundtruth import (
     EXPECTED_LINES_TOTAL,
@@ -81,6 +81,7 @@ def cmd_segment(book_slug: str) -> None:
     # false alarm (0/N matched). It is enforced across both کلیات volumes by
     # tests/test_inpage_groundtruth.py instead; the report states that
     # baseline rather than re-running the check per book.
+    isolated_pairs, isolated_mapped = excluded_report(data)
     gate_output = (
         completeness_errors(data)
         + roundtrip_errors(paragraphs)[:20]
@@ -89,6 +90,10 @@ def cmd_segment(book_slug: str) -> None:
             f"کلیات volumes, not per book: baseline is {MIN_LINES_MATCHED}/"
             f"{EXPECTED_LINES_TOTAL} lines and {MIN_WHOLE_GHAZALS} whole "
             f"ghazal(s) (see tests/test_inpage_groundtruth.py)."
+        ]
+        + [
+            f"{isolated_pairs} isolated pairs excluded as layout records, "
+            f"{isolated_mapped} of which decoded to a character"
         ]
         + verse_errors(segments)
     )

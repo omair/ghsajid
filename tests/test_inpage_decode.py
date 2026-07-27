@@ -2,7 +2,7 @@ import struct
 import unittest
 from pathlib import Path
 
-from tools.inpage.decode import all_codes, decode
+from tools.inpage.decode import all_codes, decode, excluded_report
 from tools.inpage.ole import read_text_stream
 
 TAJAWUZ = Path("inp/TAJAWUZ.INP")
@@ -103,6 +103,21 @@ class TestDecode(unittest.TestCase):
         # spells `ے `, `اب` and the `۱۔` of a table of contents that way.
         data = _pairs([0x81, 0x82]) + _para_mark(10)
         self.assertEqual([p.text for p in decode(data)], ["اب"])
+
+    def test_excluded_report_counts_isolated_pairs_and_their_mapped_subset(self):
+        # Two isolated pairs (one mapped, 0x81; one unmapped, 0xE8) plus a
+        # genuine two-pair run that must not be counted as excluded.
+        data = (
+            b"\xff\xff\x04\x81\xff\xff"
+            + b"\xff\xff\x04\xe8\xff\xff"
+            + _pairs([0x82, 0x83])
+            + _para_mark(10)
+        )
+        self.assertEqual(excluded_report(data), (2, 1))
+
+    def test_excluded_report_is_zero_for_a_stream_with_no_isolated_pairs(self):
+        data = _pairs([0x81, 0x82]) + _para_mark(10)
+        self.assertEqual(excluded_report(data), (0, 0))
 
     def test_drops_control_codes_from_codes_entirely(self):
         # Codes below 0x20 are stream control bytes, never characters, so they
