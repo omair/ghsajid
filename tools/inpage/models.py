@@ -23,11 +23,12 @@ class Paragraph:
 class Segment:
     """One candidate piece found inside a book."""
 
-    kind: str                       # ghazals | nazms | front_matter | heading
+    kind: str                       # ghazals | nazms | reviews
     title: str
     body: str
     order: int
     section: str = ""
+    written_note: str = ""          # date and place, verbatim from the source
     flags: list[str] = field(default_factory=list)
 
 

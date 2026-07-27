@@ -9,7 +9,10 @@ This is heuristic by construction. Nothing here writes to content/: the output
 goes to staging with a report, and a human resolves every flag.
 """
 
-from .classify import NORMALISED_HEADINGS, SECTION_HEADINGS, SECOND_MISRA_GEOMETRY
+from .classify import (
+    COLOPHON, HEADING, NORMALISED_HEADINGS, PROSE, SECOND_MISRA_GEOMETRY,
+    SECTION_HEADINGS, UNKNOWN, VERSE, classify,
+)
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
 
@@ -26,52 +29,105 @@ MAX_TITLE_LENGTH = 200
 RADIF_LENGTHS = (3, 2, 1)
 
 
-def _body(lines: list[str]) -> str:
-    """Join lines into couplets separated by a blank line."""
-    couplets = [
-        "\n".join(lines[i:i + 2])
-        for i in range(0, len(lines), 2)
-    ]
-    return "\n\n".join(couplets)
+GHAZAL_SHAPE_THRESHOLD = 0.9
+
+
+def _is_ghazal_shaped(run: list[Paragraph]) -> bool:
+    """True when the run alternates (non-1, 1) as a ghazal's misras do.
+
+    Not an exact test: the corpus has 8 exceptions in 1642 transitions, so
+    demanding perfection would misfile real ghazals as nazms.
+    """
+    if len(run) < 2:
+        return False
+    matches = sum(
+        1
+        for index, para in enumerate(run)
+        if (para.geometry == SECOND_MISRA_GEOMETRY) == (index % 2 == 1)
+    )
+    return matches / len(run) >= GHAZAL_SHAPE_THRESHOLD
+
+
+def _ghazal_body(shers: list[tuple[str, str]]) -> str:
+    return "\n\n".join(
+        "\n".join(line for line in sher if line) for sher in shers
+    )
 
 
 def segment(paragraphs: list[Paragraph]) -> list[Segment]:
-    """Split decoded paragraphs into candidate pieces."""
-    segments: list[Segment] = []
-    section = ""
-    lines: list[str] = []
-    previous = None
+    """Assemble classified paragraphs into pieces.
 
-    def flush() -> None:
-        if not lines:
-            return
-        flags = ["odd-line-count"] if len(lines) % 2 else []
-        if len(lines[0]) > MAX_TITLE_LENGTH:
-            flags.append("over-long-title")
-        segments.append(Segment(
-            kind="ghazals",
-            title=lines[0],
-            body=_body(lines),
-            order=len(segments) + 1,
+    Heuristic by construction — output goes to staging behind a review report,
+    never straight to content/. Nothing is ever dropped: an unpaired line is
+    flagged, and a run that fits no pattern still becomes a piece.
+    """
+    kinds = classify(paragraphs)
+    pieces: list[Segment] = []
+    section = ""
+    title_candidate = ""
+
+    def add(kind: str, title: str, body: str, flags: list[str]) -> Segment:
+        if len(title) > MAX_TITLE_LENGTH:
+            flags = flags + ["over-long-title"]
+        piece = Segment(
+            kind=kind,
+            title=title,
+            body=body,
+            order=len(pieces) + 1,
             section=section,
             flags=flags,
-        ))
-        lines.clear()
+        )
+        pieces.append(piece)
+        return piece
 
-    for para in paragraphs:
-        heading = NORMALISED_HEADINGS.get(skeleton(para.text))
-        if heading is not None:
-            flush()
-            section = heading
-            previous = None
+    index = 0
+    while index < len(paragraphs):
+        kind = kinds[index]
+        para = paragraphs[index]
+
+        if kind == HEADING:
+            section = NORMALISED_HEADINGS[skeleton(para.text)]
+            index += 1
             continue
-        if previous is not None and para.geometry <= previous:
-            flush()
-        lines.append(para.text)
-        previous = para.geometry
 
-    flush()
-    return segments
+        if kind == COLOPHON:
+            if pieces:
+                pieces[-1].written_note = para.text
+            index += 1
+            continue
+
+        if kind == UNKNOWN:
+            title_candidate = para.text
+            index += 1
+            continue
+
+        if kind == PROSE:
+            start = index
+            while index < len(paragraphs) and kinds[index] in (PROSE, VERSE):
+                index += 1
+            body = "\n\n".join(p.text for p in paragraphs[start:index])
+            add("reviews", paragraphs[start].text[:MAX_TITLE_LENGTH], body, [])
+            title_candidate = ""
+            continue
+
+        if kind == VERSE:
+            start = index
+            while index < len(paragraphs) and kinds[index] == VERSE:
+                index += 1
+            run = paragraphs[start:index]
+            if _is_ghazal_shaped(run):
+                for group in split_ghazals(pair_shers(run)):
+                    flags = ["half-sher"] if any(not s[1] for s in group) else []
+                    add("ghazals", group[0][0], _ghazal_body(group), flags)
+            else:
+                title = title_candidate or run[0].text
+                add("nazms", title, "\n".join(p.text for p in run), [])
+            title_candidate = ""
+            continue
+
+        index += 1
+
+    return pieces
 
 
 def pair_shers(run: list[Paragraph]) -> list[tuple[str, str]]:

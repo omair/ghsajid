@@ -1,11 +1,23 @@
 import unittest
 
 from tools.inpage.models import Paragraph
-from tools.inpage.segment import is_matla, pair_shers, split_ghazals
+from tools.inpage.segment import is_matla, pair_shers, segment, split_ghazals
 
 
 def para(text, geometry):
     return Paragraph(text=text, geometry=geometry, raw=text, codes=[])
+
+
+FRONT = [para("رنگِ ادب پبلی کیشنز", 81), para("۱۔۲۔", 80)]
+GHAZAL = [
+    # The second misra is lengthened from the brief's literal "کا جادو الگ"
+    # (11 chars) to clear classify.VERSE_MIN (15) — below that floor, classify()
+    # marks the line UNKNOWN rather than VERSE and the whole fixture never
+    # reaches segment()'s ghazal-pairing branch. The radif ("الگ") and the
+    # matlaa relationship to the first misra are unchanged.
+    para("جسم کی خوشبو الگ", 73), para("میرے دل کا جادو الگ", 1),
+    para("چاٹ لیتی ہے یہ فکر", 89), para("ہو نہ جائے تو الگ", 1),
+]
 
 
 class TestPairShers(unittest.TestCase):
@@ -59,6 +71,59 @@ class TestSplitGhazals(unittest.TestCase):
     def test_no_sher_is_lost(self):
         shers = [("a الگ", "b الگ"), ("c", "d"), ("e ہوئی", "f ہوئی"), ("g", "h")]
         self.assertEqual(sum(len(g) for g in split_ghazals(shers)), len(shers))
+
+
+class TestSegmentBook(unittest.TestCase):
+    def test_front_matter_produces_no_piece(self):
+        pieces = segment(FRONT + GHAZAL)
+        self.assertEqual([p.kind for p in pieces], ["ghazals"])
+
+    def test_a_ghazal_keeps_all_its_lines(self):
+        piece = segment(FRONT + GHAZAL)[0]
+        self.assertEqual(len(piece.body.split("\n\n")), 2)
+
+    def test_a_ghazal_is_titled_by_its_matla_first_misra(self):
+        self.assertEqual(segment(FRONT + GHAZAL)[0].title, "جسم کی خوشبو الگ")
+
+    def test_two_matlas_make_two_ghazals(self):
+        # Lengthened from the brief's literal "دنیا الگ ہے" / "چراغوں کا الگ"
+        # for the same VERSE_MIN reason as GHAZAL above, and re-ended on a
+        # shared word so the pair actually is a matlaa — the brief's two
+        # lines end "ہے" and "الگ" respectively, which is_matla (already
+        # merged, tested) does not consider rhyming.
+        second = [para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1)]
+        self.assertEqual(len(segment(FRONT + GHAZAL + second)), 2)
+
+    def test_a_non_alternating_run_becomes_one_nazm(self):
+        nazm = [
+            para("مَیں چل رہا تھا", 47), para("سنہرے تانبے کی طشتری پر", 97),
+            para("کوئی نہیں تھا یہاں", 53), para("قریب مجھ سے یا دُور", 51),
+        ]
+        pieces = segment(FRONT + GHAZAL + [para("یاد", 1)] + nazm)
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertEqual(nazms[0].title, "یاد")
+
+    def test_prose_becomes_a_review(self):
+        pieces = segment(FRONT + GHAZAL + [para("ا" * 300, 67)])
+        self.assertEqual([p.kind for p in pieces if p.kind == "reviews"], ["reviews"])
+
+    def test_a_colophon_becomes_the_written_note(self):
+        pieces = segment(FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1)])
+        self.assertEqual(pieces[0].written_note, "۱۷، مئی ۲۰۱۰ئ۔ لاہور")
+
+    def test_a_heading_sets_the_section(self):
+        pieces = segment(FRONT + [para("نعت", 69)] + GHAZAL)
+        self.assertEqual(pieces[0].section, "نعت")
+
+    def test_a_half_sher_is_flagged_not_dropped(self):
+        # Lengthened from the brief's literal "تنہا مصرع یہاں" (14 chars),
+        # one under VERSE_MIN, for the same reason as GHAZAL above.
+        line = "تنہا مصرع یہاں کھڑا ہے"
+        odd = GHAZAL + [para(line, 77)]
+        piece = segment(FRONT + odd)[0]
+        self.assertIn("half-sher", piece.flags)
+        self.assertIn(line, piece.body)
 
 
 if __name__ == "__main__":

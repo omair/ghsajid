@@ -47,7 +47,11 @@ def _piece(segment: Segment, book_slug: str) -> Piece:
         script="nastaliq",
         published=None,                    # unknown for book-sourced pieces
         body=segment.body,
-        extra={"source_book": book_slug, "book_order": segment.order},
+        extra={
+            "source_book": book_slug,
+            "book_order": segment.order,
+            "written_note": segment.written_note,
+        },
     )
 
 
