@@ -16,9 +16,12 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .checks import (
+    VERSE_KINDS,
     completeness_errors,
+    conservation_errors,
     lexicon_report,
     roundtrip_errors,
+    toc_count_errors,
     verse_errors,
 )
 from .decode import decode, excluded_report
@@ -61,6 +64,29 @@ def _load(book_slug: str):
     return read_text_stream(source)
 
 
+def book_contents_and_slugs(
+    segments: list, slugs: list[str]
+) -> tuple[list, list[str]]:
+    """Filter (segments, their resolved slugs) down to Book.contents rows.
+
+    Book.contents feeds src/content.config.ts's books schema, which only
+    allows kind: ghazals | nazms — a `reviews` row would fail validation (or,
+    if the schema were ever loosened, trip resolveBook's dead-reference
+    throw, since `promote` deliberately skips reviews pieces). Reviews are
+    still written to staging by `write_segments` and still listed in the
+    report; they are simply not book-contents rows. `segments` and `slugs`
+    are filtered together, in lockstep, so the pairing (segment, its
+    resolved slug) stays positional and in book order.
+    """
+    contents: list = []
+    resolved: list[str] = []
+    for segment, slug in zip(segments, slugs, strict=True):
+        if segment.kind in VERSE_KINDS:
+            contents.append(segment)
+            resolved.append(slug)
+    return contents, resolved
+
+
 def cmd_decode(book_slug: str) -> None:
     data = _load(book_slug)
     paragraphs = decode(data)
@@ -74,7 +100,8 @@ def cmd_decode(book_slug: str) -> None:
 def cmd_segment(book_slug: str) -> None:
     data = _load(book_slug)
     paragraphs = decode(data)
-    segments = segment_paragraphs(paragraphs)
+    dropped_unknowns: list[str] = []
+    segments = segment_paragraphs(paragraphs, dropped_unknowns)
 
     # Gate C (ground truth) is a property of the codepage, not of any one
     # book: the 11 ground-truth ghazals exist only in the کلیات volumes, so
@@ -97,7 +124,21 @@ def cmd_segment(book_slug: str) -> None:
             f"{isolated_mapped} of which decoded to a character"
         ]
         + verse_errors(segments)
+        + toc_count_errors(paragraphs, segments)
+        + conservation_errors(paragraphs, segments)
     )
+    if dropped_unknowns:
+        # The spec says unknown is flagged and retained, never dropped — but
+        # segment() only retains an UNKNOWN paragraph's text when a nazm with
+        # no title of its own immediately follows it. Every other UNKNOWN
+        # reaches no piece and no flag, which is invisible unless surfaced
+        # here: this is the same shape of loss as a real dropped-misra bug,
+        # even though every instance measured so far is mis-decode garbage.
+        sample = ", ".join(repr(text[:60]) for text in dropped_unknowns[:5])
+        gate_output.append(
+            f"{len(dropped_unknowns)} unknown paragraph(s) reached no piece "
+            f"(first few: {sample})"
+        )
     outliers = lexicon_report(paragraphs, corpus_lexicon())
     if outliers:
         gate_output.append("lexicon outliers (review for clustered mis-decodes): "
@@ -116,9 +157,10 @@ def cmd_segment(book_slug: str) -> None:
     out.mkdir(parents=True, exist_ok=True)
     _, slugs, problems = write_segments(segments, book_slug, out)
     gate_output.extend(problems)
+    book_contents, book_slugs = book_contents_and_slugs(segments, slugs)
     write_book(
-        Book(title=TITLES[book_slug], slug=book_slug, contents=segments),
-        slugs,
+        Book(title=TITLES[book_slug], slug=book_slug, contents=book_contents),
+        book_slugs,
         out,
     )
     (out / "segments.json").write_text(

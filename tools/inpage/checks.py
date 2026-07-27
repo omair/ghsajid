@@ -13,6 +13,7 @@ against the committed baseline, not verbatim reproduction of every ghazal
 import collections
 import re
 
+from .classify import VERSE, classify, toc_count
 from .codepage import decode_byte, encode_char, unmapped
 from .decode import all_codes
 from .groundtruth import (
@@ -109,6 +110,94 @@ def lexicon_report(paragraphs: list[Paragraph], lexicon: set[str]) -> list[str]:
         if word not in lexicon
     )
     return [f"{word} ({n}x)" for word, n in counts.most_common(50)]
+
+
+def toc_count_errors(
+    paragraphs: list[Paragraph], segments: list[Segment]
+) -> list[str]:
+    """The POEM count must equal what the book's own فہرست declares.
+
+    تجاوز's فہرست is numbered 1-100 and باغِ نشاط's 1-85, so the expected
+    count is read from the file rather than judged. This turns "866 pieces
+    looks wrong" into arithmetic.
+
+    Counted against the poems, not every piece. Read in the source, each
+    فہرست sits under the heading غزلیں and its numbering ends before the
+    critical foreword that follows it — تجاوز's numbers run out at paragraph
+    65 and Dr Saadat Saeed's essay starts at 67, signed and dated at 83. That
+    essay is what becomes the `reviews` pieces (5 in تجاوز, 10 in
+    باغِ نشاط), and it is not a numbered entry in either book. Comparing
+    total pieces instead made the gate fail by exactly the review count in
+    both books — +5 and +10 — while the poems matched the declared 100 and 85
+    exactly. So the basis is the poems; the reviews are carried by the
+    conservation gate and the report, not counted here.
+    """
+    expected = toc_count(paragraphs)
+    if expected is None:
+        return ["no فہرست found: the piece-count gate could not run"]
+    actual = sum(1 for segment in segments if segment.kind in VERSE_KINDS)
+    if actual != expected:
+        return [
+            f"poem count {actual} does not match the فہرست's {expected} "
+            f"(delta {actual - expected:+d})"
+        ]
+    return []
+
+
+def conservation_errors(
+    paragraphs: list[Paragraph], segments: list[Segment]
+) -> list[str]:
+    """No verse text is missing or duplicated corpus-wide.
+
+    Checked by matching the lines themselves, not by counting them. A plain
+    count of emitted lines cannot express this: it is off by the prose a
+    `reviews` piece legitimately carries (+7 lines in تجاوز, +11 in
+    باغِ نشاط, all of them the foreword's paragraphs), and it would let a
+    line dropped in one place be masked by a line duplicated in another.
+    Comparing multisets of the text says what the gate actually proves —
+    nothing lost, nothing emitted twice, across the corpus as a whole — and
+    stays blind to the prose either way.
+
+    Blind spot: the comparison is a global multiset, not a per-piece one, so
+    it cannot see a line *moving* between pieces. A sher relocated from one
+    ghazal to another conserves perfectly and this gate stays silent — it
+    does not prove each verse paragraph lands in the *same* piece it started
+    in, only that it lands in some piece, exactly once, somewhere.
+    """
+    kinds = classify(paragraphs)
+    expected = collections.Counter(
+        para.text.strip()
+        for para, kind in zip(paragraphs, kinds)
+        if kind == VERSE and para.text.strip()
+    )
+    emitted = collections.Counter(
+        line.strip()
+        for segment in segments
+        for line in segment.body.split("\n")
+        if line.strip()
+    )
+    errors = []
+    lost = expected - emitted
+    if lost:
+        total = sum(lost.values())
+        sample = ", ".join(repr(text[:40]) for text in list(lost)[:3])
+        errors.append(
+            f"verse conservation failed: {total} of {sum(expected.values())} "
+            f"verse paragraphs did not reach a piece: {sample}"
+        )
+    doubled = collections.Counter({
+        text: emitted[text] - count
+        for text, count in expected.items()
+        if emitted[text] > count
+    })
+    if doubled:
+        total = sum(doubled.values())
+        sample = ", ".join(repr(text[:40]) for text in list(doubled)[:3])
+        errors.append(
+            f"verse conservation failed: {total} verse paragraph(s) reached "
+            f"more than one piece: {sample}"
+        )
+    return errors
 
 
 def verse_errors(segments: list[Segment]) -> list[str]:

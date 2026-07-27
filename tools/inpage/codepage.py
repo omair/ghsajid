@@ -196,16 +196,19 @@ _DIGIT_EVIDENCE = (
     "from a direct occurrence"
 )
 def _add_digit_block() -> None:
-    """Assign 0xD0-0xD9 to the digits, asserting no key is already present.
+    """Assign 0xD0-0xD9 to the digits, refusing to clobber an existing key.
 
     A loop indexing into CODEPAGE would silently clobber a pre-existing key
-    if one ever collided with this range; an explicit assert makes that
-    impossible instead of merely unlikely. Loop temporaries stay local to
-    this function rather than leaking into the module namespace.
+    if one ever collided with this range. An `assert` is stripped entirely
+    under `python -O`, which would turn "impossible" back into "silent" the
+    moment anyone runs optimised — so the guard is an explicit `raise`,
+    unconditional regardless of how Python is invoked. Loop temporaries stay
+    local to this function rather than leaking into the module namespace.
     """
     for offset, digit in enumerate("۰۱۲۳۴۵۶۷۸۹"):
         code = 0xD0 + offset
-        assert code not in CODEPAGE, f"{code:#04x} already mapped, refusing to clobber it"
+        if code in CODEPAGE:
+            raise ValueError(f"{code:#04x} already mapped, refusing to clobber it")
         CODEPAGE[code] = (digit, _DIGIT_EVIDENCE)
 
 
