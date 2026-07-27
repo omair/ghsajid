@@ -9,23 +9,9 @@ This is heuristic by construction. Nothing here writes to content/: the output
 goes to staging with a report, and a human resolves every flag.
 """
 
+from .classify import NORMALISED_HEADINGS, SECTION_HEADINGS
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
-
-SECTION_HEADINGS = frozenset({
-    "غزلیں", "نعت", "نظمیں", "حمد", "قطعات", "رباعیات",
-    "نیند میں چلتے ہوئے", "چہار دریا", "ہست و بود", "اعادہ", "حقیقت", "گل سیمیا",
-})
-
-# Headings in the کلیات source can carry diacritics the codepage now maps
-# (e.g. گُل سیمیا with a pesh on the گ). SECTION_HEADINGS stays written in
-# plain form per the brief; comparisons go through skeleton() instead, so the
-# match is diacritic-insensitive without touching the readable constant.
-# Precomputed once — not per paragraph — since this set never changes. Maps
-# the normalised form back to the plain heading, so a diacritic-bearing
-# source heading (گُل سیمیا) still records the section as گل سیمیا, matching
-# SECTION_HEADINGS rather than whatever spelling the source happened to use.
-_NORMALISED_HEADINGS = {skeleton(heading): heading for heading in SECTION_HEADINGS}
 
 # A real ghazal's matlaa is a line of verse, not a paragraph. When the
 # boundary heuristic fails to find a break inside a large prose block (front
@@ -69,7 +55,7 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
         lines.clear()
 
     for para in paragraphs:
-        heading = _NORMALISED_HEADINGS.get(skeleton(para.text))
+        heading = NORMALISED_HEADINGS.get(skeleton(para.text))
         if heading is not None:
             flush()
             section = heading
