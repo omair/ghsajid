@@ -50,6 +50,22 @@ def find_in(paragraphs: list[Paragraph], want: str) -> str | None:
     return want if want and want in haystack else None
 
 
+def line_match_report(paragraphs: list[Paragraph], slugs: tuple[str, ...] = KNOWN_GHAZALS) -> dict[str, list[bool]]:
+    """Per-line match results for each known ghazal, in ground-truth order.
+
+    Splits each ghazal's committed body into its non-blank lines and checks
+    each one's skeleton against the decoded corpus independently, so gate C
+    can report line-level and whole-ghazal counts instead of an all-or-nothing
+    verdict per slug.
+    """
+    haystack = skeleton(" ".join(p.text for p in paragraphs))
+    report = {}
+    for slug in slugs:
+        lines = [line for line in site_text(slug).splitlines() if skeleton(line)]
+        report[slug] = [skeleton(line) in haystack for line in lines]
+    return report
+
+
 def corpus_lexicon() -> set[str]:
     """Every word already in the archive — the wordlist for gate D.
 
