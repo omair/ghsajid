@@ -85,13 +85,26 @@ def _ghazal_body(shers: list[tuple[str, str]]) -> str:
     )
 
 
-def segment(paragraphs: list[Paragraph]) -> list[Segment]:
+def segment(
+    paragraphs: list[Paragraph], dropped_unknowns: list[str] | None = None
+) -> list[Segment]:
     """Assemble classified paragraphs into pieces.
 
     Heuristic by construction — output goes to staging behind a review report,
     never straight to content/. Nothing is ever dropped: an unpaired line is
     flagged, and a run that fits no pattern still becomes a piece.
+
+    `UNKNOWN` paragraphs are the one exception worth naming: each is held as
+    `title_candidate` on the chance a nazm immediately follows it with no
+    title of its own, but a candidate that is overwritten by a later UNKNOWN,
+    or that is still pending when a review/ghazal/EOF makes it moot, reaches
+    no piece at all — it is not retained anywhere in the return value. This
+    is unchanged behaviour, not a new bug: `dropped_unknowns`, if given a
+    list, is appended with the text of every such paragraph so a caller (see
+    `cmd_segment`) can surface the count instead of it vanishing silently.
     """
+    if dropped_unknowns is None:
+        dropped_unknowns = []
     kinds = classify(paragraphs)
     pieces: list[Segment] = []
     section = ""
@@ -149,6 +162,10 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
             continue
 
         if kind == UNKNOWN:
+            # A candidate still pending when a new one arrives never reached
+            # a piece — see the docstring's note on dropped_unknowns.
+            if title_candidate:
+                dropped_unknowns.append(title_candidate)
             title_candidate = para.text
             index += 1
             continue
@@ -159,6 +176,8 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
                 index += 1
             body = "\n\n".join(p.text for p in paragraphs[start:index])
             add("reviews", paragraphs[start].text[:MAX_TITLE_LENGTH], body, [])
+            if title_candidate:
+                dropped_unknowns.append(title_candidate)
             title_candidate = ""
             continue
 
@@ -168,6 +187,10 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
                 index += 1
             run = paragraphs[start:index]
             if _is_ghazal_shaped(run):
+                # A ghazal is titled by its matlaa, never by title_candidate —
+                # a pending candidate here is moot and reaches no piece.
+                if title_candidate:
+                    dropped_unknowns.append(title_candidate)
                 for group in split_ghazals(pair_shers(run)):
                     flags = ["half-sher"] if any(not s[1] for s in group) else []
                     add("ghazals", group[0][0], _ghazal_body(group), flags)
@@ -178,6 +201,11 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
             continue
 
         index += 1
+
+    # A candidate still pending at end of book (paragraphs ran out right
+    # after the last UNKNOWN) never reached a piece either.
+    if title_candidate:
+        dropped_unknowns.append(title_candidate)
 
     return pieces
 

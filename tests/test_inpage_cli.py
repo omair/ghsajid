@@ -7,8 +7,35 @@ from pathlib import Path
 from unittest import mock
 
 from tools.inpage import __main__ as cli
+from tools.inpage.models import Segment
 
 TAJAWUZ = Path("inp/TAJAWUZ.INP")
+
+
+class TestBookContentsAndSlugs(unittest.TestCase):
+    """Finding 1: a book record must not carry `reviews` rows.
+
+    src/content.config.ts's books schema only allows kind: ghazals | nazms,
+    so passing every segment straight through to Book.contents (as
+    cmd_segment used to) would write a `reviews` row into e.g.
+    باغِ نشاط's books/*.yaml — the first real `promote` would then either
+    fail schema validation or trip resolveBook's dead-reference throw, since
+    `promote` deliberately skips reviews pieces.
+    """
+
+    def test_reviews_are_excluded_and_order_is_preserved(self):
+        ghazal_1 = Segment(kind="ghazals", title="a", body="a", order=1)
+        review = Segment(kind="reviews", title="r", body="r", order=2)
+        nazm = Segment(kind="nazms", title="n", body="n", order=3)
+        ghazal_2 = Segment(kind="ghazals", title="b", body="b", order=4)
+        segments = [ghazal_1, review, nazm, ghazal_2]
+        slugs = ["ghazal-1", "review", "nazm", "ghazal-2"]
+
+        contents, resolved = cli.book_contents_and_slugs(segments, slugs)
+
+        self.assertEqual(contents, [ghazal_1, nazm, ghazal_2])
+        self.assertEqual(resolved, ["ghazal-1", "nazm", "ghazal-2"])
+        self.assertTrue(all(s.kind != "reviews" for s in contents))
 
 
 @unittest.skipUnless(TAJAWUZ.exists(), "inp/ sources not present")

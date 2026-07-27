@@ -1,8 +1,10 @@
 import unittest
+from unittest import mock
 
 from tools.inpage.models import Paragraph
 from tools.inpage.segment import (
-    _is_ghazal_shaped, is_matla, pair_shers, run_rhyme, segment, split_ghazals,
+    MAX_TITLE_LENGTH, _is_ghazal_shaped, is_matla, pair_shers, run_rhyme,
+    segment, split_ghazals,
 )
 
 
@@ -269,6 +271,26 @@ class TestSegmentBook(unittest.TestCase):
         note = "۱۷، مئی ۲۰۱۰ئ۔ لاہور"
         pieces = segment(FRONT + [para(note, 1)] + GHAZAL)
         self.assertEqual(pieces[0].written_note, note)
+
+    def test_an_over_long_title_is_flagged(self):
+        # No real title from any of segment()'s three call sites can exceed
+        # MAX_TITLE_LENGTH today (a `reviews` title is sliced to the cap
+        # itself, and a ghazal/nazm title comes from a VERSE paragraph, which
+        # classify() caps well under it) -- this guard exists for the day one
+        # of those assumptions breaks, e.g. the ~1400-character title one
+        # pilot run actually produced. Lowering the cap below an ordinary
+        # title's length is what real over-long input would look like from
+        # add()'s point of view, without inventing an unreachable fixture.
+        with mock.patch("tools.inpage.segment.MAX_TITLE_LENGTH", 5):
+            piece = segment(FRONT + GHAZAL)[0]
+        self.assertIn("over-long-title", piece.flags)
+
+    def test_pieces_are_numbered_from_one_in_book_order(self):
+        second = [para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1)]
+        pieces = segment(
+            FRONT + GHAZAL + second + [para("ا" * 300, 67)]
+        )
+        self.assertEqual([p.order for p in pieces], list(range(1, len(pieces) + 1)))
 
 
 class TestIsGhazalShaped(unittest.TestCase):

@@ -147,15 +147,22 @@ def toc_count_errors(
 def conservation_errors(
     paragraphs: list[Paragraph], segments: list[Segment]
 ) -> list[str]:
-    """Every verse paragraph must land in exactly one piece.
+    """No verse text is missing or duplicated corpus-wide.
 
     Checked by matching the lines themselves, not by counting them. A plain
-    count of emitted lines cannot express "exactly one piece": it is off by
-    the prose a `reviews` piece legitimately carries (+7 lines in تجاوز, +11
-    in باغِ نشاط, all of them the foreword's paragraphs), and it would let a
+    count of emitted lines cannot express this: it is off by the prose a
+    `reviews` piece legitimately carries (+7 lines in تجاوز, +11 in
+    باغِ نشاط, all of them the foreword's paragraphs), and it would let a
     line dropped in one place be masked by a line duplicated in another.
-    Comparing multisets of the text says what the gate means — nothing lost,
-    nothing emitted twice — and stays blind to the prose either way.
+    Comparing multisets of the text says what the gate actually proves —
+    nothing lost, nothing emitted twice, across the corpus as a whole — and
+    stays blind to the prose either way.
+
+    Blind spot: the comparison is a global multiset, not a per-piece one, so
+    it cannot see a line *moving* between pieces. A sher relocated from one
+    ghazal to another conserves perfectly and this gate stays silent — it
+    does not prove each verse paragraph lands in the *same* piece it started
+    in, only that it lands in some piece, exactly once, somewhere.
     """
     kinds = classify(paragraphs)
     expected = collections.Counter(

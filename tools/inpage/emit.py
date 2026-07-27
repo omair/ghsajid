@@ -121,7 +121,7 @@ def write_segments(
     """
     slugs, problems = resolve_slugs(segments)
     written: list[Path] = []
-    for segment, slug in zip(segments, slugs):
+    for segment, slug in zip(segments, slugs, strict=True):
         piece = _piece(segment, book_slug)
         piece.slug = slug
         written.append(_write_piece(piece, root))
@@ -148,7 +148,7 @@ def write_book(book: Book, slugs: list[str], root: Path) -> Path:
     if book.volume_of:
         lines.append(f'volume_of: "{book.volume_of}"')
     lines.append("contents:")
-    for segment, slug in zip(book.contents, slugs):
+    for segment, slug in zip(book.contents, slugs, strict=True):
         section = f' section: "{segment.section}",' if segment.section else ""
         lines.append(
             f'  - {{{section} kind: "{segment.kind}", slug: "{slug}" }}'
