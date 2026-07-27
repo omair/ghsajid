@@ -14,6 +14,7 @@ from .models import Piece
 FIELD_ORDER = [
     "reviewed_book", "reviewed_author", "source", "url", "video_id",
     "recorded", "description", "written_note", "published_in", "part",
+    "source_book", "book_order",
 ]
 
 
@@ -44,8 +45,11 @@ def frontmatter(piece: Piece) -> str:
         f"slug: {_quote(piece.slug)}",
         f"language: {_quote(piece.language)}",
         f"script: {_quote(piece.script)}",
-        f"published: {piece.published}",
     ]
+    # Book-sourced pieces have no publication date of their own — only the
+    # book's year, which is a different fact. Omit rather than invent one.
+    if piece.published:
+        lines.append(f"published: {piece.published}")
     tags = _render("tags", piece.tags)
     if tags:
         lines.append(tags)
