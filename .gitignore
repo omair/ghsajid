@@ -13,3 +13,9 @@ docs/superpowers/
 
 # Fetched tool binary, not source
 tools/bin/
+
+# InPage source files -- inputs to tools/inpage/, like scans. Large binaries.
+inp/
+
+# Ingestion staging -- rebuildable output, reviewed before it reaches content/
+out/
