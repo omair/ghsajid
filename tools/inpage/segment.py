@@ -33,19 +33,25 @@ GHAZAL_SHAPE_THRESHOLD = 0.9
 
 
 def _is_ghazal_shaped(run: list[Paragraph]) -> bool:
-    """True when the run alternates (non-1, 1) as a ghazal's misras do.
+    """True when most of the run pairs cleanly into shers.
 
-    Not an exact test: the corpus has 8 exceptions in 1642 transitions, so
-    demanding perfection would misfile real ghazals as nazms.
+    Measured by greedy pairing, NOT by positional parity. Parity — asking
+    whether geometry == 1 falls on odd indices — is fragile: one unpairable
+    line shifts the parity of everything after it, so conformance collapses to
+    ~50% from the first anomaly onward. باغِ نشاط has 8 such lines in 1276 and
+    was misfiled as a single nazm; تجاوز has zero, which is the only reason
+    parity appeared to work there.
+
+    Greedy pairing resyncs after each anomaly, so the measurement stays local:
+    باغِ نشاط scores 634 clean pairs of 642 (98.8%) and تجاوز 817 of 817.
+    A nazm, whose lines do not alternate at all, produces mostly half shers
+    and falls far below the threshold.
     """
     if len(run) < 2:
         return False
-    matches = sum(
-        1
-        for index, para in enumerate(run)
-        if (para.geometry == SECOND_MISRA_GEOMETRY) == (index % 2 == 1)
-    )
-    return matches / len(run) >= GHAZAL_SHAPE_THRESHOLD
+    shers = pair_shers(run)
+    clean = sum(1 for _, second in shers if second)
+    return clean / len(shers) >= GHAZAL_SHAPE_THRESHOLD
 
 
 def _ghazal_body(shers: list[tuple[str, str]]) -> str:
@@ -65,8 +71,14 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
     pieces: list[Segment] = []
     section = ""
     title_candidate = ""
+    # A COLOPHON reaching the front of the book, before any piece has been
+    # formed, has nothing to attach to yet (see the COLOPHON branch below).
+    # Held here rather than dropped, and attached to the first piece add()
+    # creates, whatever kind it turns out to be.
+    pending_colophon = ""
 
     def add(kind: str, title: str, body: str, flags: list[str]) -> Segment:
+        nonlocal pending_colophon
         if len(title) > MAX_TITLE_LENGTH:
             flags = flags + ["over-long-title"]
         piece = Segment(
@@ -77,6 +89,9 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
             section=section,
             flags=flags,
         )
+        if pending_colophon:
+            piece.written_note = pending_colophon
+            pending_colophon = ""
         pieces.append(piece)
         return piece
 
@@ -93,6 +108,10 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
         if kind == COLOPHON:
             if pieces:
                 pieces[-1].written_note = para.text
+            else:
+                # Nothing exists yet to attach this to. Never drop it: hold
+                # it until add() creates the next piece.
+                pending_colophon = para.text
             index += 1
             continue
 

@@ -1,7 +1,9 @@
 import unittest
 
 from tools.inpage.models import Paragraph
-from tools.inpage.segment import is_matla, pair_shers, segment, split_ghazals
+from tools.inpage.segment import (
+    _is_ghazal_shaped, is_matla, pair_shers, segment, split_ghazals,
+)
 
 
 def para(text, geometry):
@@ -9,6 +11,25 @@ def para(text, geometry):
 
 
 FRONT = [para("رنگِ ادب پبلی کیشنز", 81), para("۱۔۲۔", 80)]
+
+
+def _clean_shers(start: int, count: int) -> list[Paragraph]:
+    """`count` distinct, cleanly-pairing shers, numbered from `start`.
+
+    Distinct per-sher text (the running number) keeps `is_matla` from firing
+    on any of them: each misra ends "اول"/"دوم", never matching across
+    shers, so a run built from these never splits into extra ghazals.
+    """
+    lines: list[Paragraph] = []
+    for i in range(start, start + count):
+        lines.append(para(f"پہلا مصرع نمبر {i} یہاں پڑا اول", 73))
+        lines.append(para(f"دوسرا مصرع نمبر {i} یہاں پڑا دوم", 1))
+    return lines
+
+
+# A single unpairable line, geometry not 1, with no partner on either side.
+HALF_LINE = "تنہا مصرع یہاں کھڑا ہے"
+
 GHAZAL = [
     # The second misra is lengthened from the brief's literal "کا جادو الگ"
     # (11 chars) to clear classify.VERSE_MIN (15) — below that floor, classify()
@@ -117,13 +138,51 @@ class TestSegmentBook(unittest.TestCase):
         self.assertEqual(pieces[0].section, "نعت")
 
     def test_a_half_sher_is_flagged_not_dropped(self):
-        # Lengthened from the brief's literal "تنہا مصرع یہاں" (14 chars),
-        # one under VERSE_MIN, for the same reason as GHAZAL above.
-        line = "تنہا مصرع یہاں کھڑا ہے"
-        odd = GHAZAL + [para(line, 77)]
+        # Ten clean shers with one interior unpairable line: greedy pairing
+        # resyncs right after it, so 10 of 11 shers still pair (0.909),
+        # clearing GHAZAL_SHAPE_THRESHOLD -- the whole run stays ghazal-shaped
+        # and the odd line is flagged, not dropped. (A run this small with
+        # the anomaly under the old positional-parity test would have passed
+        # or failed by coincidence of index, not by any real pairing logic --
+        # this fixture is sized so the greedy measurement is the thing under
+        # test.)
+        odd = _clean_shers(0, 5) + [para(HALF_LINE, 77)] + _clean_shers(5, 5)
         piece = segment(FRONT + odd)[0]
         self.assertIn("half-sher", piece.flags)
-        self.assertIn(line, piece.body)
+        self.assertIn(HALF_LINE, piece.body)
+
+    def test_a_leading_colophon_is_retained_not_dropped(self):
+        # A COLOPHON arriving before any piece exists has nothing to attach
+        # to yet. Neither pilot book hits this (each one's first colophon
+        # follows a piece already formed), so this is synthetic: the note
+        # must still reach the eventual piece rather than being discarded.
+        note = "۱۷، مئی ۲۰۱۰ئ۔ لاہور"
+        pieces = segment(FRONT + [para(note, 1)] + GHAZAL)
+        self.assertEqual(pieces[0].written_note, note)
+
+
+class TestIsGhazalShaped(unittest.TestCase):
+    """Direct coverage of the greedy-pairing measurement itself."""
+
+    def test_one_interior_unpairable_line_still_counts_as_ghazal_shaped(self):
+        # The exact case positional parity got wrong: one anomaly in the
+        # middle. Greedy pairing resyncs immediately after it, so this run
+        # (10 of 11 shers clean, 0.909) stays above GHAZAL_SHAPE_THRESHOLD --
+        # under the old parity test, everything past this line would have
+        # had its expected geometry flipped, and the whole run could tip
+        # into "not ghazal" depending on how much run follows.
+        run = _clean_shers(0, 5) + [para(HALF_LINE, 77)] + _clean_shers(5, 5)
+        self.assertTrue(_is_ghazal_shaped(run))
+
+    def test_a_genuinely_non_alternating_run_is_not_ghazal_shaped(self):
+        # Free verse: no line carries the second-misra geometry at all, so
+        # every "sher" greedy pairing produces is a half sher -- 0% clean,
+        # far below the threshold. This must not become a ghazal.
+        nazm = [
+            para("مَیں چل رہا تھا", 47), para("سنہرے تانبے کی طشتری پر", 97),
+            para("کوئی نہیں تھا یہاں", 53), para("قریب مجھ سے یا دُور", 51),
+        ]
+        self.assertFalse(_is_ghazal_shaped(nazm))
 
 
 if __name__ == "__main__":
