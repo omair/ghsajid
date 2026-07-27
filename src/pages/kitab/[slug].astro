@@ -1,0 +1,47 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { resolveBook } from "../../lib/books";
+import { urduNumber } from "../../lib/urdu";
+
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+  return books.map((book) => ({ params: { slug: book.data.slug }, props: { book } }));
+}
+
+const { book } = Astro.props;
+const items = await resolveBook(book);
+
+// Group consecutive items under their section heading.
+const groups: { section: string; items: typeof items }[] = [];
+for (const item of items) {
+  const last = groups[groups.length - 1];
+  if (last && last.section === item.section) last.items.push(item);
+  else groups.push({ section: item.section, items: [item] });
+}
+---
+
+<Base title={book.data.title} measure="index">
+  <div class="ghazal-index__head">
+    <h1>{book.data.title}</h1>
+    <span class="ghazal-index__count">{urduNumber(items.length)}</span>
+  </div>
+  {
+    groups.map((group) => (
+      <section>
+        {group.section && <h2>{group.section}</h2>}
+        <ul class="ghazal-list">
+          {group.items.map(({ entry }) => (
+            <li>
+              <a class="ghazal-row" href={`/${entry.collection === "ghazals" ? "ghazal" : "nazm"}/${entry.data.slug}`}>
+                <div class="ghazal-row__lines">
+                  <div class="ghazal-row__a">{entry.data.title}</div>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Base>
