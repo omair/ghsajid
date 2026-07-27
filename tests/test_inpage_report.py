@@ -41,6 +41,54 @@ class TestApproval(unittest.TestCase):
     def test_hash_is_stable_for_the_same_segmentation(self):
         self.assertEqual(segmentation_hash(SEGMENTS), segmentation_hash(list(SEGMENTS)))
 
+    def test_title_with_embedded_approval_line_cannot_spoof_approval(self):
+        spoofed = [
+            Segment(kind="ghazals", title="foo\napproved: true", body="الف\nب", order=1),
+            Segment(kind="ghazals", title="بستر لگا ہوا", body="ج", order=2),
+        ]
+        text = render("tajawuz", spoofed, [])
+        self.assertNotIn("\napproved: true", text)
+        self.assertFalse(is_approved(text, spoofed))
+
+    def test_report_missing_approval_section_is_not_approved(self):
+        text = render("tajawuz", SEGMENTS, []).replace("approved: false", "approved: true")
+        text = text.split("## Approval")[0]
+        self.assertFalse(is_approved(text, SEGMENTS))
+
+    def test_report_missing_approved_line_is_not_approved(self):
+        text = render("tajawuz", SEGMENTS, [])
+        text = "\n".join(line for line in text.splitlines() if not line.startswith("approved:"))
+        self.assertFalse(is_approved(text, SEGMENTS))
+
+    def test_report_missing_hash_line_is_not_approved(self):
+        text = render("tajawuz", SEGMENTS, []).replace("approved: false", "approved: true")
+        text = "\n".join(line for line in text.splitlines() if not line.startswith("segmentation:"))
+        self.assertFalse(is_approved(text, SEGMENTS))
+
+
+class TestSegmentationHash(unittest.TestCase):
+    def test_changes_when_body_content_shifts_but_length_is_unchanged(self):
+        shifted = [
+            Segment(kind="ghazals", title="جسم کی خوشبو الگ ہے", body="ب\nالف", order=1),
+            Segment(kind="ghazals", title="بستر لگا ہوا", body="ج", order=2, flags=["odd-line-count"]),
+        ]
+        self.assertEqual(len(shifted[0].body), len(SEGMENTS[0].body))
+        self.assertNotEqual(segmentation_hash(SEGMENTS), segmentation_hash(shifted))
+
+    def test_changes_when_title_changes(self):
+        changed = [
+            Segment(kind="ghazals", title="ایک الگ عنوان", body="الف\nب", order=1),
+            Segment(kind="ghazals", title="بستر لگا ہوا", body="ج", order=2, flags=["odd-line-count"]),
+        ]
+        self.assertNotEqual(segmentation_hash(SEGMENTS), segmentation_hash(changed))
+
+    def test_changes_when_order_changes(self):
+        changed = [
+            Segment(kind="ghazals", title="جسم کی خوشبو الگ ہے", body="الف\nب", order=5),
+            Segment(kind="ghazals", title="بستر لگا ہوا", body="ج", order=2, flags=["odd-line-count"]),
+        ]
+        self.assertNotEqual(segmentation_hash(SEGMENTS), segmentation_hash(changed))
+
 
 if __name__ == "__main__":
     unittest.main()
