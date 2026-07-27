@@ -90,6 +90,20 @@ class TestKinds(unittest.TestCase):
         paras = BODY + [para("یاد", 1)]
         self.assertEqual(self.kinds(paras)[-1], classify.UNKNOWN)
 
+    def test_run_together_misras_inside_the_body_are_verse(self):
+        # 67 chars — two misras joined by a comma, as the typesetter
+        # sometimes ran them. This must not be discarded as UNKNOWN.
+        paras = BODY + [para("ا" * 67, 1)]
+        self.assertEqual(self.kinds(paras)[-1], classify.VERSE)
+
+    def test_long_paragraph_inside_the_body_is_still_prose(self):
+        paras = BODY + [para("ا" * 300, 1)]
+        self.assertEqual(self.kinds(paras)[-1], classify.PROSE)
+
+    def test_very_short_paragraph_inside_the_body_is_still_unknown(self):
+        paras = BODY + [para("ا" * 3, 1)]
+        self.assertEqual(self.kinds(paras)[-1], classify.UNKNOWN)
+
     def test_every_paragraph_gets_exactly_one_kind(self):
         paras = [para("۰۰۰", 1), para("ناشر", 32)] + BODY
         self.assertEqual(len(self.kinds(paras)), len(paras))

@@ -151,6 +151,19 @@ class TestSegmentBook(unittest.TestCase):
         self.assertIn("half-sher", piece.flags)
         self.assertIn(HALF_LINE, piece.body)
 
+    def test_two_colophons_on_the_same_piece_are_both_retained(self):
+        # No book in the corpus has adjacent colophons today, so this is
+        # synthetic: a second COLOPHON attaching to the same piece must be
+        # appended, not silently overwrite the first (the same class of loss
+        # closed for a leading colophon by pending_colophon above).
+        first_note = "۱۷، مئی ۲۰۱۰ئ۔ لاہور"
+        second_note = "۱۸، مئی ۲۰۱۰ئ۔ کراچی"
+        pieces = segment(
+            FRONT + GHAZAL + [para(first_note, 1), para(second_note, 1)]
+        )
+        self.assertIn(first_note, pieces[0].written_note)
+        self.assertIn(second_note, pieces[0].written_note)
+
     def test_a_leading_colophon_is_retained_not_dropped(self):
         # A COLOPHON arriving before any piece exists has nothing to attach
         # to yet. Neither pilot book hits this (each one's first colophon

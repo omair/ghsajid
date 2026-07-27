@@ -11,7 +11,7 @@ goes to staging with a report, and a human resolves every flag.
 
 from .classify import (
     COLOPHON, HEADING, NORMALISED_HEADINGS, PROSE, SECOND_MISRA_GEOMETRY,
-    SECTION_HEADINGS, UNKNOWN, VERSE, classify,
+    UNKNOWN, VERSE, classify,
 )
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
@@ -107,7 +107,15 @@ def segment(paragraphs: list[Paragraph]) -> list[Segment]:
 
         if kind == COLOPHON:
             if pieces:
-                pieces[-1].written_note = para.text
+                # A second colophon attaching to the same piece is appended,
+                # not overwritten — the same "never drop it" rule as
+                # pending_colophon below. No book in the corpus today has
+                # adjacent colophons, so this path is covered by a synthetic
+                # test rather than a measured one.
+                current = pieces[-1].written_note
+                pieces[-1].written_note = (
+                    f"{current} {para.text}" if current else para.text
+                )
             else:
                 # Nothing exists yet to attach this to. Never drop it: hold
                 # it until add() creates the next piece.

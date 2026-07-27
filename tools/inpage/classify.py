@@ -31,6 +31,20 @@ PROSE_MIN = 101
 SEPARATOR_TEXT = "۰۰۰"
 SECOND_MISRA_GEOMETRY = 1
 
+# The typesetter sometimes ran two misras onto a single physical line, e.g.
+# "آپ کا اذن ہوتے ہی چل دوں گا مَیں، اپنے موجود کو بھی بدل دوں گا مَیں" (67
+# chars) and "میرے ہونے سے کچھ فرق پڑتا نہیں، بارِ غم میرے رونے سے جھڑتا نہیں"
+# (63 chars) — both plainly two misras joined by a comma. Measured across the
+# corpus, this UNKNOWN band (63-100 chars, in body) is never noise: تجاوز 0,
+# باغِ نشاط 7, کلیات vol 1 22, کلیات vol 2 204 (503 UNKNOWN total, of which
+# 299 are the genuinely ambiguous <15 case). Anything in this range is kept as
+# verse rather than falling through to UNKNOWN, where segment() only ever
+# treats UNKNOWN as a possible nazm title and silently drops the rest.
+# VERSE_MAX itself still means "a normal single misra" and is used elsewhere
+# (e.g. body_start_index); this is a distinct, explicit rule layered on top,
+# not a widening of that constant.
+RUN_TOGETHER_MISRA_MAX = 100
+
 TOC_LINE = re.compile(r"^[۰-۹۔\s]+$")
 # The hamza after a year decodes as ئ (InPage 0xA3), not ء. Accept both.
 YEAR = re.compile(r"[۰-۹]{4}\s*[ئء]")
@@ -97,6 +111,10 @@ def _kind(text: str, in_body: bool) -> str:
     if len(text) >= PROSE_MIN:
         return PROSE
     if in_body and _is_verse_length(text):
+        return VERSE
+    if in_body and VERSE_MAX < len(text) <= RUN_TOGETHER_MISRA_MAX:
+        # Run-together misras (see RUN_TOGETHER_MISRA_MAX above) — real verse,
+        # not unknown.
         return VERSE
     if not in_body:
         return FRONT_MATTER

@@ -5,10 +5,11 @@ import unittest
 from dataclasses import asdict
 from pathlib import Path
 
-from tools.inpage.emit import write_book, write_segment, write_segments
+from tools.inpage.emit import _piece, write_book, write_segment, write_segments
 from tools.inpage.models import Book, Segment
 from tools.inpage.promote import promote
 from tools.inpage.report import render
+from tools.migrate.emit import frontmatter
 
 
 class TestWriteSegment(unittest.TestCase):
@@ -37,6 +38,18 @@ class TestWriteSegment(unittest.TestCase):
         segment = Segment(kind="ghazals", title="رات اک لہر رُکی پانی میں", body="الف\nب", order=1)
         path = write_segment(segment, "tajawuz", self.root)
         self.assertEqual(path.name, "raat-ak-lehar-ruki-pani-mein.md")
+
+    def test_written_note_survives_into_the_emitted_frontmatter(self):
+        # A colophon attached in segment.py must actually reach the file a
+        # human reviews, not just live on the Segment in memory.
+        note = "۱۷، مئی ۲۰۱۰ئ۔ لاہور"
+        segment = Segment(
+            kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1,
+            written_note=note,
+        )
+        piece = _piece(segment, "tajawuz")
+        text = frontmatter(piece)
+        self.assertIn(f"written_note: {json.dumps(note, ensure_ascii=False)}", text)
 
     def test_an_over_long_title_produces_a_capped_slug(self):
         # A misdetected paragraph run with no line break produced a "title"
