@@ -32,6 +32,19 @@ URDU_LETTERS = "ابپتٹثجچحخدڈذرڑزژسشصضطظعغفقکگلمن
 NOT_LETTER = re.compile(f"[^{URDU_LETTERS}\\s]")
 WHITESPACE = re.compile(r"\s+")
 
+# Committed floor, raised deliberately: the site text and the printed کلیات
+# are genuinely different editions (site-only provenance blocks, InPage
+# typesetting conventions, misras run together, real textual variants), so
+# gate C asserts a measured baseline instead of verbatim reproduction. A
+# wrong codepage entry breaks hundreds of lines at once and still fails
+# hard; editorial variance between editions does not raise a false alarm.
+MIN_LINES_MATCHED = 139
+# Exact canary, not a floor: if the ground-truth corpus changes size at all,
+# that is a deliberate event (a slug added/removed, lines re-split) requiring
+# a look, not a silent pass. Do not treat this like MIN_LINES_MATCHED.
+EXPECTED_LINES_TOTAL = 169
+MIN_WHOLE_GHAZALS = 1
+
 
 def skeleton(text: str) -> str:
     """Reduce text to letters and single spaces — the tier that must match."""
