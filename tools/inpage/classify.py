@@ -56,19 +56,30 @@ def _is_verse_length(text: str) -> bool:
     return VERSE_MIN <= len(text) <= VERSE_MAX
 
 
+# Two shers' worth of alternation. ONE sher is not enough evidence: تجاوز's
+# publisher block — رنگِ ادب پبلی کیشنز (19 chars, geometry 81) followed by
+# آفس نمبرکتاب مارکیٹ ،اُردو بازار،کراچی (38 chars, geometry 1) — is
+# coincidentally sher-shaped, and a 2-paragraph test starts the body at index
+# 10 in both pilot books, swallowing the whole فہرست.
+#
+# Measured: a run of 4 lands تجاوز on index 85 (its first ghazal) and
+# باغِ نشاط on 136 (a real verse line). Do NOT raise it further — 6 pushes
+# باغِ نشاط to 145 and skips a genuine poem.
+MIN_BODY_RUN = 4
+
+
 def body_start_index(paragraphs: list[Paragraph]) -> int:
-    """Index of the first ghazal-shaped pair, or len(paragraphs) if none.
+    """Index where the poems begin, or len(paragraphs) if never.
 
     Uses raw character length rather than the VERSE kind: VERSE itself depends
     on the body having started, so the other way round would be circular.
     """
-    for index in range(len(paragraphs) - 1):
-        first, second = paragraphs[index], paragraphs[index + 1]
-        if (
-            _is_verse_length(first.text)
-            and _is_verse_length(second.text)
-            and first.geometry != SECOND_MISRA_GEOMETRY
-            and second.geometry == SECOND_MISRA_GEOMETRY
+    for index in range(len(paragraphs) - MIN_BODY_RUN + 1):
+        run = paragraphs[index:index + MIN_BODY_RUN]
+        if all(
+            _is_verse_length(para.text)
+            and (para.geometry == SECOND_MISRA_GEOMETRY) == (offset % 2 == 1)
+            for offset, para in enumerate(run)
         ):
             return index
     return len(paragraphs)
@@ -99,3 +110,28 @@ def classify(paragraphs: list[Paragraph]) -> list[str]:
         _kind(para.text.strip(), index >= start)
         for index, para in enumerate(paragraphs)
     ]
+
+
+URDU_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789")
+DIGIT_RUN = re.compile(r"[۰-۹]+")
+
+
+def toc_count(paragraphs: list[Paragraph]) -> int | None:
+    """How many pieces the book's own فہرست says it contains.
+
+    The highest entry number, read only from paragraphs before the body
+    starts — page numbers printed within the poems would otherwise count.
+    Returns None when the book has no parseable فہرست, so the gate can report
+    that it could not run rather than passing silently.
+    """
+    start = body_start_index(paragraphs)
+    numbers: list[int] = []
+    for para in paragraphs[:start]:
+        text = para.text.strip()
+        if text == SEPARATOR_TEXT or not TOC_LINE.fullmatch(text):
+            continue
+        numbers.extend(
+            int(run.translate(URDU_DIGITS)) for run in DIGIT_RUN.findall(text)
+        )
+    positive = [n for n in numbers if n > 0]
+    return max(positive) if positive else None
