@@ -1,0 +1,46 @@
+import unittest
+
+from tools.inpage.models import Segment
+from tools.inpage.report import is_approved, render, segmentation_hash
+
+SEGMENTS = [
+    Segment(kind="ghazals", title="جسم کی خوشبو الگ ہے", body="الف\nب", order=1),
+    Segment(kind="ghazals", title="بستر لگا ہوا", body="ج", order=2, flags=["odd-line-count"]),
+]
+
+
+class TestRender(unittest.TestCase):
+    def test_lists_every_segment_with_its_first_line(self):
+        text = render("tajawuz", SEGMENTS, [])
+        self.assertIn("جسم کی خوشبو الگ ہے", text)
+        self.assertIn("بستر لگا ہوا", text)
+
+    def test_shows_flags_so_they_cannot_be_missed(self):
+        self.assertIn("odd-line-count", render("tajawuz", SEGMENTS, []))
+
+    def test_starts_unapproved(self):
+        self.assertIn("approved: false", render("tajawuz", SEGMENTS, []))
+
+    def test_includes_gate_output(self):
+        self.assertIn("unmapped char codes", render("tajawuz", SEGMENTS, ["unmapped char codes: 0x02"]))
+
+
+class TestApproval(unittest.TestCase):
+    def test_unapproved_report_is_not_approved(self):
+        self.assertFalse(is_approved(render("tajawuz", SEGMENTS, []), SEGMENTS))
+
+    def test_approved_report_is_approved(self):
+        text = render("tajawuz", SEGMENTS, []).replace("approved: false", "approved: true")
+        self.assertTrue(is_approved(text, SEGMENTS))
+
+    def test_approval_does_not_survive_resegmentation(self):
+        text = render("tajawuz", SEGMENTS, []).replace("approved: false", "approved: true")
+        changed = SEGMENTS + [Segment(kind="ghazals", title="نیا", body="ہ", order=3)]
+        self.assertFalse(is_approved(text, changed))
+
+    def test_hash_is_stable_for_the_same_segmentation(self):
+        self.assertEqual(segmentation_hash(SEGMENTS), segmentation_hash(list(SEGMENTS)))
+
+
+if __name__ == "__main__":
+    unittest.main()
