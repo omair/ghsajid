@@ -14,7 +14,10 @@ KULLIYAT = [Path("inp/MAZAMEER (1).INP"), Path("inp/MAZAMEER (2).INP")]
 # wrong codepage entry breaks hundreds of lines at once and still fails
 # hard; editorial variance between editions does not raise a false alarm.
 MIN_LINES_MATCHED = 139
-MIN_LINES_TOTAL = 169
+# Exact canary, not a floor: if the ground-truth corpus changes size at all,
+# that is a deliberate event (a slug added/removed, lines re-split) requiring
+# a look, not a silent pass. Do not treat this like MIN_LINES_MATCHED.
+EXPECTED_LINES_TOTAL = 169
 MIN_WHOLE_GHAZALS = 1
 
 
@@ -65,12 +68,12 @@ class TestGroundTruth(unittest.TestCase):
             if not all(results)
         }
 
-        self.assertEqual(total, MIN_LINES_TOTAL, "ground-truth line count changed unexpectedly")
+        self.assertEqual(total, EXPECTED_LINES_TOTAL, "ground-truth line count changed unexpectedly")
         self.assertGreaterEqual(
             matched,
             MIN_LINES_MATCHED,
             f"only {matched}/{total} ground-truth lines reproduce (baseline: "
-            f"{MIN_LINES_MATCHED}/{MIN_LINES_TOTAL}); unmatched line indices per slug: {unmatched}",
+            f"{MIN_LINES_MATCHED}/{EXPECTED_LINES_TOTAL}); unmatched line indices per slug: {unmatched}",
         )
         self.assertGreaterEqual(
             whole,

@@ -113,14 +113,19 @@ CODEPAGE.update({
 
 # Digits, keyed off dates in the کلیات colophons. The stream stores a number
 # in visual (left-to-right) order, so the run reads reversed: 0xD5 0xD8 0xD9
-# 0xD1 after نومبر is 1985, 0xD3 0xD0 0xD0 0xD2 after مارچ is 2003. Every
-# occurrence resolves to a plausible Gregorian year (1985, 1987, 1989, 1993,
-# 2003, 2004) or a day of the month (15, 23, 28) under 0xD0+n == n, and under
-# no other offset.
+# 0xD1 after نومبر is 1985, 0xD3 0xD0 0xD0 0xD2 after مارچ is 2003. The nine
+# cited dates directly exercise 0xD0-0xD5, 0xD7, 0xD8, 0xD9 — every occurrence
+# resolves to a plausible Gregorian year (1985, 1987, 1989, 1993, 2003, 2004)
+# or a day of the month (15, 23, 28) under 0xD0+n == n, and under no other
+# offset. 0xD6 (۶) never appears in any cited date; it is not directly
+# observed and is instead inferred from contiguity with the rest of the block.
 _DIGIT_EVIDENCE = (
     "0xD0+n is the digit n; from colophon dates — نومبر ۱۹۸۵ء, فروری ۱۹۸۹ء, "
     "اپریل ۱۹۹۳ء, مارچ ۲۰۰۳ء, دسمبر ۲۰۰۴ء (digits run left-to-right in the "
-    "stream, so they read reversed)"
+    "stream, so they read reversed). These dates directly exercise "
+    "0xD0-0xD5, 0xD7, 0xD8, 0xD9; 0xD6 is not directly observed in any cited "
+    "date and is inferred from contiguity with the rest of the block, not "
+    "from a direct occurrence"
 )
 for _d, _digit in enumerate("۰۱۲۳۴۵۶۷۸۹"):
     CODEPAGE[0xD0 + _d] = (_digit, _DIGIT_EVIDENCE)
