@@ -1,64 +1,64 @@
 import unittest
 
 from tools.inpage.models import Paragraph
-from tools.inpage.segment import segment
+from tools.inpage.segment import is_matla, pair_shers, split_ghazals
 
 
 def para(text, geometry):
-    return Paragraph(text=text, geometry=geometry, codes=[])
+    return Paragraph(text=text, geometry=geometry, raw=text, codes=[])
 
 
-class TestSegment(unittest.TestCase):
-    def test_a_section_heading_opens_a_section(self):
-        paras = [para("غزلیں", 15), para("پہلا مصرع", 63), para("دوسرا مصرع", 65)]
-        segments = segment(paras)
-        self.assertEqual(segments[0].section, "غزلیں")
+class TestPairShers(unittest.TestCase):
+    def test_pairs_on_the_second_misra_geometry(self):
+        run = [para("پہلا", 73), para("دوسرا", 1)]
+        self.assertEqual(pair_shers(run), [("پہلا", "دوسرا")])
 
-    def test_a_geometry_reset_starts_a_new_piece(self):
-        paras = [
-            para("الف", 63), para("ب", 65),
-            para("ج", 63), para("د", 65),
+    def test_pairs_several_shers_in_order(self):
+        run = [para("ا", 73), para("ب", 1), para("ج", 89), para("د", 1)]
+        self.assertEqual(pair_shers(run), [("ا", "ب"), ("ج", "د")])
+
+    def test_a_trailing_unpaired_line_is_kept_as_a_half_sher(self):
+        # Never drop a line: the second element is empty, and the caller flags it.
+        run = [para("ا", 73), para("ب", 1), para("ج", 89)]
+        self.assertEqual(pair_shers(run), [("ا", "ب"), ("ج", "")])
+
+
+class TestIsMatla(unittest.TestCase):
+    def test_true_when_both_misras_end_with_the_same_word(self):
+        self.assertTrue(is_matla("عطر کی خوشبو الگ", "کا جادو الگ"))
+
+    def test_true_on_a_multi_word_radif(self):
+        self.assertTrue(is_matla("نئی چادر بچھی ہوئی", "سے بڑھ کر بچھی ہوئی"))
+
+    def test_false_when_only_the_second_misra_rhymes(self):
+        self.assertFalse(is_matla("چاٹ لیتی ہے یہ فکر", "ہو نہ جائے تو الگ"))
+
+    def test_ignores_diacritics_and_punctuation(self):
+        self.assertTrue(is_matla("عِطر کی خُوشبو الگ", "کا جادو، الگ"))
+
+    def test_false_on_an_empty_second_misra(self):
+        self.assertFalse(is_matla("کوئی مصرع", ""))
+
+
+class TestSplitGhazals(unittest.TestCase):
+    def test_starts_a_new_ghazal_at_each_matla(self):
+        shers = [
+            ("خوشبو الگ", "جادو الگ"),      # matla
+            ("یہ فکر", "تو الگ"),
+            ("دنیا الگ", "چراغوں کا الگ"),  # matla
         ]
-        segments = segment(paras)
-        self.assertEqual(len(segments), 2)
+        groups = split_ghazals(shers)
+        self.assertEqual(len(groups), 2)
+        self.assertEqual(len(groups[0]), 2)
 
-    def test_piece_is_titled_by_its_first_line(self):
-        paras = [para("جسم کی خوشبو الگ ہے", 63), para("خواب کی دنیا الگ ہے", 65)]
-        self.assertEqual(segment(paras)[0].title, "جسم کی خوشبو الگ ہے")
+    def test_leading_shers_before_any_matla_are_kept_as_a_group(self):
+        shers = [("یہ فکر", "تو الگ"), ("خوشبو الگ", "جادو الگ")]
+        groups = split_ghazals(shers)
+        self.assertEqual(len(groups), 2)
 
-    def test_pieces_are_numbered_in_book_order(self):
-        paras = [para("الف", 63), para("ب", 65), para("ج", 63), para("د", 65)]
-        self.assertEqual([s.order for s in segment(paras)], [1, 2])
-
-    def test_an_odd_line_count_is_flagged_not_dropped(self):
-        paras = [para("الف", 63), para("ب", 65), para("ج", 67)]
-        self.assertIn("odd-line-count", segment(paras)[0].flags)
-
-    def test_body_joins_lines_into_couplets(self):
-        paras = [para("الف", 63), para("ب", 65), para("ج", 67), para("د", 69)]
-        self.assertEqual(segment(paras)[0].body, "الف\nب\n\nج\nد")
-
-    def test_an_over_long_title_is_flagged_but_not_dropped(self):
-        # A misdetected paragraph run with no line break produces a "title"
-        # long enough that slugify()'s output crashed file writes in the
-        # پہلا pilot run. The piece must survive, only flagged.
-        long_title = "غلام حسین ساجد " * 20  # well over 200 characters
-        paras = [para(long_title, 63), para("دوسرا مصرع", 65)]
-        segments = segment(paras)
-        self.assertEqual(len(segments), 1)
-        self.assertIn("over-long-title", segments[0].flags)
-        self.assertEqual(segments[0].title, long_title)
-
-    def test_a_normal_title_is_not_flagged_over_long(self):
-        paras = [para("جسم کی خوشبو الگ ہے", 63), para("خواب کی دنیا الگ ہے", 65)]
-        self.assertNotIn("over-long-title", segment(paras)[0].flags)
-
-    def test_a_heading_with_a_diacritic_is_still_recognised(self):
-        # گُل سیمیا carries a pesh on the گ; skeleton() strips it before
-        # comparison, so this must still open the گل سیمیا section.
-        paras = [para("گُل سیمیا", 15), para("پہلا مصرع", 63), para("دوسرا مصرع", 65)]
-        segments = segment(paras)
-        self.assertEqual(segments[0].section, "گل سیمیا")
+    def test_no_sher_is_lost(self):
+        shers = [("a الگ", "b الگ"), ("c", "d"), ("e ہوئی", "f ہوئی"), ("g", "h")]
+        self.assertEqual(sum(len(g) for g in split_ghazals(shers)), len(shers))
 
 
 if __name__ == "__main__":
