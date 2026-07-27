@@ -7,6 +7,7 @@ stepped over two bytes at a time, matching the pair alignment of the stream.
 """
 
 import struct
+import unicodedata
 
 from .codepage import decode_byte
 from .models import Paragraph
@@ -24,7 +25,10 @@ def decode(data: bytes) -> list[Paragraph]:
     index = 0
 
     def flush(geometry: int) -> None:
-        raw = "".join(chars)
+        # InPage writes a combining mark after its bearer — alef then madda for
+        # آ, gol he then hamza for ۂ. NFC folds those canonical sequences into
+        # the single characters the rest of the archive is written in.
+        raw = unicodedata.normalize("NFC", "".join(chars))
         if raw.strip() or codes:
             paragraphs.append(Paragraph(
                 text=raw.strip(), geometry=geometry, raw=raw, codes=list(codes),

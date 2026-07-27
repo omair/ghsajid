@@ -38,6 +38,93 @@ CODEPAGE.update({
     0xF3: ("۔", "Urdu full stop; sentence-final throughout the preface"),
 })
 
+# --- Marks and letters solved by aligning the کلیات against the 11 ghazals
+# already on the site (tools/inpage/groundtruth.py). Each entry below was read
+# off a character-level diff of a decoded paragraph against its committed
+# WordPress-era text, not guessed from position in the table.
+
+CODEPAGE.update({
+    0xAA: (
+        "ِ",
+        "zer/kasra; the izafat. Site line رنگِ ادب پبلی کیشنز and "
+        "خلق ِ خدا align this code onto U+0650 (11 direct diff votes, "
+        "4383 occurrences in MAZAMEER (1) — izafat is everywhere in ghazal)",
+    ),
+    0xAB: (
+        "َ",
+        "zabar/fatha; site مَیں (ماورائے سراغ ہوں مَیں بھی) and سَر put "
+        "U+064E exactly here (7 direct diff votes)",
+    ),
+    0xAD: (
+        "ّ",
+        "tashdid/shadda; site چکّر in ایک چکّر ہے مرے پاؤں میں زنجیر نہیں, "
+        "plus مٹّی / تکلّف / تمنّا in the TAJAWUZ preface (7 direct diff votes)",
+    ),
+    0xB3: (
+        "ٓ",
+        "madda, written after its alef: 0x81 0xB3 spells آ — ا+0xB3+نے والوں "
+        "= آنے والوں, ا+0xB3+یندہ = آیندہ, ا+0xB3+فس = آفس. 29 site آ "
+        "aligned onto the pair, so this code is the combining mark, not آ",
+    ),
+    0xC8: (
+        "آ",
+        "alef-madda as one code — the other spelling of آ. Bare 0xC8 begins "
+        "آسماں / آئنے / آدھی رات / آخری with no alef before it; 17 site آ "
+        "aligned onto this single code",
+    ),
+    0xBF: (
+        "ٔ",
+        "hamza above, written after its bearer: ہ+0xBF is the ۂ of izafat — "
+        "خانۂ دنیا, حلقۂ دیوار, نغمۂ شادی, قریۂ وہم",
+    ),
+    0xC7: (
+        "ً",
+        "tanwin/fathatan, written after its alef: قطعاً, نسبتاً, خالصتاً in "
+        "the TAJAWUZ preface — Arabic adverbs, all with the same ending",
+    ),
+    0xCF: (
+        "ؔ",
+        "takhallus mark: occurs only after a pen-name — ساجدؔ (the poet's "
+        "own), دردؔ, شاعرؔ — and never inside a word",
+    ),
+    0xED: (
+        "،",
+        "Urdu comma; 12 site ، aligned onto it, e.g. رنگِ ادب پبلی کیشنز ، "
+        "کراچی and the address اُردو بازار، کراچی",
+    ),
+    0xEE: (
+        "؟",
+        "Urdu question mark; 2 site ؟ aligned onto it at end of "
+        "interrogative misras",
+    ),
+    0xFE: (
+        "‘",
+        "opening single quote, doubled to make a double quote: 0xFE 0xFE "
+        "opens and 0xFD 0xFD closes the quoted متاع and عناصر, and a single "
+        'site " aligned onto the 0xFE pair. Role (open) is from position; '
+        "U+2018 is the convention for the curly form",
+    ),
+    0xFD: (
+        "’",
+        "closing single quote, the partner of 0xFE: 0xFD 0xFD closes every "
+        'run 0xFE 0xFE opens, and a single site " aligned onto the pair',
+    ),
+})
+
+# Digits, keyed off dates in the کلیات colophons. The stream stores a number
+# in visual (left-to-right) order, so the run reads reversed: 0xD5 0xD8 0xD9
+# 0xD1 after نومبر is 1985, 0xD3 0xD0 0xD0 0xD2 after مارچ is 2003. Every
+# occurrence resolves to a plausible Gregorian year (1985, 1987, 1989, 1993,
+# 2003, 2004) or a day of the month (15, 23, 28) under 0xD0+n == n, and under
+# no other offset.
+_DIGIT_EVIDENCE = (
+    "0xD0+n is the digit n; from colophon dates — نومبر ۱۹۸۵ء, فروری ۱۹۸۹ء, "
+    "اپریل ۱۹۹۳ء, مارچ ۲۰۰۳ء, دسمبر ۲۰۰۴ء (digits run left-to-right in the "
+    "stream, so they read reversed)"
+)
+for _d, _digit in enumerate("۰۱۲۳۴۵۶۷۸۹"):
+    CODEPAGE[0xD0 + _d] = (_digit, _DIGIT_EVIDENCE)
+
 # Genuine duplicate codes, if any are discovered: alias -> canonical code.
 # Declared explicitly so the injectivity test stays meaningful.
 ALIASES: dict[int, int] = {}
