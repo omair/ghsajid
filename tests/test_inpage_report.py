@@ -3,9 +3,16 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.inpage.emit import write_book, write_segments
+from tools.inpage.emit import resolve_book_records, write_book, write_segments
 from tools.inpage.models import Book, Segment
-from tools.inpage.report import is_approved, render, restamp_report, segmentation_hash
+from tools.inpage.report import (
+    ABSENT,
+    _staged_digests,
+    is_approved,
+    render,
+    restamp_report,
+    segmentation_hash,
+)
 
 SEGMENTS = [
     Segment(kind="ghazals", title="جسم کی خوشبو الگ ہے", body="الف\nب", order=1),
@@ -290,6 +297,95 @@ class TestRestampReport(unittest.TestCase):
         new_approval_at = new_text.rfind("## Approval")
         # Everything before the ## Approval section is untouched.
         self.assertEqual(approved[:approval_at], new_text[:new_approval_at])
+
+
+class TestHashCoversEveryBookRecord(unittest.TestCase):
+    """One record per collection means one digest per record.
+
+    The hash digested exactly `books/<book_slug>.yaml`, which a
+    multi-collection book never writes: کلیات جلد ۲'s six records all
+    digested as `absent`, so their title and contents rows could be rewritten
+    after sign-off with the approval still reading valid.
+    """
+
+    NIND = "نیند میں چلتے ہوئے"
+    CHAHAR = "چہار دریا"
+
+    def setUp(self):
+        self.staging = Path(tempfile.mkdtemp())
+        self.segments = [
+            Segment(kind="ghazals", title="پہلی نظم", body="اول", order=1,
+                    collection=self.NIND),
+            Segment(kind="nazms", title="دوسری نظم", body="دوم", order=2,
+                    collection=self.CHAHAR),
+        ]
+        _, slugs, _ = write_segments(self.segments, "kulliyat-jild-2", self.staging)
+        self.records, _ = resolve_book_records(self.segments, "kulliyat-jild-2")
+        for (collection, record_slug), segment, slug in zip(
+            self.records, self.segments, slugs
+        ):
+            write_book(
+                Book(
+                    title=collection,
+                    slug=record_slug,
+                    collected_in="kulliyat-jild-2",
+                    contents=[segment],
+                ),
+                [slug],
+                self.staging,
+            )
+
+    def tearDown(self):
+        shutil.rmtree(self.staging)
+
+    def _hash(self):
+        return segmentation_hash(self.segments, self.staging, "kulliyat-jild-2")
+
+    def test_every_record_is_named_in_the_digest(self):
+        digested = _staged_digests(self.staging, "kulliyat-jild-2", self.segments)
+        names = [line.split("\x1f")[0] for line in digested]
+        for _, record_slug in self.records:
+            self.assertIn(f"books/{record_slug}.yaml", names)
+        self.assertEqual(len(self.records), 2)
+
+    def test_no_record_digests_as_absent(self):
+        digested = _staged_digests(self.staging, "kulliyat-jild-2", self.segments)
+        for line in digested:
+            name, digest = line.split("\x1f")
+            self.assertNotEqual(digest, ABSENT, name)
+
+    def test_editing_any_record_changes_the_hash(self):
+        for _, record_slug in self.records:
+            with self.subTest(record=record_slug):
+                record = self.staging / "books" / f"{record_slug}.yaml"
+                before = self._hash()
+                original = record.read_bytes()
+                record.write_text(
+                    record.read_text(encoding="utf-8").replace("title:", "title: x"),
+                    encoding="utf-8",
+                )
+                self.assertNotEqual(before, self._hash())
+                record.write_bytes(original)
+                self.assertEqual(before, self._hash())
+
+    def test_approval_does_not_survive_an_edit_to_any_record(self):
+        for _, record_slug in self.records:
+            with self.subTest(record=record_slug):
+                record = self.staging / "books" / f"{record_slug}.yaml"
+                original = record.read_bytes()
+                text = render(
+                    "kulliyat-jild-2", self.segments, [], self.staging
+                ).replace("approved: false", "approved: true")
+                self.assertTrue(
+                    is_approved(text, self.segments, self.staging, "kulliyat-jild-2")
+                )
+                record.write_text(
+                    'title: "کوئی اور کتاب"\ncontents:\n', encoding="utf-8"
+                )
+                self.assertFalse(
+                    is_approved(text, self.segments, self.staging, "kulliyat-jild-2")
+                )
+                record.write_bytes(original)
 
 
 class TestPieceLineShowsKind(unittest.TestCase):

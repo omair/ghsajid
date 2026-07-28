@@ -37,7 +37,7 @@ from .checks import (
 )
 from .classify import running_headers
 from .decode import decode, excluded_report
-from .emit import write_book, write_segments
+from .emit import resolve_book_records, write_book, write_segments
 from .groundtruth import (
     EXPECTED_LINES_TOTAL,
     MIN_LINES_MATCHED,
@@ -49,7 +49,6 @@ from .ole import read_text_stream
 from .promote import promote
 from .report import render, restamp_report
 from .segment import segment as segment_paragraphs
-from tools.migrate.urdu import slugify
 
 SOURCES = {
     "tajawuz": Path("inp/TAJAWUZ.INP"),
@@ -275,29 +274,28 @@ def cmd_segment(book_slug: str) -> None:
         pieces_by.setdefault(piece.collection, []).append(piece)
         slugs_by.setdefault(piece.collection, []).append(slug)
 
-    if list(pieces_by) == [""]:
-        # No running headers — تجاوز, باغِ نشاط, کلیات جلد ۱. The book is its
-        # own single record.
+    # Which records this staging tree gets is decided in exactly one place —
+    # `resolve_book_records` — because the approval hash and `promote` must
+    # agree with this loop file for file. They did not: this grew one record
+    # per collection while both of those still addressed a single
+    # books/<book_slug>.yaml. A collection with no usable slug, or two that
+    # slugify alike, come back as reported problems rather than a silently
+    # missing or silently overwritten record.
+    records, record_problems = resolve_book_records(segments, book_slug)
+    gate_output.extend(record_problems)
+    for collection, record_slug in records:
+        # collection "" means no running headers — تجاوز, باغِ نشاط,
+        # کلیات جلد ۱. The book is its own single record, under its own title.
         write_book(
-            Book(title=TITLES[book_slug], slug=book_slug, contents=book_contents),
-            book_slugs,
+            Book(
+                title=collection or TITLES[book_slug],
+                slug=record_slug,
+                collected_in=book_slug if collection else "",
+                contents=pieces_by.get(collection, []),
+            ),
+            slugs_by.get(collection, []),
             out,
         )
-    else:
-        for collection, pieces in pieces_by.items():
-            if not collection:
-                # Front matter, and anything before the first page header.
-                continue
-            write_book(
-                Book(
-                    title=collection,
-                    slug=slugify(collection),
-                    collected_in=book_slug,
-                    contents=pieces,
-                ),
-                slugs_by[collection],
-                out,
-            )
     (out / "segments.json").write_text(
         json.dumps([asdict(s) for s in segments], ensure_ascii=False, indent=2),
         encoding="utf-8",

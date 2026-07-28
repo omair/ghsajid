@@ -5,11 +5,44 @@ import unittest
 from dataclasses import asdict
 from pathlib import Path
 
-from tools.inpage.emit import _piece, write_book, write_segment, write_segments
+from tools.inpage.emit import (
+    _piece,
+    book_record_slugs,
+    resolve_book_records,
+    write_book,
+    write_segment,
+    write_segments,
+)
 from tools.inpage.models import Book, Segment
 from tools.inpage.promote import promote
 from tools.inpage.report import render
 from tools.migrate.emit import frontmatter
+
+
+def stage_book_records(segments, book_slug, book_staging, titles=None):
+    """Write pieces + one record per collection, exactly as cmd_segment does.
+
+    Kept in one place so the promote and report tests exercise the same
+    staging shape the CLI actually produces for کلیات جلد ۲ — six records,
+    one per collection — rather than each inventing its own.
+    """
+    _, slugs, _ = write_segments(segments, book_slug, book_staging)
+    contents = [(s, slug) for s, slug in zip(segments, slugs)
+                if s.kind in ("ghazals", "nazms")]
+    records, problems = resolve_book_records(segments, book_slug)
+    for collection, record_slug in records:
+        rows = [(s, slug) for s, slug in contents if s.collection == collection]
+        write_book(
+            Book(
+                title=collection or (titles or {}).get(book_slug, book_slug),
+                slug=record_slug,
+                collected_in=book_slug if collection else "",
+                contents=[s for s, _ in rows],
+            ),
+            [slug for _, slug in rows],
+            book_staging,
+        )
+    return records, problems
 
 
 class TestWriteSegment(unittest.TestCase):
@@ -252,8 +285,17 @@ class TestPromote(unittest.TestCase):
         first = Segment(kind="ghazals", title="پہلی نظم", body="اول", order=1)
         second = Segment(kind="ghazals", title="پہلی نظم", body="دوم", order=2)
         book_staging = self.staging / "tajawuz"
-        _, _, staging_problems = write_segments([first, second], "tajawuz", book_staging)
+        _, slugs, staging_problems = write_segments(
+            [first, second], "tajawuz", book_staging
+        )
         self.assertTrue(any("collision" in p for p in staging_problems))
+        # A complete staging tree, as cmd_segment writes it: the book record
+        # the segments name is part of what promote must find.
+        write_book(
+            Book(title="تجاوز", slug="tajawuz", contents=[first, second]),
+            slugs,
+            book_staging,
+        )
 
         segments_path = book_staging / "segments.json"
         segments_path.write_text(
@@ -264,7 +306,9 @@ class TestPromote(unittest.TestCase):
         written, problems = promote("tajawuz", self.staging, self.content)
 
         names = sorted(p.name for p in written)
-        self.assertEqual(names, ["pahli-nazm-2.md", "pahli-nazm.md"])
+        self.assertEqual(
+            names, ["pahli-nazm-2.md", "pahli-nazm.md", "tajawuz.yaml"]
+        )
         self.assertEqual(problems, [])
 
     def test_orphaned_staging_file_from_a_prior_run_is_not_promoted(self):
@@ -392,19 +436,26 @@ class TestPromoteIsBoundToTheStagedBytes(unittest.TestCase):
         self.assertTrue(any("not approved" in p for p in problems))
 
     def test_a_stray_yaml_in_staging_is_not_promoted(self):
-        # The record path is derived from book_slug, so a second yaml dropped
+        # The record paths are derived from the segments, so a yaml dropped
         # into staging/books is neither hashed nor copied — promote used to
-        # glob the directory and would have copied this.
+        # glob the directory and would have copied this. It is also REPORTED:
+        # a record nothing described is exactly what the hash cannot see, so
+        # silently ignoring it hid the fact that something put it there.
         stray = self.record.parent / "smuggled.yaml"
         stray.write_text('title: "چوری"\nslug: "smuggled"\ncontents:\n', encoding="utf-8")
 
         written, problems = promote("tajawuz", self.staging, self.content)
 
-        self.assertEqual(problems, [])
         self.assertEqual(
             sorted(p.name for p in written), ["pahli-nazm.md", "tajawuz.yaml"]
         )
         self.assertFalse((self.content / "books" / "smuggled.yaml").exists())
+        self.assertTrue(
+            any("smuggled.yaml" in p and "unexpected" in p for p in problems),
+            problems,
+        )
+        # And nothing else went wrong — the stray is the only complaint.
+        self.assertEqual(len(problems), 1, problems)
 
 
 if __name__ == "__main__":
@@ -451,3 +502,159 @@ class TestBookPerCollection(unittest.TestCase):
         book = Book(title="تجاوز", slug="tajawuz")
         text = write_book(book, [], self.root).read_text(encoding="utf-8")
         self.assertNotIn("collected_in", text)
+
+
+NIND = "نیند میں چلتے ہوئے"
+CHAHAR = "چہار دریا"
+
+MULTI = [
+    Segment(kind="ghazals", title="پہلی نظم", body="اول", order=1, collection=NIND),
+    Segment(kind="ghazals", title="دوسری نظم", body="دوم", order=2, collection=NIND),
+    Segment(kind="nazms", title="تیسری نظم", body="سوم", order=3, collection=CHAHAR),
+]
+
+
+class TestResolveBookRecords(unittest.TestCase):
+    """The single source of truth for which records a staging tree has.
+
+    `cmd_segment` writes one record per collection; the approval hash and
+    `promote` must derive that same list, from the segments, never from a
+    directory walk.
+    """
+
+    def test_a_book_with_no_collections_is_its_own_single_record(self):
+        segments = [Segment(kind="ghazals", title="a", body="a", order=1)]
+        records, problems = resolve_book_records(segments, "tajawuz")
+        self.assertEqual(records, [("", "tajawuz")])
+        self.assertEqual(problems, [])
+
+    def test_one_record_per_distinct_collection_in_book_order(self):
+        records, problems = resolve_book_records(MULTI, "kulliyat-jild-2")
+        self.assertEqual([c for c, _ in records], [NIND, CHAHAR])
+        self.assertEqual(problems, [])
+        self.assertEqual(
+            book_record_slugs(MULTI, "kulliyat-jild-2"), [s for _, s in records]
+        )
+
+    def test_reviews_do_not_create_a_record(self):
+        segments = MULTI + [
+            Segment(kind="reviews", title="مضمون", body="ن", order=4,
+                    collection="کوئی اور")
+        ]
+        records, _ = resolve_book_records(segments, "kulliyat-jild-2")
+        self.assertEqual([c for c, _ in records], [NIND, CHAHAR])
+
+    def test_the_leading_uncollected_run_gets_no_record(self):
+        segments = [
+            Segment(kind="ghazals", title="a", body="a", order=1),
+            Segment(kind="ghazals", title="b", body="b", order=2, collection=NIND),
+        ]
+        records, _ = resolve_book_records(segments, "kulliyat-jild-2")
+        self.assertEqual([c for c, _ in records], [NIND])
+
+    def test_two_collections_slugifying_alike_are_reported_not_overwritten(self):
+        # Synthetic: inert on today's data. Segment titles are disambiguated
+        # by `resolve_slugs`; collection names were not, so two that slugify
+        # the same silently overwrote each other's yaml — one collection's
+        # whole contents list lost, with no report of any kind.
+        segments = [
+            Segment(kind="ghazals", title="a", body="a", order=1, collection="راہ"),
+            Segment(kind="ghazals", title="b", body="b", order=2, collection="راہ!"),
+        ]
+        records, problems = resolve_book_records(segments, "kulliyat-jild-2")
+
+        slugs = [s for _, s in records]
+        self.assertEqual(len(slugs), 2)
+        self.assertEqual(len(set(slugs)), 2, "collision must not collapse to one file")
+        self.assertTrue(any("collision" in p for p in problems), problems)
+        self.assertTrue(any("راہ!" in p for p in problems), problems)
+
+    def test_a_collection_that_slugifies_to_nothing_is_reported(self):
+        segments = [
+            Segment(kind="ghazals", title="a", body="a", order=1, collection="۔۔۔"),
+        ]
+        records, problems = resolve_book_records(segments, "kulliyat-jild-2")
+        if records:
+            self.assertTrue(all(slug for _, slug in records))
+        else:
+            self.assertTrue(problems)
+
+
+class TestPromoteCopiesEveryBookRecord(unittest.TestCase):
+    """کلیات جلد ۲ has six records; promote copied one path and said nothing.
+
+    The copy was guarded by `if record.is_file():` with no `else`, and the
+    path was `books/<book_slug>.yaml` — a file a multi-collection book never
+    writes. 561 poems would have landed in content/ with no /kitab page.
+    """
+
+    def setUp(self):
+        self.staging = Path(tempfile.mkdtemp())
+        self.content = Path(tempfile.mkdtemp())
+        self.book_staging = self.staging / "kulliyat-jild-2"
+        self.records, _ = stage_book_records(
+            MULTI, "kulliyat-jild-2", self.book_staging
+        )
+        (self.book_staging / "segments.json").write_text(
+            json.dumps([asdict(s) for s in MULTI]), encoding="utf-8"
+        )
+        (self.book_staging / "report.md").write_text(
+            render("kulliyat-jild-2", MULTI, [], self.book_staging).replace(
+                "approved: false", "approved: true"
+            ),
+            encoding="utf-8",
+        )
+
+    def tearDown(self):
+        shutil.rmtree(self.staging)
+        shutil.rmtree(self.content)
+
+    def test_every_record_reaches_content(self):
+        written, problems = promote("kulliyat-jild-2", self.staging, self.content)
+
+        self.assertEqual(problems, [])
+        expected = sorted(f"{slug}.yaml" for _, slug in self.records)
+        self.assertEqual(len(expected), 2)
+        self.assertEqual(
+            sorted(p.name for p in written if p.suffix == ".yaml"), expected
+        )
+        for name in expected:
+            self.assertTrue((self.content / "books" / name).exists(), name)
+
+    def test_no_record_is_named_after_the_volume_itself(self):
+        # The bug in one assertion: the old code addressed exactly this path.
+        self.assertFalse(
+            (self.book_staging / "books" / "kulliyat-jild-2.yaml").exists()
+        )
+
+    def test_a_record_named_by_the_segments_but_missing_is_reported(self):
+        missing = self.book_staging / "books" / f"{self.records[0][1]}.yaml"
+        missing.unlink()
+        # Re-approve against the tree as it now stands, so the refusal under
+        # test is the missing record itself and not the stale hash.
+        (self.book_staging / "report.md").write_text(
+            render("kulliyat-jild-2", MULTI, [], self.book_staging).replace(
+                "approved: false", "approved: true"
+            ),
+            encoding="utf-8",
+        )
+
+        written, problems = promote("kulliyat-jild-2", self.staging, self.content)
+
+        self.assertTrue(
+            any(missing.name in p and "missing" in p for p in problems), problems
+        )
+        self.assertNotIn(missing.name, [p.name for p in written])
+
+    def test_an_existing_record_is_never_overwritten(self):
+        name = f"{self.records[0][1]}.yaml"
+        target = self.content / "books" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('title: "hand entered"\n', encoding="utf-8")
+        before = target.read_bytes()
+
+        written, problems = promote("kulliyat-jild-2", self.staging, self.content)
+
+        self.assertEqual(target.read_bytes(), before)
+        self.assertNotIn(target, written)
+        self.assertTrue(any(name in p and "skipped" in p for p in problems), problems)
