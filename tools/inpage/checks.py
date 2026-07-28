@@ -284,6 +284,63 @@ def toc_count_errors(
     return []
 
 
+# Poem counts a gathering volume declares for the books it gathers, keyed by
+# book slug then by collection. These are NOT judgements about how many poems
+# look right; they are arithmetic the book prints about itself, in the same
+# class as تجاوز's numbered فہرست of 100 (see `toc_count_errors`).
+#
+# کلیات جلد ۱'s فہرست, the piece at order 1, states each collection's sections
+# and their sizes:
+#
+#   موسم    بہار، سعیر، برشگال، خزاں، زمہریر at بیس غزلیں (20) each,
+#           plus قدیم at تیس غزلیں (30)                    = 130
+#   عناصر   مٹّی، پانی، آگ، ہَوا، خواب at بیس غزلیں (20) each = 100
+#
+# They are worth asserting because they are independent of the boundary the
+# segmenter finds: the title-page blocks and the declared counts are two
+# separate structures in the book, and they agree to the poem. If a future
+# change moves a boundary, one of these two numbers moves with it and this
+# gate says by how much. Do NOT adjust a boundary to make a count come out —
+# the whole value of these two figures is that the book declared them.
+#
+# The volume's other four collections — کتابِ صبح، آیندہ، معاملہ، روداد —
+# declare no count anywhere in the source, so none is asserted for them. Their
+# totals are reported by cmd_segment's "poems per collection" line and left at
+# that; inventing a number to assert against would be worse than asserting
+# nothing.
+DECLARED_COLLECTION_COUNTS: dict[str, dict[str, int]] = {
+    "kulliyat-jild-1": {"موسم": 130, "عناصر": 100},
+}
+
+
+def declared_collection_count_errors(
+    segments: list[Segment], declared: dict[str, int]
+) -> list[str]:
+    """Each declared collection must hold exactly the poems it declares.
+
+    Counted over VERSE_KINDS, like `toc_count_errors`: a دیباچہ inside a
+    collection is a `reviews` piece and was never one of its غزلیں.
+
+    A collection missing from the segmentation entirely reports its whole
+    count as the delta rather than passing silently — that is the shape a
+    broken boundary detector would take, and a gate that goes quiet when its
+    subject disappears is not a gate.
+    """
+    counts = collections.Counter(
+        piece.collection for piece in segments if piece.kind in VERSE_KINDS
+    )
+    errors = []
+    for name, expected in declared.items():
+        actual = counts.get(name, 0)
+        if actual != expected:
+            errors.append(
+                f"collection {name} holds {actual} poems against the "
+                f"{expected} the volume's own فہرست declares for it "
+                f"(delta {actual - expected:+d})"
+            )
+    return errors
+
+
 # The share of a book's poems one section may cover before the label stops
 # being evidence of anything. باغِ نشاط is the measured case: its only two
 # headings are both نعت (paragraphs 131 and 144), the غزلیں heading the book

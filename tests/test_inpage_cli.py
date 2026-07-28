@@ -11,6 +11,7 @@ from tools.inpage import __main__ as cli
 from tools.inpage.models import Segment
 
 TAJAWUZ = Path("inp/TAJAWUZ.INP")
+JILD_1 = Path("inp/MAZAMEER (1).INP")
 
 
 class TestBookContentsAndSlugs(unittest.TestCase):
@@ -96,6 +97,62 @@ class TestCmdSegmentStaging(unittest.TestCase):
         cli.cmd_segment("tajawuz")
         book_staging = self.staging_root / "tajawuz"
         self.assertTrue((book_staging / "report.md").exists())
+
+    def test_a_single_book_still_writes_exactly_one_record(self):
+        cli.cmd_segment("tajawuz")
+        books = sorted(p.name for p in (self.staging_root / "tajawuz" / "books").iterdir())
+        self.assertEqual(books, ["tajawuz.yaml"])
+        self.assertNotIn(
+            "collected_in",
+            (self.staging_root / "tajawuz" / "books" / "tajawuz.yaml").read_text(
+                encoding="utf-8"
+            ),
+        )
+
+
+@unittest.skipUnless(JILD_1.exists(), "inp/ sources not present")
+class TestCmdSegmentKulliyatJild1Records(unittest.TestCase):
+    """جلد ۱ must write one record per gathered book, not one for the volume.
+
+    The volume prints no running page header, so before its title-page blocks
+    were read it produced a single `kulliyat-jild-1.yaml` holding all 570
+    poems — six separately-published books filed as one.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.staging_root = Path(tempfile.mkdtemp())
+        with mock.patch.object(cli, "STAGING", cls.staging_root):
+            cli.cmd_segment("kulliyat-jild-1")
+        cls.books = cls.staging_root / "kulliyat-jild-1" / "books"
+        cls.report = (
+            cls.staging_root / "kulliyat-jild-1" / "report.md"
+        ).read_text(encoding="utf-8")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.staging_root)
+
+    def test_six_records_are_written(self):
+        self.assertEqual(len(list(self.books.iterdir())), 6)
+
+    def test_no_record_is_named_for_the_volume_itself(self):
+        self.assertFalse((self.books / "kulliyat-jild-1.yaml").exists())
+
+    def test_every_record_says_which_volume_it_was_read_from(self):
+        for path in self.books.iterdir():
+            with self.subTest(record=path.name):
+                self.assertIn(
+                    'collected_in: "kulliyat-jild-1"',
+                    path.read_text(encoding="utf-8"),
+                )
+
+    def test_the_report_states_both_declared_counts(self):
+        self.assertIn("موسم 130", self.report)
+        self.assertIn("عناصر 100", self.report)
+
+    def test_the_report_names_the_title_page_blocks(self):
+        self.assertIn("title page", self.report)
 
 
 class TestCmdRestampValidatesItsSlug(unittest.TestCase):

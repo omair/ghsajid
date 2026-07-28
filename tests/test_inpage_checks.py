@@ -611,5 +611,85 @@ class TestKulliyatIndexBaseline(unittest.TestCase):
         self.assertIn("census", errors[0])
 
 
+class TestDeclaredCollectionCounts(unittest.TestCase):
+    """A collection whose poem count the volume's own فہرست declares.
+
+    کلیات جلد ۱'s فہرست states موسم's six sections as بیس غزلیں five times
+    over plus تیس غزلیں (130) and عناصر's five as بیس غزلیں each (100). Those
+    are the book declaring its own arithmetic, in the same class as تجاوز's
+    numbered فہرست, so they are asserted rather than judged. The volume's
+    other four collections declare nothing, and must NOT be asserted against
+    a number someone invented for them.
+    """
+
+    DECLARED = {"موسم": 3, "عناصر": 2}
+
+    def _poems(self, mausam: int, anasir: int):
+        segments = []
+        order = 1
+        for name, count in (("موسم", mausam), ("عناصر", anasir)):
+            for _ in range(count):
+                segments.append(Segment(
+                    kind="ghazals", title="x", body="x", order=order,
+                    collection=name,
+                ))
+                order += 1
+        # A review inside a collection is not one of its poems.
+        segments.append(Segment(
+            kind="reviews", title="r", body="r", order=order,
+            collection="موسم",
+        ))
+        # An undeclared collection is reported elsewhere, never asserted here.
+        segments.append(Segment(
+            kind="ghazals", title="y", body="y", order=order + 1,
+            collection="روداد",
+        ))
+        return segments
+
+    def test_silent_when_every_declared_count_is_met(self):
+        self.assertEqual(
+            checks.declared_collection_count_errors(
+                self._poems(3, 2), self.DECLARED
+            ),
+            [],
+        )
+
+    def test_a_short_collection_reports_its_delta(self):
+        errors = checks.declared_collection_count_errors(
+            self._poems(1, 2), self.DECLARED
+        )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("موسم", errors[0])
+        self.assertIn("-2", errors[0])
+
+    def test_a_long_collection_reports_its_delta(self):
+        errors = checks.declared_collection_count_errors(
+            self._poems(3, 5), self.DECLARED
+        )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("عناصر", errors[0])
+        self.assertIn("+3", errors[0])
+
+    def test_a_collection_that_was_never_attributed_is_reported(self):
+        segments = [s for s in self._poems(3, 2) if s.collection != "عناصر"]
+        errors = checks.declared_collection_count_errors(
+            segments, self.DECLARED
+        )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("عناصر", errors[0])
+        self.assertIn("-2", errors[0])
+
+    def test_no_declaration_asserts_nothing(self):
+        self.assertEqual(
+            checks.declared_collection_count_errors(self._poems(1, 1), {}), []
+        )
+
+    def test_the_real_declarations_are_the_two_the_fihrist_states(self):
+        self.assertEqual(
+            checks.DECLARED_COLLECTION_COUNTS,
+            {"kulliyat-jild-1": {"موسم": 130, "عناصر": 100}},
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

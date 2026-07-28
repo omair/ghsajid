@@ -1,16 +1,22 @@
+import collections
 import unittest
 from pathlib import Path
 
 from tools.inpage.checks import (
-    KULLIYAT_VOLUMES, TOC_FIRST_LINE_BASELINE,
-    completeness_errors, conservation_errors,
+    DECLARED_COLLECTION_COUNTS, KULLIYAT_VOLUMES, TOC_FIRST_LINE_BASELINE,
+    completeness_errors, conservation_errors, declared_collection_count_errors,
     roundtrip_errors, segmentation_groundtruth_errors, toc_count_errors,
     toc_first_line_baseline_errors,
 )
-from tools.inpage.classify import toc_count
+from tools.inpage.classify import running_headers, toc_count
 from tools.inpage.decode import decode
+from tools.inpage.emit import resolve_book_records
+from tools.inpage.groundtruth import skeleton
 from tools.inpage.ole import read_text_stream
-from tools.inpage.segment import segment
+from tools.inpage.segment import (
+    GATHERED_COLLECTIONS, KULLIYAT_JILD_1_COLLECTIONS,
+    attribute_gathered_collections, collection_boundary_dedication, segment,
+)
 
 TAJAWUZ = Path("inp/TAJAWUZ.INP")
 BAGH = Path("inp/BAGH E NISHAT KI TARAF.INP")
@@ -132,7 +138,9 @@ class TestKulliyatGroundTruth(unittest.TestCase):
                 self.assertEqual(conservation_errors(paragraphs, segments), [])
 
 
-# The collection ہمارے بیچ, in کلیات جلد ۱, is written entirely in one radif:
+# The collection معاملہ, in کلیات جلد ۱ — ہمارے بیچ is its radif, not its
+# name; the volume's title page and معاملہ's own title page both name it — is
+# written entirely in one radif:
 # every one of its ghazals ends every second misra on ہمارے بیچ. Its ghazals
 # are also extraordinarily long — 15 to 71 shers, where the poet's norm is
 # 5 to 15 — and that combination makes them look exactly like a segmentation
@@ -220,6 +228,187 @@ class TestHumareBeechCollection(unittest.TestCase):
         (other,) = [s for s in long if s not in radif]
         self.assertEqual(other.body.split("\n")[0], "جب سے اُس شوخ سے ملا ہوں مَیں")
         self.assertIn("ساجد", other.body.split("\n\n")[-1])
+
+
+# کلیات جلد ۱ prints no running page header, so no page names the collection
+# a poem belongs to. It gathers six separately-published books all the same,
+# each introduced inside the body by its own title page — an imprint and a
+# dedication. The ranges below are the poems BETWEEN those title pages; the
+# title page itself is neither book's poem and is left unattributed.
+#
+# موسم and عناصر are the two the volume's own فہرست counts: بہار / سعیر /
+# برشگال / خزاں / زمہریر at بیس غزلیں each plus قدیم at تیس غزلیں is 130, and
+# مٹّی / پانی / آگ / ہَوا / خواب at بیس غزلیں each is 100. Two independent
+# structures — the title pages and the declared counts — agree to the poem.
+JILD_1_COLLECTIONS = (
+    ("موسم", 4, 130, 5, 134),
+    ("عناصر", 135, 100, 137, 237),
+    ("کتابِ صبح", 238, 92, 240, 331),
+    ("آیندہ", 332, 104, 334, 437),
+    ("معاملہ", 438, 15, 440, 454),
+    ("روداد", 455, 124, 457, 581),
+)
+
+# What کلیات جلد ۲ reads off its running page headers. Held here so a change
+# to جلد ۱'s title-page path that leaked into the header path fails loudly.
+# Spelled exactly as the source prints them, diacritics and all — InPage puts
+# the pesh of ہست و بُود and گُلِ سیمیا before its letter rather than over it,
+# and the header text is taken verbatim.
+JILD_2_COLLECTIONS = {
+    "نیند میں چلتے ہوئے": 90,
+    "چہار دریا": 51,
+    "ہست و  ُبود": 100,
+    "اِعادہ": 102,
+    "حقیقت": 76,
+    "ُگلِ سیمیا": 141,
+}
+
+
+def _distribution(segments):
+    return collections.Counter(
+        s.collection for s in segments if s.kind in ("ghazals", "nazms")
+    )
+
+
+@unittest.skipUnless(
+    KULLIYAT["kulliyat-jild-1"].exists(), "inp/ sources not present"
+)
+class TestKulliyatJild1Collections(unittest.TestCase):
+    """The six books کلیات جلد ۱ gathers, against the real volume."""
+
+    @classmethod
+    def setUpClass(cls):
+        paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
+        cls.segments = segment(paragraphs)
+        cls.boundaries, cls.problems = attribute_gathered_collections(
+            cls.segments, KULLIYAT_JILD_1_COLLECTIONS
+        )
+
+    def test_the_volumes_own_title_page_names_the_same_six_in_order(self):
+        # The evidence the whole table rests on: paragraph 4 of the volume,
+        # under مزامیر / (کلیاتِ غلام حسین ساجدؔ) / (جلداوّل), lists the six
+        # books it gathers. If the source ever stops saying this, the table
+        # has lost its warrant and must not be trusted on faith.
+        paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
+        title_page = skeleton(" ".join(p.text for p in paragraphs[:6]))
+        listed = [name for name, _, _, _, _ in JILD_1_COLLECTIONS]
+        positions = [title_page.find(skeleton(name)) for name in listed]
+        for name, at in zip(listed, positions):
+            with self.subTest(collection=name):
+                self.assertNotEqual(at, -1, f"{name} is not on the title page")
+        self.assertEqual(positions, sorted(positions), "and in this order")
+
+    def test_the_volume_prints_no_running_header(self):
+        # The premise of this whole path: جلد ۲'s mechanism cannot work here.
+        paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
+        self.assertEqual(running_headers(paragraphs), set())
+
+    def test_every_title_page_is_found_and_named(self):
+        self.assertEqual(
+            self.boundaries,
+            [(order, name) for name, order, _, _, _ in JILD_1_COLLECTIONS],
+        )
+        self.assertEqual(self.problems, [])
+
+    def test_each_collection_holds_its_own_poems(self):
+        counts = _distribution(self.segments)
+        for name, _, poems, first, last in JILD_1_COLLECTIONS:
+            with self.subTest(collection=name):
+                orders = [
+                    s.order for s in self.segments
+                    if s.collection == name and s.kind in ("ghazals", "nazms")
+                ]
+                self.assertEqual(counts[name], poems)
+                self.assertEqual((orders[0], orders[-1]), (first, last))
+
+    def test_mausam_yields_the_130_the_fihrist_declares(self):
+        self.assertEqual(_distribution(self.segments)["موسم"], 130)
+
+    def test_anasir_yields_the_100_the_fihrist_declares(self):
+        self.assertEqual(_distribution(self.segments)["عناصر"], 100)
+
+    def test_the_declared_count_gate_is_silent(self):
+        self.assertEqual(
+            declared_collection_count_errors(
+                self.segments,
+                DECLARED_COLLECTION_COUNTS["kulliyat-jild-1"],
+            ),
+            [],
+        )
+
+    def test_only_the_title_pages_are_left_unattributed(self):
+        unattributed = [
+            s for s in self.segments
+            if not s.collection and s.kind in ("ghazals", "nazms")
+        ]
+        self.assertEqual(
+            [s.order for s in unattributed], [135, 238, 332, 438, 455]
+        )
+
+    def test_six_book_records_are_written_under_this_volume(self):
+        records, problems = resolve_book_records(
+            self.segments, "kulliyat-jild-1"
+        )
+        self.assertEqual(problems, [])
+        self.assertEqual(
+            [name for name, _ in records],
+            [name for name, _, _, _, _ in JILD_1_COLLECTIONS],
+        )
+
+    def test_the_known_ghazals_are_untouched_by_attribution(self):
+        self.assertEqual(
+            segmentation_groundtruth_errors(
+                self.segments, KULLIYAT_VOLUMES["kulliyat-jild-1"]
+            ),
+            [],
+        )
+
+
+@unittest.skipUnless(
+    KULLIYAT["kulliyat-jild-2"].exists(), "inp/ sources not present"
+)
+class TestKulliyatJild2IsUnaffected(unittest.TestCase):
+    """جلد ۲ reads its collections off running headers, and must keep doing so."""
+
+    @classmethod
+    def setUpClass(cls):
+        paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-2"]))
+        cls.segments = segment(paragraphs)
+
+    def test_the_header_distribution_is_unchanged(self):
+        counts = _distribution(self.segments)
+        self.assertEqual(
+            {name: counts[name] for name in JILD_2_COLLECTIONS},
+            JILD_2_COLLECTIONS,
+        )
+
+    def test_the_volume_is_not_keyed_into_the_title_page_table(self):
+        self.assertNotIn("kulliyat-jild-2", GATHERED_COLLECTIONS)
+
+    def test_no_title_page_block_is_found_in_it(self):
+        self.assertEqual(
+            [s.order for s in self.segments
+             if collection_boundary_dedication(s)],
+            [],
+        )
+
+
+@unittest.skipUnless(TAJAWUZ.exists(), "inp/ sources not present")
+class TestSingleBooksAttributeNothing(unittest.TestCase):
+    """تجاوز and باغِ نشاط are single published books, not gatherings."""
+
+    def test_no_collection_is_attributed(self):
+        for path in (TAJAWUZ, BAGH):
+            with self.subTest(source=path.name):
+                segments = segment(decode(read_text_stream(path)))
+                self.assertEqual(
+                    set(s.collection for s in segments), {""}
+                )
+                self.assertEqual(
+                    [s.order for s in segments
+                     if collection_boundary_dedication(s)],
+                    [],
+                )
 
 
 if __name__ == "__main__":

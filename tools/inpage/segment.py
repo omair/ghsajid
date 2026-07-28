@@ -149,6 +149,199 @@ def collections_at(paragraphs: list[Paragraph], kinds: list[str]) -> list[str]:
     return out
 
 
+# --- کلیات جلد ۱: the books it gathers, and how it delimits them -----------
+#
+# کلیات جلد ۲ prints the current collection's name atop every page, so
+# `collections_at` reads a poem's collection straight off the page. کلیات
+# جلد ۱ prints no running header at all — `running_headers` returns the empty
+# set for it — and its 570 poems were therefore attributed to nothing: one
+# book record for six separately-published books.
+#
+# It delimits those books the way the printed books themselves do. Each one
+# opens, INSIDE the body, with its own title page: an imprint (month, year,
+# publisher, city, in parentheses) and a dedication, usually followed by an
+# epigraph couplet and a دیباچہ. Segmentation has no category for a title
+# page, so a block falls out as whatever its shape suggests — `reviews` at
+# order 4, `nazms` at 135, 238, 332 and 438, `ghazals` at 455. Its KIND
+# therefore carries no information. Those two printed lines do.
+
+# The imprint. The year's digits do not survive InPage's separate number
+# stream, so what reaches the text is the hamza that follows them (decoded as
+# ئ, InPage 0xA3 — the same one classify.YEAR accepts) inside a bracketed run
+# carrying at least one Urdu comma: "(جون ئ،اورینٹ پبلشرز،لاہور)". One
+# bracket may be missing where the piece boundary fell through it — order
+# 238 reads "ئ،سارنگ پبلی کیشنز،لاہور)" — so the opening paren is optional.
+COLLECTION_IMPRINT = re.compile(r"^\(?[^()]{0,60}ئ\s*[،,][^()]{0,60}\)$")
+
+# The dedication: a whole line reading "<someone> کے نام" or "<someone> کے
+# لیے", optionally exclaimed.
+COLLECTION_DEDICATION = re.compile(r"^.{0,60}?(?:کے نام|کے لیے)\s*!?$")
+
+
+def collection_boundary_dedication(piece: Segment) -> str:
+    """The dedication line of `piece` if it is a collection's title page.
+
+    BOTH lines are required, and that is the whole of the detection. A
+    dedication alone is not evidence of anything: a ghazal whose radif is
+    کے لیے ends every second misra on it, and کلیات جلد ۱ holds 20 such
+    ghazals — reading them as boundaries would cut the volume into 26
+    "collections", most of them one poem long. Every block in the volume
+    prints both lines, so requiring both costs nothing and is exact:
+    measured across all four books in the corpus, imprint AND dedication
+    together select 6 pieces in کلیات جلد ۱ and nothing at all in تجاوز,
+    باغِ نشاط or کلیات جلد ۲.
+
+    The title is searched as well as the body: the block at order 332 was cut
+    such that its imprint became the piece's title and only the dedication
+    stayed in the body.
+    """
+    lines = [piece.title.strip()] + [
+        line.strip() for line in piece.body.split("\n") if line.strip()
+    ]
+    if not any(COLLECTION_IMPRINT.match(line) for line in lines):
+        return ""
+    return next(
+        (line for line in lines if COLLECTION_DEDICATION.match(line)), ""
+    )
+
+
+# The NAME is never taken from the block itself — a title page's lines run
+# together unpredictably once segmented, and guessing one wrong misattributes
+# a whole published book of this poet's work to another with no gate
+# downstream able to see it. It is read from this table, keyed by the
+# dedication the block prints (the one line of a title page unique to its
+# book), and every entry carries the evidence that established it, in the
+# manner of codepage.py. Do not add an entry you cannot justify here.
+#
+# A block whose dedication is not in this table is REPORTED and its poems are
+# left unattributed: an unnamed collection is truthful, a guessed name is not.
+#
+# The decisive evidence for the whole table is the volume's own title page.
+# Paragraph 4 of کلیات جلد ۱, under مزامیر / (کلیاتِ غلام حسین ساجدؔ) /
+# (جلداوّل), reads:
+#
+#     (موسم، عناصر، کتابِ صبح، آیندہ، معاملہ اور رُوداد)
+#
+# Six names, in this order — the book stating its own contents. The six title
+# pages found in the body are six, in this order, and each entry's dedication
+# sits on the block introducing the collection at that position. The
+# per-entry evidence below is what corroborates each name independently of
+# that line, so no name rests on a single reading; the title page is what
+# makes the SET closed, and it is why a seventh block appearing here would be
+# a finding rather than a name to invent.
+KULLIYAT_JILD_1_COLLECTIONS: dict[str, tuple[str, str]] = {
+    "مرحوم ماں باپ کے نام": (
+        "موسم",
+        "the volume's own فہرست (the piece at order 1) opens on موسم and "
+        "lists its six sections — بہار، سعیر، برشگال، خزاں، زمہریر at "
+        "بیس غزلیں each and قدیم at تیس غزلیں; the block itself prints موسم "
+        "as its first line; the essay at order 439 names it first in "
+        "‘‘موسم، عناصر، کتابِ صبح اور آئندہ کی شاعری’’ and the poet's own "
+        "روداد at order 456 opens ‘‘موسموں کی کتھا کہتے’’",
+    ),
+    "محمدخالد کے لیے": (
+        "عناصر",
+        "the فہرست lists عناصر second, with its five sections مٹّی، پانی، "
+        "آگ، ہَوا، خواب at بیس غزلیں each; the block prints عناصر and its "
+        "subtitle ‘‘(مٹّی، پانی، آگ، ہَوا اورخواب)’’; named again in the "
+        "essay at order 439 and in روداد's ‘‘عناصر سے ہم کلامی’’",
+    ),
+    "ڈاکٹر مرزا حامد بیگ کے لیے": (
+        "کتابِ صبح",
+        "the فہرست lists کتابِ صبح third; the block prints کتابِ صبح and "
+        "the epigraph sher ‘‘وہ کام آئیں گے تزئینِ کتابِ صبح میں ساجدؔ’’; "
+        "named again in the essay at order 439",
+    ),
+    "اپنی بیٹی سنبل نسیم کے لیے": (
+        "آیندہ",
+        "the block's دیباچہ line reads ‘‘آیندہ تخلیقی وفور کا ایک کرشمہ’’; "
+        "the essay at order 439 names it fourth — ‘‘…اور آئندہ کی شاعری’’ — "
+        "and روداد at order 456 has ‘‘آیندہ کے خواب بنتے ہوئے’’",
+    ),
+    "شمس الرحمن فاروقی کے نام": (
+        "معاملہ",
+        "the block prints معاملہ and quotes ‘‘معاملہ ہے کوئی اور ہی ہمارے "
+        "بیچ’’; the دیباچہ immediately after it (order 439, ڈاکٹر نجیب "
+        "جمال) is headed ‘‘معاملہ’’ کی غزلیں and discusses their shared "
+        "radif — the fifteen ہمارے بیچ ghazals that follow, which are "
+        "exactly the fifteen the collection's own فہرست lists (see "
+        "tests.test_inpage_pilot.TestHumareBeechCollection)",
+    ),
+    "راشدہ ساجد کے نام": (
+        "روداد",
+        "the poet's own preface immediately after the block (order 456) is "
+        "headed روداد, signed غلام حسین ساجد, and says ‘‘روداد’’ اُسی دنیا "
+        "کی بازیافت کا ثمر ہے; the block carries its own separate imprint "
+        "(مارچ، سانجھ پبلی کیشنز، لاہور), which is what shows معاملہ ended "
+        "at the fifteenth ہمارے بیچ ghazal rather than running to the end "
+        "of the volume. Spelled روداد, as the preface and the running text "
+        "print it; the title page's رُوداد is the same word with the pesh "
+        "set",
+    ),
+}
+
+# Which volumes are gatherings delimited this way, keyed by book slug. Keyed
+# rather than applied everywhere for the same reason the کلیات-only gates are:
+# the table above is evidence about ONE book, and a table of one book's
+# dedications must never be consulted for another's.
+GATHERED_COLLECTIONS: dict[str, dict[str, tuple[str, str]]] = {
+    "kulliyat-jild-1": KULLIYAT_JILD_1_COLLECTIONS,
+}
+
+
+def attribute_gathered_collections(
+    segments: list[Segment], table: dict[str, tuple[str, str]],
+) -> tuple[list[tuple[int, str]], list[str]]:
+    """Stamp each piece with the collection whose title page last preceded it.
+
+    Mutates `segments` — `Segment.collection`, the same field جلد ۲ fills from
+    its running headers, so `emit.resolve_book_records` writes one book record
+    per gathered book with no change of its own.
+
+    The title-page block itself is left UNATTRIBUTED, deliberately. It is an
+    imprint and a dedication, not a poem of the book it opens: four of the six
+    blocks segment as `nazms` and one as `ghazals`, so attributing them would
+    both put a title page into a book record's contents as if it were poetry
+    and add one to each collection's count — عناصر would read 101 against the
+    100 its own فہرست declares. Left unattributed they stay staged, still
+    flagged, still readable in the report, and out of every contents list.
+
+    Returns `(boundaries, problems)`: `boundaries` is `(order, name)` per
+    block in book order, with `name` empty when the table does not attest
+    one, and `problems` names each such block for the report.
+
+    An empty `table` is a no-op — تجاوز, باغِ نشاط and کلیات جلد ۲ are not
+    gatherings delimited this way, and nothing here may touch what جلد ۲ read
+    off its running headers.
+    """
+    if not table:
+        return [], []
+    by_dedication = {
+        skeleton(dedication): name for dedication, (name, _) in table.items()
+    }
+    boundaries: list[tuple[int, str]] = []
+    problems: list[str] = []
+    current = ""
+    for piece in segments:
+        dedication = collection_boundary_dedication(piece)
+        if not dedication:
+            piece.collection = current
+            continue
+        current = by_dedication.get(skeleton(dedication), "")
+        boundaries.append((piece.order, current))
+        piece.collection = ""
+        if not current:
+            problems.append(
+                f"the title page at order {piece.order} (dedication "
+                f"{dedication!r}) matches no entry in this volume's "
+                f"collection table, so the poems after it are left "
+                f"UNATTRIBUTED — an unnamed collection is truthful, a "
+                f"guessed name is not. Add the entry, with its evidence, to "
+                f"segment.KULLIYAT_JILD_1_COLLECTIONS."
+            )
+    return boundaries, problems
+
+
 def _position_collection(
     natural: str,
     last_index: int,
@@ -670,7 +863,9 @@ def split_ghazals(
 
     A length outlier is NOT evidence of fusion here, and the one place it
     looks most like it is the place it is least true. کلیات جلد ۱ carries a
-    whole collection, ہمارے بیچ, written in a single radif: fifteen ghazals
+    whole collection — معاملہ, named on the volume's title page and on its
+    own; ہمارے بیچ is its radif, not its title — written in a single radif:
+    fifteen ghazals
     of 15 to 71 shers, against a book-wide norm of 5 to 15. The obvious
     reading — that a shared radif defeated the rhyme test and welded them —
     is wrong twice over. The fifteen ghazals carry fifteen DIFFERENT qafia

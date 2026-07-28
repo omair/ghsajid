@@ -21,12 +21,14 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .checks import (
+    DECLARED_COLLECTION_COUNTS,
     KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE,
     VERSE_KINDS,
     clear_unverifiable_sections,
     completeness_errors,
     conservation_errors,
+    declared_collection_count_errors,
     flag_decode_garbage,
     flag_single_line_pieces,
     lexicon_report,
@@ -49,6 +51,7 @@ from .models import Book, Segment
 from .ole import read_text_stream
 from .promote import promote
 from .report import render, restamp_report
+from .segment import GATHERED_COLLECTIONS, attribute_gathered_collections
 from .segment import segment as segment_paragraphs
 
 SOURCES = {
@@ -137,6 +140,17 @@ def cmd_segment(book_slug: str) -> None:
         if piece.kind == "reviews":
             piece.reviewed_book = TITLES[book_slug]
 
+    # کلیات جلد ۱ gathers six separately-published books and prints no running
+    # page header, so `collections_at` has nothing to read. Its collections are
+    # read instead from the title page each gathered book opens with, inside
+    # the body (see segment.attribute_gathered_collections). Runs before every
+    # gate below, because `collection` is what the count gate counts, what the
+    # "poems per collection" line reports, and what `resolve_book_records`
+    # groups by. A book not keyed into GATHERED_COLLECTIONS is untouched.
+    boundaries, boundary_problems = attribute_gathered_collections(
+        segments, GATHERED_COLLECTIONS.get(book_slug, {})
+    )
+
     # Gate C (ground truth) is a property of the codepage, not of any one
     # book: the 11 ground-truth ghazals exist only in the کلیات volumes, so
     # running groundtruth_errors() against any other book is a guaranteed
@@ -178,6 +192,13 @@ def cmd_segment(book_slug: str) -> None:
         + flag_single_line_pieces(segments)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(paragraphs, segments)
+        # A title page the volume prints that this table cannot name, and the
+        # two counts کلیات جلد ۱'s own فہرست declares. Both are no-ops for a
+        # book that is not a gathering.
+        + boundary_problems
+        + declared_collection_count_errors(
+            segments, DECLARED_COLLECTION_COUNTS.get(book_slug, {})
+        )
         # The کلیات-only gates. Both are wired by slug for the same reason
         # gate C above is not wired per book at all: the 11 ground-truth
         # ghazals exist only in these two volumes, so running the
@@ -222,6 +243,33 @@ def cmd_segment(book_slug: str) -> None:
             ) or "none"),
         ]
     )
+    if boundaries:
+        # The reviewer must be able to see WHERE each collection was cut, not
+        # only the totals: the boundary is the one judgement in this path, and
+        # a wrong one moves two collections' counts at once.
+        declared = DECLARED_COLLECTION_COUNTS.get(book_slug, {})
+        gate_output.append(
+            f"{len(boundaries)} collection title page(s) found in the body — "
+            f"an imprint and a dedication, the way this volume delimits the "
+            f"separately-published books it gathers. Each block introduces "
+            f"the collection named after it and belongs to no collection's "
+            f"poems itself: "
+            + ", ".join(
+                f"order {order} → {name or '(unnamed)'}"
+                for order, name in boundaries
+            )
+        )
+        if declared:
+            gate_output.append(
+                "declared poem counts asserted against the volume's own "
+                "فہرست: "
+                + ", ".join(
+                    f"{name} {n}" for name, n in sorted(declared.items())
+                )
+                + ". The remaining collections declare no count anywhere in "
+                "the source; their totals are reported above and asserted "
+                "against nothing."
+            )
     if position_attributed:
         # Attribution by position, not by the source naming it: these pieces
         # precede every running header the book prints, so they took the

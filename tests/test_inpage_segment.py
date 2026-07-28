@@ -1,10 +1,11 @@
 import unittest
 from unittest import mock
 
-from tools.inpage.models import Paragraph
+from tools.inpage.models import Paragraph, Segment
 from tools.inpage.segment import (
-    MAX_TITLE_LENGTH, _is_ghazal_shaped, is_matla, pair_shers, run_rhyme,
-    segment, split_ghazals,
+    KULLIYAT_JILD_1_COLLECTIONS, MAX_TITLE_LENGTH, _is_ghazal_shaped,
+    attribute_gathered_collections, collection_boundary_dedication, is_matla,
+    pair_shers, run_rhyme, segment, split_ghazals,
 )
 
 
@@ -719,3 +720,133 @@ class TestRunningHeaderClosesEssayRegion(unittest.TestCase):
         self.assertEqual(
             [p.kind for p in pieces if p.kind == "reviews"], []
         )
+
+
+# --- کلیات جلد ۱'s gathered collections ------------------------------------
+
+IMPRINT_LINE = "(جون ئ،اورینٹ پبلشرز،لاہور)"
+DEDICATION_LINE = "شمس الرحمن فاروقی کے نام"
+
+# A table of the shape tools.inpage.segment.KULLIYAT_JILD_1_COLLECTIONS has,
+# built here so these tests exercise the mechanism rather than the real
+# volume's contents (which tests/test_inpage_pilot.py gates against the file).
+FAKE_TABLE = {DEDICATION_LINE: ("معاملہ", "test fixture")}
+
+
+def _boundary_block(order: int, title: str, body: str) -> Segment:
+    return Segment(kind="nazms", title=title, body=body, order=order)
+
+
+class TestCollectionBoundaryDetection(unittest.TestCase):
+    """A collection's title page is recognised by what it PRINTS.
+
+    Not by its kind: in کلیات جلد ۱ the six blocks segment as `reviews`,
+    `nazms` and `ghazals` — whatever their shape suggests — so the kind
+    carries no information at all.
+    """
+
+    def test_an_imprint_and_a_dedication_together_are_a_boundary(self):
+        block = _boundary_block(
+            1, "معاملہ", f"{IMPRINT_LINE}\n{DEDICATION_LINE}"
+        )
+        self.assertEqual(
+            collection_boundary_dedication(block), DEDICATION_LINE
+        )
+
+    def test_the_imprint_may_be_the_pieces_title(self):
+        # کلیات جلد ۱ order 332: the piece boundary fell such that the imprint
+        # became the title and only the dedication stayed in the body.
+        block = _boundary_block(
+            1, "ئ،قوسین،لاہور)", "اپنی بیٹی سنبل نسیم کے لیے!"
+        )
+        self.assertEqual(
+            collection_boundary_dedication(block), "اپنی بیٹی سنبل نسیم کے لیے!"
+        )
+
+    def test_a_dedication_alone_is_not_a_boundary(self):
+        # A ghazal whose radif is کے لیے ends every second misra on it.
+        # کلیات جلد ۱ has 20 such ghazals; taking a dedication alone as
+        # evidence would cut the volume into 26 "collections".
+        ghazal = Segment(
+            kind="ghazals",
+            title="تارِ گریہ میں گلِ اشک پرونے کے لیے",
+            body=(
+                "تارِ گریہ میں گلِ اشک پرونے کے لیے\n"
+                "کیوں پریشاں ہو کسی اور کی ہونے کے لیے"
+            ),
+            order=1,
+        )
+        self.assertEqual(collection_boundary_dedication(ghazal), "")
+
+    def test_an_imprint_alone_is_not_a_boundary(self):
+        block = _boundary_block(1, "کوئی کتاب", IMPRINT_LINE)
+        self.assertEqual(collection_boundary_dedication(block), "")
+
+
+class TestAttributeGatheredCollections(unittest.TestCase):
+    """Every poem takes the collection whose title page last preceded it."""
+
+    def _volume(self):
+        return [
+            Segment(kind="ghazals", title="پہلے", body="پہلے", order=1),
+            _boundary_block(2, "معاملہ", f"{IMPRINT_LINE}\n{DEDICATION_LINE}"),
+            Segment(kind="ghazals", title="بعد", body="بعد", order=3),
+            Segment(kind="reviews", title="تنقید", body="تنقید", order=4),
+        ]
+
+    def test_pieces_after_the_block_take_its_name(self):
+        segments = self._volume()
+        attribute_gathered_collections(segments, FAKE_TABLE)
+        self.assertEqual(
+            [s.collection for s in segments], ["", "", "معاملہ", "معاملہ"]
+        )
+
+    def test_the_block_itself_belongs_to_no_collection(self):
+        # It is an imprint and a dedication, not a poem of the book it opens.
+        # Left unattributed it stays out of every book record's contents,
+        # which is exactly where a title page does not belong.
+        segments = self._volume()
+        attribute_gathered_collections(segments, FAKE_TABLE)
+        self.assertEqual(segments[1].collection, "")
+
+    def test_the_boundaries_are_reported_in_order(self):
+        segments = self._volume()
+        boundaries, problems = attribute_gathered_collections(
+            segments, FAKE_TABLE
+        )
+        self.assertEqual(boundaries, [(2, "معاملہ")])
+        self.assertEqual(problems, [])
+
+    def test_an_unattested_dedication_leaves_the_collection_unnamed(self):
+        # An unnamed collection is truthful; a guessed name is not.
+        segments = self._volume()
+        boundaries, problems = attribute_gathered_collections(segments, {})
+        self.assertEqual(boundaries, [])
+        self.assertEqual(problems, [])
+
+        segments = self._volume()
+        boundaries, problems = attribute_gathered_collections(
+            segments, {"کسی اور کے نام": ("کوئی اور", "fixture")}
+        )
+        self.assertEqual(boundaries, [(2, "")])
+        self.assertEqual([s.collection for s in segments], ["", "", "", ""])
+        self.assertEqual(len(problems), 1)
+        self.assertIn("UNATTRIBUTED", problems[0])
+
+    def test_an_empty_table_changes_nothing(self):
+        # تجاوز, باغِ نشاط and کلیات جلد ۲ are not keyed into the table, so
+        # this path must be a no-op for them.
+        segments = self._volume()
+        segments[0].collection = "نیند میں چلتے ہوئے"
+        boundaries, problems = attribute_gathered_collections(segments, {})
+        self.assertEqual((boundaries, problems), ([], []))
+        self.assertEqual(segments[0].collection, "نیند میں چلتے ہوئے")
+
+    def test_the_real_table_names_six_collections(self):
+        self.assertEqual(
+            [name for name, _ in KULLIYAT_JILD_1_COLLECTIONS.values()],
+            ["موسم", "عناصر", "کتابِ صبح", "آیندہ", "معاملہ", "روداد"],
+        )
+        for name, evidence in KULLIYAT_JILD_1_COLLECTIONS.values():
+            with self.subTest(name=name):
+                self.assertTrue(evidence.strip(), "every name carries evidence")
