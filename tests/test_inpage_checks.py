@@ -108,7 +108,7 @@ class TestLexicon(unittest.TestCase):
 
 class TestTocCountGate(unittest.TestCase):
     def test_reports_a_mismatch_with_the_delta(self):
-        segments = [Segment(kind="ghazals", title="t", body="b", order=1)]
+        segments = [Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں")]
         errors = toc_count_errors(TOC_AND_GHAZAL, segments)
         self.assertEqual(len(errors), 1)
         self.assertIn("2", errors[0])
@@ -123,11 +123,44 @@ class TestTocCountGate(unittest.TestCase):
         # neither book gives it a numbered entry. Counting it would fail the
         # gate by exactly the number of review pieces.
         segments = [
-            Segment(kind="ghazals", title="t", body="b", order=1),
-            Segment(kind="ghazals", title="t", body="b", order=2),
-            Segment(kind="reviews", title="t", body="b", order=3),
+            Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں"),
+            Segment(kind="ghazals", title="t", body="b", order=2, section="غزلیں"),
+            Segment(kind="reviews", title="t", body="b", order=3, section="غزلیں"),
         ]
         self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
+
+    def test_a_piece_before_any_heading_is_not_counted_against_the_fihrist(self):
+        # باغِ نشاط's epigraph couplet -- the poem the book is named after --
+        # sits in section="" (before the نعت heading) and is not a numbered
+        # فہرست entry. The gate must count only the two sectioned poems
+        # below, matching the declared count of 2, and stay silent even
+        # though a third VERSE_KINDS piece exists in the source.
+        segments = [
+            Segment(kind="ghazals", title="epigraph", body="b", order=1, section=""),
+            Segment(kind="ghazals", title="t", body="b", order=2, section="نعت"),
+            Segment(kind="ghazals", title="t", body="b", order=3, section="نعت"),
+        ]
+        self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
+
+    def test_still_fails_when_sectioned_poems_exceed_the_declared_count(self):
+        # Over-splitting under a heading must still be caught -- an
+        # unsectioned piece must never be able to mask a real surplus.
+        segments = [
+            Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں"),
+            Segment(kind="ghazals", title="t", body="b", order=2, section="غزلیں"),
+            Segment(kind="ghazals", title="t", body="b", order=3, section="غزلیں"),
+        ]
+        errors = toc_count_errors(TOC_AND_GHAZAL, segments)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("+1", errors[0])
+
+    def test_still_fails_when_sectioned_poems_fall_short_of_the_declared_count(self):
+        segments = [
+            Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں"),
+        ]
+        errors = toc_count_errors(TOC_AND_GHAZAL, segments)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("-1", errors[0])
 
 
 class TestConservationGate(unittest.TestCase):

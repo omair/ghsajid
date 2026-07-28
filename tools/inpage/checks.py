@@ -131,11 +131,27 @@ def toc_count_errors(
     both books — +5 and +10 — while the poems matched the declared 100 and 85
     exactly. So the basis is the poems; the reviews are carried by the
     conservation gate and the report, not counted here.
+
+    Counted only under a section heading, for the same reason. باغِ نشاط's
+    epigraph couplet — باغِ نشاط کی طرف اپنے قدم نہیں بڑھے / جب سے ہمارے کھوج
+    میں بادِ صبا نہیں رہی, the couplet the book takes its title from — was
+    recovered as a real, correctly segmented poem, but it sits before any
+    heading, in `section: ""`, so it is not a numbered فہرست entry either.
+    Counting every VERSE_KINDS piece made the gate read 86 against a declared
+    85. Checked directly: exactly 85 poems sit under باغِ نشاط's نعت heading
+    and exactly 100 under تجاوز's غزلیں, both matching their فہرست precisely
+    — the نعت heading was already entry 1, so recovering its truncated lines
+    added no piece, and the epigraph is the only surplus. So the count is
+    further narrowed to poems with a non-empty `section`; the epigraph is
+    still emitted as a piece, still written to the book record, still
+    promotable, just not counted against a فہرست that never numbered it.
     """
     expected = toc_count(paragraphs)
     if expected is None:
         return ["no فہرست found: the piece-count gate could not run"]
-    actual = sum(1 for segment in segments if segment.kind in VERSE_KINDS)
+    actual = sum(
+        1 for segment in segments if segment.kind in VERSE_KINDS and segment.section
+    )
     if actual != expected:
         return [
             f"poem count {actual} does not match the فہرست's {expected} "
