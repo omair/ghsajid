@@ -313,3 +313,35 @@ class TestPieceLineShowsKind(unittest.TestCase):
         rendered = render("tajawuz", pieces, [], None)
         self.assertNotIn("sher", rendered)
         self.assertIn("reviews", rendered)
+
+
+class TestRestampToleratesAMalformedApprovalLine(unittest.TestCase):
+    """restamp must not require a well-formed approved: line.
+
+    Its whole job is to force that line to false. A reviewer wrote
+    `approved: approved` — which `is_approved` rightly rejects — and restamp
+    refusing to touch it left them with no way forward at all: `segment`
+    would have destroyed their hand-correction and `promote` would refuse.
+    """
+
+    def setUp(self):
+        self.staging = Path(tempfile.mkdtemp())
+        self.segments = [Segment(kind="ghazals", title="پہلی", body="اول\nدوم", order=1)]
+        write_segments(self.segments, "tajawuz", self.staging)
+
+    def tearDown(self):
+        shutil.rmtree(self.staging)
+
+    def test_rewrites_an_unrecognised_value_to_false(self):
+        text = render("tajawuz", self.segments, [], self.staging).replace(
+            "approved: false", "approved: approved"
+        )
+        new_text, _, _ = restamp_report(text, self.segments, self.staging, "tajawuz")
+        self.assertIn("approved: false", new_text)
+        self.assertNotIn("approved: approved", new_text)
+
+    def test_still_raises_when_there_is_no_approved_line_at_all(self):
+        text = render("tajawuz", self.segments, [], self.staging)
+        text = "\n".join(l for l in text.splitlines() if not l.startswith("approved:"))
+        with self.assertRaises(ValueError):
+            restamp_report(text, self.segments, self.staging, "tajawuz")

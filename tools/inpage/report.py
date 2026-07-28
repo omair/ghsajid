@@ -15,6 +15,8 @@ from .models import VERSE_KINDS, Segment
 
 APPROVAL_HEADING = "## Approval"
 APPROVED_LINE = re.compile(r"^approved:\s*(true|false)\s*$", re.M)
+# Any value, well-formed or not — only restamp uses this, to overwrite it.
+ANY_APPROVED_LINE = re.compile(r"^approved:.*$", re.M)
 HASH_LINE = re.compile(r"^segmentation:\s*([0-9a-f]{16})\s*$", re.M)
 
 
@@ -183,7 +185,12 @@ def restamp_report(
     stamped_matches = list(HASH_LINE.finditer(section))
     if not stamped_matches:
         raise ValueError("report has no segmentation: line to restamp")
-    approved_matches = list(APPROVED_LINE.finditer(section))
+    # Match ANY value here, not just true/false. restamp's job is to force the
+    # line to false, so it must not require a well-formed one to begin with —
+    # a reviewer wrote `approved: approved`, which `is_approved` correctly
+    # rejects, and refusing to restamp that left them with no way forward at
+    # all. Rewriting it to `approved: false` is exactly the right outcome.
+    approved_matches = list(ANY_APPROVED_LINE.finditer(section))
     if not approved_matches:
         raise ValueError("report has no approved: line to restamp")
 
@@ -201,7 +208,7 @@ def restamp_report(
     # the approved line's offset (same-length replacement of a same-shaped
     # line in the common case), but re-matching against the actual current
     # text is correct regardless of length, rather than trusting stale spans.
-    approved_matches = list(APPROVED_LINE.finditer(new_section))
+    approved_matches = list(ANY_APPROVED_LINE.finditer(new_section))
     if not approved_matches:
         raise ValueError("report has no approved: line to restamp")
     approved_match = approved_matches[-1]
