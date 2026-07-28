@@ -56,7 +56,7 @@ CONTENT = Path("content")
 
 TITLES = {
     "tajawuz": "تجاوز",
-    "bagh-e-nishat-ki-taraf": "باغ نشاط کی طرف",
+    "bagh-e-nishat-ki-taraf": "باغِ نشاط کی طرف",
     "kulliyat-jild-1": "مزامیر ۔ کلیات، جلد اول",
     "kulliyat-jild-2": "مزامیر ۔ کلیات، جلد دوم",
 }

@@ -3,11 +3,12 @@ import { getCollection, getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { urduNumber } from "../lib/urdu";
 
-const [ghazals, nazms, reviews, videos, darsGah] = await Promise.all([
+const [ghazals, nazms, reviews, videos, books, darsGah] = await Promise.all([
   getCollection("ghazals"),
   getCollection("nazms"),
   getCollection("reviews"),
   getCollection("videos"),
+  getCollection("books"),
   getEntry("containers", "dars-gah"),
 ]);
 
@@ -29,6 +30,10 @@ const works = [
     count: darsGah?.data.contents.length ?? 0,
     note: "خودنوشت",
   },
+  // کتابیں is a different axis from غزلیں/نظمیں: those list by form, this
+  // lists by the book he published them in. It sits next to درس گاہ because
+  // both are ways into whole works rather than into a single piece.
+  { href: "/kitab/", title: "کتابیں", count: books.length, note: "مجموعے" },
   { href: "/ghazal/", title: "غزلیں", count: ghazals.length, note: "کلام" },
   { href: "/nazm/", title: "نظمیں", count: nazms.length, note: "کلام" },
   { href: "/tabsira/", title: "تبصرے", count: reviews.length, note: "تنقید" },
