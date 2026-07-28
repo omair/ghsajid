@@ -9,25 +9,77 @@ const entries = (await getCollection("ghazals")).sort((a, b) =>
   a.data.title.localeCompare(b.data.title, "ur"),
 );
 
+// Fold a line to what a reader would actually type. The corpus is heavily
+// diacriticked — مَیں, ہُوا, عِطر — and nobody types the marks, so a literal
+// match would miss the commonest words in the archive. Strip the combining
+// marks and the tatweel, and fold the Arabic letter forms an Arabic keyboard
+// produces onto their Urdu counterparts. Same idea as `skeleton()` in the
+// ingestion pipeline, which is what let us verify the codepage at all.
+const FOLD = /[ً-ٰٟۖ-ۭـ]/g;
+const ARABIC_FORMS: Record<string, string> = {
+  "ي": "ی", // ARABIC YEH  -> FARSI YEH
+  "ك": "ک", // ARABIC KAF  -> KEHEH
+  "ة": "ہ", // TEH MARBUTA -> HEH GOAL
+  "أ": "ا",
+  "إ": "ا",
+  "آ": "ا", // fold madda too: readers type ا for آ
+};
+
+function fold(text: string): string {
+  return text
+    .normalize("NFC")
+    .replace(FOLD, "")
+    .replace(/[يكةأإآ]/g, (c) => ARABIC_FORMS[c])
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // The matla is the first two lines of the body; show both misras.
 const rows = entries.map((entry, i) => {
   const lines = (entry.body ?? "")
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
-  return { slug: entry.data.slug, n: urduNumber(i + 1), a: lines[0] ?? "", b: lines[1] ?? "" };
+  const a = lines[0] ?? "";
+  const b = lines[1] ?? "";
+  return {
+    slug: entry.data.slug,
+    n: urduNumber(i + 1),
+    a,
+    b,
+    // Precomputed at build time so a keystroke costs one substring test.
+    find: fold(`${a} ${b}`),
+  };
 });
 ---
 
 <Base title="غزلیں" measure="index">
   <div class="ghazal-index__head">
     <h1>غزلیں</h1>
-    <span class="ghazal-index__count">{urduNumber(entries.length)}</span>
+    <div class="ghazal-index__tools">
+      {/* Hidden until the script runs: a dead box is worse than no box. */}
+      <input
+        id="ghazal-search"
+        class="ghazal-search"
+        type="search"
+        hidden
+        autocomplete="off"
+        placeholder="کسی مصرعے کی تلاش"
+        aria-label="غزلوں میں تلاش کریں"
+        aria-controls="ghazal-list"
+      />
+      <span
+        class="ghazal-index__count"
+        id="ghazal-count"
+        aria-live="polite"
+        data-total={urduNumber(entries.length)}>{urduNumber(entries.length)}</span
+      >
+    </div>
   </div>
-  <ul class="ghazal-list">
+  <ul class="ghazal-list" id="ghazal-list">
     {
       rows.map((r) => (
-        <li>
+        <li data-find={r.find}>
           <a class="ghazal-row" href={`/ghazal/${r.slug}`}>
             <span class="ghazal-row__n">{r.n}</span>
             <div class="ghazal-row__lines">
@@ -39,4 +91,65 @@ const rows = entries.map((entry, i) => {
       ))
     }
   </ul>
+  <p class="ghazal-empty" id="ghazal-empty" hidden>
+    اس مصرعے سے کوئی غزل نہیں ملی۔
+    <button type="button" class="ghazal-empty__clear" id="ghazal-clear">
+      ساری غزلیں دکھائیے
+    </button>
+  </p>
 </Base>
+
+<script>
+  const input = document.getElementById("ghazal-search") as HTMLInputElement;
+  const list = document.getElementById("ghazal-list")!;
+  const count = document.getElementById("ghazal-count")!;
+  const empty = document.getElementById("ghazal-empty")!;
+  const clear = document.getElementById("ghazal-clear")!;
+  const rows = Array.from(list.children) as HTMLElement[];
+  const total = count.dataset.total!;
+
+  // Must match the build-time fold in this page's frontmatter, or a query
+  // would be normalised differently from the text it searches.
+  const MARKS = /[ً-ٰٟۖ-ۭـ]/g;
+  const FORMS: Record<string, string> = {
+    "ي": "ی",
+    "ك": "ک",
+    "ة": "ہ",
+    "أ": "ا",
+    "إ": "ا",
+    "آ": "ا",
+  };
+  const fold = (text: string) =>
+    text
+      .normalize("NFC")
+      .replace(MARKS, "")
+      .replace(/[يكةأإآ]/g, (c) => FORMS[c])
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const DIGITS = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  const urdu = (n: number) =>
+    String(n).replace(/\d/g, (d) => DIGITS[Number(d)]);
+
+  function apply() {
+    const query = fold(input.value);
+    let shown = 0;
+    for (const row of rows) {
+      const hit = !query || row.dataset.find!.includes(query);
+      row.hidden = !hit;
+      if (hit) shown++;
+    }
+    // The count is already in the masthead of this page; make it answer the
+    // question the search asks rather than adding a second indicator.
+    count.textContent = query ? `${urdu(shown)} / ${total}` : total;
+    empty.hidden = shown > 0;
+  }
+
+  input.hidden = false;
+  input.addEventListener("input", apply);
+  clear.addEventListener("click", () => {
+    input.value = "";
+    apply();
+    input.focus();
+  });
+</script>

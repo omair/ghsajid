@@ -459,6 +459,64 @@ a:hover {
   color: var(--muted);
 }
 
+/* Search sits on the same hairline the head already draws — a ruled line to
+   write on, not a box bolted onto the page. It shares the head row with the
+   count, which becomes the answer to what you typed. */
+.ghazal-index__tools {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+.ghazal-search {
+  font-family: "Noto Nastaliq Urdu", serif;
+  font-size: 0.95rem;
+  line-height: 2;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 0 0.2rem;
+  width: 13rem;
+  max-width: 46vw;
+  transition: border-color 0.2s ease;
+}
+.ghazal-search::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+/* Focus thickens and colours the rule the field already sits on. A boxed
+   outline would be the only hard rectangle on a page built from hairlines —
+   and the caret plus a 1px-to-2px change carries the state without relying
+   on colour alone. */
+.ghazal-search:focus,
+.ghazal-search:focus-visible {
+  outline: none;
+  border-bottom: 2px solid var(--sabz);
+  padding-bottom: 0;
+}
+/* The browser's own clear affordance sits badly against a bare rule. */
+.ghazal-search::-webkit-search-cancel-button {
+  display: none;
+}
+.ghazal-empty {
+  font-family: "Noto Nastaliq Urdu", serif;
+  line-height: 2.2;
+  color: var(--muted);
+  padding: 1.6rem 0.1rem;
+}
+.ghazal-empty__clear {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--sabz);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  border-radius: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
 /* The memoir is an ordered, illustrated autobiography, not a bank of numbers.
    Each part shows its number and the words it opens on; the 13 illustrated
    parts carry a thumbnail, so the photographs pull you in. */
