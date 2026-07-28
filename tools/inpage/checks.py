@@ -14,7 +14,7 @@ import collections
 import re
 
 from .classify import (
-    VERSE, VERSE_MAX, VERSE_MIN, body_start_index, classify, toc_count,
+    VERSE, _is_verse_length, body_start_index, classify, toc_count,
 )
 from .codepage import decode_byte, encode_char, unmapped
 from .decode import all_codes
@@ -420,6 +420,37 @@ KULLIYAT_VOLUMES: dict[str, tuple[str, ...]] = {
 }
 
 
+# How far a holder's own line count may exceed the site copy's before the
+# piece is judged to hold something beyond the ghazal itself. Measured across
+# all 11 real holders in the real جلد ۱ / جلد ۲ streams (holder lines minus
+# site lines):
+#
+#     slug                                                    diff
+#     agar-farman-roaii-sahab-i-toqir-ka-haq-hai                 0
+#     bian-us-bazm-mein-meri-kahani-ho-rahi-hai                  0
+#     chalne-laga-hai-phir-se-mira-dil-ruka-hoa                  0
+#     dikhe-ghalat-kaha-koi-soche-ghalat-kaha                    0
+#     garadash-i-jam-kahin-garadash-i-mina-sakat                +2
+#     hanas-raha-hai-jo-mari-halat-pah-jane-kaun-hai              0
+#     ishq-se-aur-kar-dania-se-hazar-karta-hun-mein               0
+#     jahan-bhar-mein-mare-dil-sa-koi-gahar-ho-nahin-sakta       +2
+#     jahan-mein-dalte-rahte-hain-masioa-ki-tarah                 0
+#     maoraie-saragh-hun-main-bhi                                -3
+#     ninad-warasah-hai-mira-khwab-amanat-hai-mari                0
+#
+# The spread runs -3 to +2, edition variance in both directions — the site
+# copy and the printed کلیات are different editions, so a holder may
+# legitimately lack a line the site has, or carry a line (or a line split)
+# the site does not; see _ghazal_line_skeletons and gate C's own 169-139
+# shortfall for the same variance measured a different way. A weld onto the
+# end appends a whole second poem — every ghazal in these two volumes runs
+# 12-30 lines — so a small margin past the measured +2 separates the two
+# comfortably without hugging the measured figure: 5 clears every real
+# holder with room while catching a fusion that appends even the shortest
+# poem this corpus holds.
+HOLDER_LINE_COUNT_TOLERANCE = 5
+
+
 def segmentation_groundtruth_errors(
     segments: list[Segment], slugs: tuple[str, ...] = KNOWN_GHAZALS
 ) -> list[str]:
@@ -451,15 +482,32 @@ def segmentation_groundtruth_errors(
     actually answer: of the lines the printed edition does reproduce, do they
     all land in ONE piece?
 
-    Two conditions, because a holder count alone is half a gate:
+    Three conditions, because a holder count alone is half a gate, and an
+    opening check alone is only half of the other half:
 
     * Exactly one piece holds the ghazal — a piece "holds" it when any of the
       ghazal's lines is in that piece. A ghazal split by a page header puts
       its opening in one piece and its tail in another, and reports 2.
-    * That piece OPENS with the ghazal. Fusion is invisible to the count:
-      when a missed matlaa welds two ghazals together, both are in one piece
-      and both report exactly 1 holder. The second one is the one that no
-      longer begins its piece, and this is what catches it.
+    * That piece OPENS with the ghazal. This catches fusion where the known
+      ghazal TRAILS — a missed matlaa welds an earlier, unknown poem onto the
+      front of it. Both poems land in one piece, so the holder count alone
+      sees 1 and stays silent; the first line of that piece is the unknown
+      poem's, not this ghazal's, and that mismatch is what this condition
+      catches. It catches nothing about what follows the ghazal's own last
+      line — a piece that opens correctly and then keeps going is invisible
+      to it, which is the asymmetry the next condition closes.
+    * That piece does not run MATERIALLY PAST the ghazal's last line. This
+      catches the mirror fusion, where the known ghazal LEADS and an unknown
+      poem is welded onto its end — invisible to both conditions above, since
+      the holder count still reads 1 and the ghazal still opens the piece.
+      Measured across the 11 real holders in both volumes, a holder's own
+      line count differs from the site copy's by -3 to +2 — edition
+      variance, since the site text and the printed کلیات are different
+      editions and either can hold a line, or a line split, the other
+      lacks (see `_ghazal_line_skeletons` and gate C's own 169-139 shortfall
+      for the same variance measured a different way). See
+      HOLDER_LINE_COUNT_TOLERANCE for where the bound is set relative to
+      that measured spread.
 
     Only VERSE_KINDS pieces are considered. The فہرست and the critic's essay
     both reproduce lines of these ghazals — measured, they hold 1-2 lines of
@@ -488,19 +536,27 @@ def segmentation_groundtruth_errors(
                 f"segment as a single piece"
             )
             continue
-        opening = next(
-            (line for line in
-             (skeleton(raw) for raw in holders[0].body.split("\n")) if line),
-            "",
-        )
+        holder = holders[0]
+        holder_lines = [
+            line for line in
+            (skeleton(raw) for raw in holder.body.split("\n")) if line
+        ]
+        opening = holder_lines[0] if holder_lines else ""
         if not any(
-            opening == line or opening in line or line in opening
+            opening.startswith(line) or line.startswith(opening)
             for line in lines
         ):
             errors.append(
                 f"{slug} does not open the piece holding it (order "
-                f"{holders[0].order}, which begins {holders[0].title[:30]!r}): "
+                f"{holder.order}, which begins {holder.title[:30]!r}): "
                 f"the ghazal is fused behind another"
+            )
+        elif len(holder_lines) > len(lines) + HOLDER_LINE_COUNT_TOLERANCE:
+            errors.append(
+                f"{slug}'s holder (order {holder.order}) runs {len(holder_lines)} "
+                f"lines against the site copy's {len(lines)} — more than the "
+                f"{HOLDER_LINE_COUNT_TOLERANCE}-line tolerance for edition "
+                f"variance, so something else was likely welded onto its end"
             )
     return errors
 
@@ -546,7 +602,7 @@ def toc_first_line_baseline_errors(
     front = [
         line for line in
         (skeleton(para.text.strip()) for para in paragraphs[:start]
-         if VERSE_MIN <= len(para.text.strip()) <= VERSE_MAX)
+         if _is_verse_length(para.text.strip()))
         if line
     ]
     matlaas = {

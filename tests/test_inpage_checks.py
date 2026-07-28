@@ -430,15 +430,52 @@ class TestSegmentationGroundTruth(unittest.TestCase):
 
     def test_reports_a_ghazal_fused_behind_another(self):
         # Fusion, which a bare holder count cannot see: both ghazals are in
-        # one piece, so each has exactly one holder. Only the second one
-        # fails to open its piece.
+        # one piece, so each has exactly one holder. The second ghazal fails
+        # to open its piece, which is what the "opens with it" check catches.
+        # The first ghazal now also runs materially past its own last line
+        # (the second ghazal's text is appended after it), which the extent
+        # bound added below catches independently -- welding two whole
+        # ghazals together trips BOTH checks, one per slug.
         pieces = self._pieces()
         first, second = pieces[0], pieces[1]
         first.body = f"{first.body}\n{second.body}"
         pieces.remove(second)
         errors = checks.segmentation_groundtruth_errors(pieces)
+        self.assertEqual(len(errors), 2)
+        joined = " ".join(errors)
+        self.assertIn(KNOWN_GHAZALS[0], joined)
+        self.assertIn(KNOWN_GHAZALS[1], joined)
+        self.assertIn("welded onto its end", joined)
+        self.assertIn("fused behind another", joined)
+
+    def test_reports_a_ghazal_fused_with_the_piece_after_it(self):
+        # The complement Finding 1 closes: the known ghazal LEADS and an
+        # unknown piece is welded onto its END. Both land in one piece (the
+        # holder count stays 1) and the known ghazal still opens the piece
+        # (the "opens with it" check stays silent too) -- before this fix,
+        # mutating a holder this way was silent for all 11. Only a bound on
+        # the holder's own extent catches it.
+        pieces = self._pieces()
+        victim = pieces[0]
+        # Well past HOLDER_LINE_COUNT_TOLERANCE (5) and past the measured
+        # spread (-3 to +2), so this cannot be edition variance.
+        welded_on = "\n".join(f"قققق ثثثث {n}" for n in range(20))
+        victim.body = f"{victim.body}\n{welded_on}"
+        errors = checks.segmentation_groundtruth_errors(pieces)
         self.assertEqual(len(errors), 1)
-        self.assertIn(KNOWN_GHAZALS[1], errors[0])
+        self.assertIn(KNOWN_GHAZALS[0], errors[0])
+        self.assertIn("welded onto its end", errors[0])
+
+    def test_the_extent_bound_tolerates_the_measured_edition_variance(self):
+        # A holder legitimately running a little longer than the site copy
+        # (see HOLDER_LINE_COUNT_TOLERANCE's measured -3..+2 spread) must not
+        # be flagged. +2 is the largest measured surplus; the bound must
+        # clear it with room.
+        pieces = self._pieces()
+        victim = pieces[0]
+        extra = "\n".join(f"قققق ثثثث {n}" for n in range(2))
+        victim.body = f"{victim.body}\n{extra}"
+        self.assertEqual(checks.segmentation_groundtruth_errors(pieces), [])
 
     def test_the_volume_map_covers_every_known_ghazal_exactly_once(self):
         # The per-book wiring narrows the gate to one volume's share. If that
@@ -449,6 +486,22 @@ class TestSegmentationGroundTruth(unittest.TestCase):
         ]
         self.assertEqual(sorted(listed), sorted(KNOWN_GHAZALS))
         self.assertEqual(len(listed), len(set(listed)))
+
+    def test_prefix_matching_rejects_a_coincidental_substring_match(self):
+        # Every line of this ghazal ends in the same radif, "کا حق ہے".
+        # Bidirectional substring matching (opening in line OR line in
+        # opening) would accept a holder whose real opening line was
+        # unrelated garbage that merely CONTAINED that radif somewhere,
+        # since the radif is a substring of every real line even though it
+        # is never a PREFIX of one. Prefix matching correctly rejects it.
+        pieces = self._pieces()
+        victim = pieces[0]
+        _, rest = victim.body.split("\n", 1)
+        victim.body = f"کا حق ہے\n{rest}"
+        errors = checks.segmentation_groundtruth_errors(pieces)
+        self.assertEqual(len(errors), 1)
+        self.assertIn(KNOWN_GHAZALS[0], errors[0])
+        self.assertIn("fused behind another", errors[0])
 
     def test_a_prose_piece_quoting_a_ghazal_is_not_a_second_holder(self):
         # The فہرست and the critic's essay both reproduce lines of these
