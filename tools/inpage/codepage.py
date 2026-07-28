@@ -85,7 +85,10 @@ CODEPAGE.update({
     0xCF: (
         "ؔ",
         "takhallus mark: occurs only after a pen-name — ساجدؔ (the poet's "
-        "own), دردؔ, شاعرؔ — and never inside a word",
+        "own), دردؔ, شاعرؔ — and never inside a word. The exact codepoint "
+        "(U+0614) was chosen by convention here and later CONFIRMED against "
+        "KamalAbdali/InpageToUnicode, an independently written C decoder "
+        "that maps this same byte to U+0614",
     ),
     0xED: (
         "،",
@@ -191,9 +194,13 @@ _DIGIT_EVIDENCE = (
     "0xD0+n is the digit n; from colophon dates — نومبر ۱۹۸۵ء, فروری ۱۹۸۹ء, "
     "اپریل ۱۹۹۳ء, مارچ ۲۰۰۳ء, دسمبر ۲۰۰۴ء (digits run left-to-right in the "
     "stream, so they read reversed). These dates directly exercise "
-    "0xD0-0xD5, 0xD7, 0xD8, 0xD9; 0xD6 is not directly observed in any cited "
-    "date and is inferred from contiguity with the rest of the block, not "
-    "from a direct occurrence"
+    "0xD0-0xD5, 0xD7, 0xD8, 0xD9. 0xD6 appears in no cited date and was "
+    "inferred from contiguity; that inference is now CONFIRMED against "
+    "KamalAbdali/InpageToUnicode, an independently written C decoder whose "
+    "table maps 0xD0-0xD9 to a consecutive digit block. Note that decoder "
+    "emits U+0660 (Arabic-Indic ٠١٢٣); Urdu takes U+06F0 (Extended "
+    "Arabic-Indic ۰۱۲۳), which is what the site itself renders, so the "
+    "codepoints here differ from it deliberately"
 )
 def _add_digit_block() -> None:
     """Assign 0xD0-0xD9 to the digits, refusing to clobber an existing key.
