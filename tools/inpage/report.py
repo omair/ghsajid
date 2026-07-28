@@ -9,7 +9,7 @@ instead of silently inheriting it.
 import hashlib
 import re
 
-from .models import Segment
+from .models import VERSE_KINDS, Segment
 
 APPROVAL_HEADING = "## Approval"
 APPROVED_LINE = re.compile(r"^approved:\s*(true|false)\s*$", re.M)
@@ -41,11 +41,18 @@ def render(book_slug: str, segments: list[Segment], gate_output: list[str]) -> s
     lines.extend(f"- {_sanitise(line)}" for line in gate_output or ["all gates clean"])
     lines.extend(["", "## Pieces", ""])
     for s in segments:
-        sher = len([b for b in s.body.split("\n\n") if b.strip()])
+        units = len([b for b in s.body.split("\n\n") if b.strip()])
+        # Print the kind, and count prose in paragraphs rather than shers.
+        # The line used to show only [section] — the last heading seen — so a
+        # reviews piece displayed as [غزلیں] and a 3358-character essay read
+        # as "2 sher". A reviewer could not tell prose from a ghazal.
+        measure = f"{units} sher" if s.kind in VERSE_KINDS else f"{units} para"
         flags = f"  ** {', '.join(s.flags)}" if s.flags else ""
         section = f"[{_sanitise(s.section)}] " if s.section else ""
         title = _sanitise(s.title)[:50]
-        lines.append(f"{s.order:4d}. {section}{title}  ({sher} sher){flags}")
+        lines.append(
+            f"{s.order:4d}. {s.kind:<8s} {section}{title}  ({measure}){flags}"
+        )
     lines.extend([
         "",
         "## Approval",

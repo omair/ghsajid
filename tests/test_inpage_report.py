@@ -92,3 +92,26 @@ class TestSegmentationHash(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPieceLineShowsKind(unittest.TestCase):
+    """A reviewer must be able to tell prose from a ghazal at a glance.
+
+    The line used to print only [section], which is the last heading seen, so
+    a `reviews` piece displayed as [غزلیں] and a 3358-character essay was
+    labelled "2 sher". That misread cost a real review pass.
+    """
+
+    def test_kind_is_shown_for_each_piece(self):
+        pieces = [Segment(kind="ghazals", title="مطلع", body="الف\nب", order=1)]
+        self.assertIn("ghazals", render("tajawuz", pieces, []))
+
+    def test_verse_is_counted_in_sher(self):
+        pieces = [Segment(kind="ghazals", title="مطلع", body="الف\nب\n\nج\nد", order=1)]
+        self.assertIn("2 sher", render("tajawuz", pieces, []))
+
+    def test_prose_is_not_counted_in_sher(self):
+        pieces = [Segment(kind="reviews", title="مضمون", body="ا" * 300, order=1)]
+        rendered = render("tajawuz", pieces, [])
+        self.assertNotIn("sher", rendered)
+        self.assertIn("reviews", rendered)

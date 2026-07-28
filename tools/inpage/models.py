@@ -2,6 +2,11 @@
 
 from dataclasses import dataclass, field
 
+# The kinds whose bodies are verse. Lives here rather than in checks.py so
+# report.py can use it without importing the whole gate module for one
+# constant — it is a property of a Segment's kind, not of any single gate.
+VERSE_KINDS = {"ghazals", "nazms"}
+
 
 @dataclass
 class Paragraph:

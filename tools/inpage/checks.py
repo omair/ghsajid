@@ -23,9 +23,8 @@ from .groundtruth import (
     MIN_WHOLE_GHAZALS,
     line_match_report,
 )
-from .models import Paragraph, Segment
+from .models import VERSE_KINDS, Paragraph, Segment
 
-VERSE_KINDS = {"ghazals", "nazms"}
 WORD = re.compile(r"[^\s]+")
 
 
