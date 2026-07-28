@@ -495,3 +495,166 @@ class TestSplitByline(unittest.TestCase):
         self.assertEqual(title, "ڈاکٹر سعادت سعید")
         self.assertEqual(author, "")
         self.assertFalse(resolved)
+
+
+class TestRunningHeadersInAssembly(unittest.TestCase):
+    HEADER = "نیند میں چلتے ہوئے"
+
+    def _with_header_mid_ghazal(self):
+        """One ghazal of four shers, interrupted by a page header."""
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        shers = _clean_shers(1, 4)
+        # A header often enough to be running, placed inside the run.
+        elsewhere = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        return FRONT + GHAZAL + shers[:4] + [para(self.HEADER, 60)] + shers[4:] + elsewhere
+
+    def test_a_page_header_does_not_split_a_ghazal(self):
+        pieces = [p for p in segment(self._with_header_mid_ghazal())
+                  if p.kind == "ghazals"]
+        # The header falls between the sher numbered 2 and the sher numbered
+        # 3. If it split the run, those two shers would land in different
+        # pieces; this is the exact scenario -- a ghazal spanning a page
+        # boundary -- that 972 running headers in vol 2 would otherwise cut
+        # in half. (Not checked by exact sher count: `_clean_shers`' distinct
+        # per-sher endings are deliberately non-rhyming, so once merged with
+        # a real preceding ghazal in one continuous run, `run_rhyme`'s
+        # look-ahead window -- a property of split_ghazals/run_rhyme, not of
+        # this task's header handling -- dilutes past MIN_RHYME and the
+        # whole run lands in a single piece rather than a piece of exactly
+        # four. That is a stronger result than "not split", not a weaker
+        # one, so the piece-identity check below is what actually matters.)
+        before = [p for p in pieces if "نمبر 2" in p.body]
+        after = [p for p in pieces if "نمبر 3" in p.body]
+        self.assertTrue(before, "sher 2 reached no ghazal piece")
+        self.assertTrue(after, "sher 3 reached no ghazal piece")
+        self.assertIs(before[0], after[0], "the ghazal was split across the header")
+
+    def test_a_header_mid_ghazal_does_not_relabel_a_piece_that_starts_before_it(self):
+        # This piece is the whole run merged into one (see the dilution note
+        # above): its own first line is GHAZAL's, which sits before the
+        # header, so it must take the collection in force there -- "" -- not
+        # the header seen later in the same run. Stamping it with the header
+        # is exactly کلیات جلد ۲'s bug: a running variable advanced past the
+        # header and every piece in the run inherited the LAST header seen,
+        # not the one where the piece's own lines actually sit.
+        pieces = [p for p in segment(self._with_header_mid_ghazal())
+                  if p.kind == "ghazals"]
+        self.assertEqual(pieces[-1].collection, "")
+
+    def test_a_real_section_heading_still_breaks_the_run(self):
+        pieces = segment(FRONT + GHAZAL + [para("نعت", 60)] + _clean_shers(1, 2))
+        sections = [p.section for p in pieces if p.kind == "ghazals"]
+        self.assertIn("نعت", sections)
+
+    def test_collection_is_empty_before_any_page_header(self):
+        pieces = segment(FRONT + GHAZAL)
+        self.assertEqual(pieces[0].collection, "")
+
+    # Four distinct first/second-misra phrasings, real-ghazal-shaped: each
+    # sher's own two misras share only the trailing rhyme word appended by
+    # `_rhymed_shers`, and the four shers of one poem share nothing else
+    # with each other either -- exactly like real poetry, where only the
+    # qafia+radif recurs across shers. A shared filler phrase here (as
+    # opposed to only the final word) would make `run_rhyme`'s multi-sher
+    # look-ahead measure that whole filler as the "rhyme", which then fails
+    # to match against a differently-worded first misra and never opens.
+    _FIRST_PHRASES = ["جسم کی خوشبو", "اک روشنی دیکھی", "کوئی صدا آئی", "دل میں اک لہر"]
+    _SECOND_PHRASES = ["میرے دل کا جادو", "پھر دور تلک آئی", "جو ساتھ رہی گئی", "چپکے سے اتر"]
+
+    def _rhymed_shers(self, rhyme_word: str, count: int) -> list[Paragraph]:
+        """`count` shers of a real ghazal, all rhyming on `rhyme_word`.
+
+        `run_rhyme`'s look-ahead window is 4, so each poem needs at least 4
+        shers of its own to establish its rhyme without the window leaking
+        into the next poem's different rhyme and diluting the split.
+        """
+        lines: list[Paragraph] = []
+        for i in range(count):
+            lines.append(para(f"{self._FIRST_PHRASES[i]} {rhyme_word}", 73))
+            lines.append(para(f"{self._SECOND_PHRASES[i]} {rhyme_word}", 1))
+        return lines
+
+    def test_a_verse_run_spanning_two_headers_splits_collection_at_the_second(self):
+        # کلیات جلد ۲'s exact shape: one collection's poems run straight into
+        # the next's with nothing between them but a page header, so the
+        # whole span is one VERSE run. The poems before HEADER2 must take
+        # HEADER1 and the poems after it must take HEADER2 -- not whichever
+        # header was last seen when the run finally gets split into pieces.
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        HEADER1 = self.HEADER          # "نیند میں چلتے ہوئے"
+        HEADER2 = "چہار دریا"
+        # Three rhymes sharing no suffix with one another (شمس/قمر/نجم end
+        # in س/ر/م respectively), so a real split_ghazals boundary forms at
+        # each transition rather than a husn-e-matla merge.
+        seed_poem = self._rhymed_shers("شمس", 4)
+        poem_a = self._rhymed_shers("قمر", 4)
+        poem_b = self._rhymed_shers("نجم", 4)
+        trailer = (
+            [para(HEADER1, 60)] * RUNNING_HEADER_MIN
+            + [para(HEADER2, 60)] * RUNNING_HEADER_MIN
+        )
+        paragraphs = (
+            FRONT + seed_poem
+            + [para(HEADER1, 60)] + poem_a
+            + [para(HEADER2, 60)] + poem_b
+            + trailer
+        )
+        pieces = [p for p in segment(paragraphs) if p.kind == "ghazals"]
+        self.assertEqual(len(pieces), 3, "the three rhymes must split into three poems")
+        before = next(p for p in pieces if "قمر" in p.body)
+        after = next(p for p in pieces if "نجم" in p.body)
+        self.assertEqual(before.collection, HEADER1)
+        self.assertEqual(after.collection, HEADER2)
+
+
+class TestRunningHeaderClosesEssayRegion(unittest.TestCase):
+    """کلیات vol 2's bug: a running header never closed an essay region.
+
+    چہار دریا prints the collection name atop every one of its 89 pages —
+    RUNNING_HEADER, not HEADING — and the essay region opened earlier in the
+    book kept absorbing everything after it, since nothing closed the region
+    until end of book. The whole collection disappeared into one `reviews`
+    piece. A new page of a poetry collection is definitively not still the
+    foreword.
+    """
+
+    HEADER = "چہار دریا"
+    SECOND_GHAZAL = [
+        para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1),
+    ]
+
+    def test_a_running_header_closes_an_essay_region(self):
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        # GHAZAL establishes the body immediately; everything below is
+        # already in_body, exactly as چہار دریا's pages are (they follow
+        # earlier collections, not the book's own front matter).
+        region = (
+            [para("۰۰۰", 80), para("ا" * 150, 67), para(self.HEADER, 60)]
+            + self.SECOND_GHAZAL
+        )
+        # Enough further occurrences for running_headers() to count this
+        # text as a running header rather than a one-off section heading.
+        extra_headers = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        pieces = segment(FRONT + GHAZAL + region + extra_headers)
+        ghazals = [p for p in pieces if p.kind == "ghazals"]
+        reviews = [p for p in pieces if p.kind == "reviews"]
+        review_text = "".join(p.body for p in reviews)
+        self.assertEqual(
+            len(ghazals), 2,
+            "the verse after the running header must become its own poem",
+        )
+        self.assertNotIn("یہ نئی دنیا الگ ہے", review_text)
+
+    def test_a_running_header_does_not_open_an_essay_region(self):
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        # Verse, a running header, more verse -- no prose anywhere, so this
+        # must never produce a `reviews` piece. Confirms RUNNING_HEADER stays
+        # out of REGION_OPEN_KINDS even though it now closes a region.
+        extra_headers = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        pieces = segment(
+            FRONT + GHAZAL + [para(self.HEADER, 60)] + self.SECOND_GHAZAL
+            + extra_headers
+        )
+        self.assertEqual(
+            [p.kind for p in pieces if p.kind == "reviews"], []
+        )

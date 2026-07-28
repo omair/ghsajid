@@ -163,5 +163,46 @@ class TestTocCount(unittest.TestCase):
         self.assertEqual(classify.toc_count(paras), 2)
 
 
+class TestRunningHeaders(unittest.TestCase):
+    """کلیات vol 2 prints the collection's name atop all 209 of its pages.
+
+    Treated as section headings they would split a ghazal at every page turn;
+    ignored entirely they would lose the only per-page record of which
+    collection a poem belongs to.
+    """
+
+    def body(self, extra=()):
+        # Four alternating verse-length paragraphs start the body.
+        run = [para("ا" * 36, 73), para("ب" * 36, 1),
+               para("ج" * 36, 75), para("د" * 36, 1)]
+        return list(run) + list(extra)
+
+    def test_a_heading_repeated_past_the_threshold_is_a_running_header(self):
+        paras = self.body([para("نعت", 60)] * (classify.RUNNING_HEADER_MIN + 1))
+        self.assertIn("نعت", classify.running_headers(paras))
+
+    def test_a_heading_at_the_threshold_is_still_a_section_heading(self):
+        paras = self.body([para("نعت", 60)] * classify.RUNNING_HEADER_MIN)
+        self.assertEqual(classify.running_headers(paras), set())
+
+    def test_a_heading_seen_once_is_a_section_heading(self):
+        paras = self.body([para("غزلیں", 60)])
+        self.assertEqual(classify.running_headers(paras), set())
+
+    def test_classify_marks_running_headers_distinctly(self):
+        paras = self.body([para("نعت", 60)] * (classify.RUNNING_HEADER_MIN + 1))
+        kinds = classify.classify(paras)
+        self.assertEqual(kinds[-1], classify.RUNNING_HEADER)
+
+    def test_classify_still_marks_a_one_off_heading_as_heading(self):
+        paras = self.body([para("غزلیں", 60)])
+        self.assertEqual(classify.classify(paras)[-1], classify.HEADING)
+
+    def test_only_body_headings_count(self):
+        # A فہرست lists section names too; those are front matter, not pages.
+        paras = [para("نعت", 60)] * 20 + self.body()
+        self.assertEqual(classify.running_headers(paras), set())
+
+
 if __name__ == "__main__":
     unittest.main()

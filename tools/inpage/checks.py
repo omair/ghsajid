@@ -13,7 +13,9 @@ against the committed baseline, not verbatim reproduction of every ghazal
 import collections
 import re
 
-from .classify import VERSE, classify, toc_count
+from .classify import (
+    VERSE, _is_verse_length, body_start_index, classify, toc_count,
+)
 from .codepage import decode_byte, encode_char, unmapped
 from .decode import all_codes
 from .groundtruth import (
@@ -22,6 +24,7 @@ from .groundtruth import (
     MIN_LINES_MATCHED,
     MIN_WHOLE_GHAZALS,
     line_match_report,
+    site_text,
     skeleton,
 )
 from .models import VERSE_KINDS, Paragraph, Segment
@@ -374,3 +377,246 @@ def verse_errors(segments: list[Segment]) -> list[str]:
                     f"{segment.kind}/{segment.title[:30]}: sher {index} has {len(lines)} misra"
                 )
     return errors
+
+
+def _ghazal_line_skeletons(slug: str) -> list[str]:
+    """The committed site text of one known ghazal, one skeleton per line."""
+    return [
+        line for line in
+        (skeleton(raw) for raw in site_text(slug).splitlines())
+        if line
+    ]
+
+
+# Which کلیات volume prints each known ghazal. The 11 are spread across the
+# two — 3 in جلد ۱, 8 in جلد ۲ — so a per-book gate must ask each volume only
+# for the ghazals it actually contains: running all 11 against جلد ۱ alone
+# reports the 8 that live in جلد ۲ as lost, every run. That is the same
+# guaranteed false alarm that had to be unwired from gate C, arriving by a
+# different route.
+#
+# Written out rather than discovered at run time, and deliberately: "which
+# ghazals is this volume missing" is the question the gate exists to answer,
+# so letting it answer that question from the segmentation it is checking
+# would excuse a genuinely lost ghazal as belonging to the other book. Every
+# one of the 11 is still gated, in the volume that prints it — a slug moved
+# to the wrong volume here fails loudly in both.
+KULLIYAT_VOLUMES: dict[str, tuple[str, ...]] = {
+    "kulliyat-jild-1": (
+        "agar-farman-roaii-sahab-i-toqir-ka-haq-hai",
+        "ishq-se-aur-kar-dania-se-hazar-karta-hun-mein",
+        "jahan-bhar-mein-mare-dil-sa-koi-gahar-ho-nahin-sakta",
+    ),
+    "kulliyat-jild-2": (
+        "bian-us-bazm-mein-meri-kahani-ho-rahi-hai",
+        "chalne-laga-hai-phir-se-mira-dil-ruka-hoa",
+        "dikhe-ghalat-kaha-koi-soche-ghalat-kaha",
+        "garadash-i-jam-kahin-garadash-i-mina-sakat",
+        "hanas-raha-hai-jo-mari-halat-pah-jane-kaun-hai",
+        "jahan-mein-dalte-rahte-hain-masioa-ki-tarah",
+        "maoraie-saragh-hun-main-bhi",
+        "ninad-warasah-hai-mira-khwab-amanat-hai-mari",
+    ),
+}
+
+
+# How far a holder's own line count may exceed the site copy's before the
+# piece is judged to hold something beyond the ghazal itself. Measured across
+# all 11 real holders in the real جلد ۱ / جلد ۲ streams (holder lines minus
+# site lines):
+#
+#     slug                                                    diff
+#     agar-farman-roaii-sahab-i-toqir-ka-haq-hai                 0
+#     bian-us-bazm-mein-meri-kahani-ho-rahi-hai                  0
+#     chalne-laga-hai-phir-se-mira-dil-ruka-hoa                  0
+#     dikhe-ghalat-kaha-koi-soche-ghalat-kaha                    0
+#     garadash-i-jam-kahin-garadash-i-mina-sakat                +2
+#     hanas-raha-hai-jo-mari-halat-pah-jane-kaun-hai              0
+#     ishq-se-aur-kar-dania-se-hazar-karta-hun-mein               0
+#     jahan-bhar-mein-mare-dil-sa-koi-gahar-ho-nahin-sakta       +2
+#     jahan-mein-dalte-rahte-hain-masioa-ki-tarah                 0
+#     maoraie-saragh-hun-main-bhi                                -3
+#     ninad-warasah-hai-mira-khwab-amanat-hai-mari                0
+#
+# The spread runs -3 to +2, edition variance in both directions — the site
+# copy and the printed کلیات are different editions, so a holder may
+# legitimately lack a line the site has, or carry a line (or a line split)
+# the site does not; see _ghazal_line_skeletons and gate C's own 169-139
+# shortfall for the same variance measured a different way. A weld onto the
+# end appends a whole second poem — every ghazal in these two volumes runs
+# 12-30 lines — so a small margin past the measured +2 separates the two
+# comfortably without hugging the measured figure: 5 clears every real
+# holder with room while catching a fusion that appends even the shortest
+# poem this corpus holds.
+HOLDER_LINE_COUNT_TOLERANCE = 5
+
+
+def segmentation_groundtruth_errors(
+    segments: list[Segment], slugs: tuple[str, ...] = KNOWN_GHAZALS
+) -> list[str]:
+    """Each of the 11 known ghazals must be exactly one piece.
+
+    They reached the site from WordPress, independently of this decoder, and
+    live only in the کلیات volumes. A ghazal cut in half by a running page
+    header, or fused with the one after it, fails here and nowhere else — the
+    conservation gate sees the text survive either way, and the count gates
+    only ever counted.
+
+    Matched on the letter skeleton, since the site text and the printed
+    edition are different editions — the same reason the codepage's
+    ground-truth gate compares skeletons rather than demanding verbatim
+    reproduction.
+
+    Matched LINE BY LINE rather than by asking whether the ghazal's whole
+    skeleton is a substring of the piece's, and that difference is the whole
+    design. Measured across both volumes, 30 of the 169 ground-truth lines
+    appear NOWHERE in the decoded corpus — not in another piece, not in a
+    paragraph, nowhere. That is exactly the 169-139 shortfall gate C already
+    records, and it is edition variance in the printed book, not text this
+    decoder mislaid: conservation_errors is silent, and no segmentation can
+    conjure a line the source does not contain. A whole-skeleton substring
+    test therefore reports 10 of 11 ghazals broken no matter how perfect
+    segmentation is, which is precisely the false alarm gate C had to be
+    amended to stop raising (see MIN_WHOLE_GHAZALS, which stands at 1 for
+    this same reason). Per-line matching asks the question segmentation can
+    actually answer: of the lines the printed edition does reproduce, do they
+    all land in ONE piece?
+
+    Three conditions, because a holder count alone is half a gate, and an
+    opening check alone is only half of the other half:
+
+    * Exactly one piece holds the ghazal — a piece "holds" it when any of the
+      ghazal's lines is in that piece. A ghazal split by a page header puts
+      its opening in one piece and its tail in another, and reports 2.
+    * That piece OPENS with the ghazal. This catches fusion where the known
+      ghazal TRAILS — a missed matlaa welds an earlier, unknown poem onto the
+      front of it. Both poems land in one piece, so the holder count alone
+      sees 1 and stays silent; the first line of that piece is the unknown
+      poem's, not this ghazal's, and that mismatch is what this condition
+      catches. It catches nothing about what follows the ghazal's own last
+      line — a piece that opens correctly and then keeps going is invisible
+      to it, which is the asymmetry the next condition closes.
+    * That piece does not run MATERIALLY PAST the ghazal's last line. This
+      catches the mirror fusion, where the known ghazal LEADS and an unknown
+      poem is welded onto its end — invisible to both conditions above, since
+      the holder count still reads 1 and the ghazal still opens the piece.
+      Measured across the 11 real holders in both volumes, a holder's own
+      line count differs from the site copy's by -3 to +2 — edition
+      variance, since the site text and the printed کلیات are different
+      editions and either can hold a line, or a line split, the other
+      lacks (see `_ghazal_line_skeletons` and gate C's own 169-139 shortfall
+      for the same variance measured a different way). See
+      HOLDER_LINE_COUNT_TOLERANCE for where the bound is set relative to
+      that measured spread.
+
+    Only VERSE_KINDS pieces are considered. The فہرست and the critic's essay
+    both reproduce lines of these ghazals — measured, they hold 1-2 lines of
+    three different slugs — and counting those prose pieces as holders would
+    report a false split on every run.
+
+    `slugs` narrows the check to one volume's share of the 11 (see
+    KULLIYAT_VOLUMES); the default gates all of them, which is what the
+    cross-volume test does.
+    """
+    poems = [
+        (piece, skeleton(piece.body)) for piece in segments
+        if piece.kind in VERSE_KINDS
+    ]
+    errors = []
+    for slug in slugs:
+        lines = _ghazal_line_skeletons(slug)
+        holders = [
+            piece for piece, body in poems
+            if any(line in body for line in lines)
+        ]
+        if len(holders) != 1:
+            errors.append(
+                f"{slug} is held by {len(holders)} pieces, not 1: the ghazal "
+                f"reached the site independently of this decoder, so it must "
+                f"segment as a single piece"
+            )
+            continue
+        holder = holders[0]
+        holder_lines = [
+            line for line in
+            (skeleton(raw) for raw in holder.body.split("\n")) if line
+        ]
+        opening = holder_lines[0] if holder_lines else ""
+        if not any(
+            opening.startswith(line) or line.startswith(opening)
+            for line in lines
+        ):
+            errors.append(
+                f"{slug} does not open the piece holding it (order "
+                f"{holder.order}, which begins {holder.title[:30]!r}): "
+                f"the ghazal is fused behind another"
+            )
+        elif len(holder_lines) > len(lines) + HOLDER_LINE_COUNT_TOLERANCE:
+            errors.append(
+                f"{slug}'s holder (order {holder.order}) runs {len(holder_lines)} "
+                f"lines against the site copy's {len(lines)} — more than the "
+                f"{HOLDER_LINE_COUNT_TOLERANCE}-line tolerance for edition "
+                f"variance, so something else was likely welded onto its end"
+            )
+    return errors
+
+
+# How many of کلیات جلد ۱'s front-matter verse-length lines matched a poem's
+# matlaa when this was measured, and the same figure for جلد ۲. A FLOOR in the
+# manner of the codepage's 139/169 baseline, and emphatically NOT a census:
+# جلد ۱ prints 136 verse-length lines in its front matter against 570 poems,
+# because its فہرست indexes collections by range and quotes only a partial
+# selection of opening lines. 78 of 570 is an artefact of that partial index,
+# not coverage of the book, and nothing should ever be inferred from the gap.
+#
+# Kept per book rather than as one number for the same reason gate C is not
+# wired per book: جلد ۲ measures 14 of 56, so a single shared floor would
+# make جلد ۲ fail every run — the guaranteed false alarm this gate exists to
+# avoid being.
+TOC_FIRST_LINE_BASELINE = {
+    "kulliyat-jild-1": 78,
+    "kulliyat-jild-2": 14,
+}
+
+
+def toc_first_line_baseline_errors(
+    paragraphs: list[Paragraph], segments: list[Segment], minimum: int
+) -> list[str]:
+    """At least `minimum` front-matter verse lines must match a poem's matlaa.
+
+    A regression guard, not a count of anything meaningful. The book's فہرست
+    quotes some opening lines among its entries; each one that still matches
+    the matlaa of some segmented poem is one more piece of evidence that the
+    boundaries landed where the book itself says they do. If a segmentation
+    change drops the number, matlaa detection moved.
+
+    NOT a census — see TOC_FIRST_LINE_BASELINE. The فہرست indexes only a
+    fraction of the poems, so this number can never reach the poem count and
+    must never be read as coverage.
+
+    Front matter is everything before `body_start_index`, restricted to
+    verse-length paragraphs so that page numbers, headings and the title
+    block are not counted as unmatched lines.
+    """
+    start = body_start_index(paragraphs)
+    front = [
+        line for line in
+        (skeleton(para.text.strip()) for para in paragraphs[:start]
+         if _is_verse_length(para.text.strip()))
+        if line
+    ]
+    matlaas = {
+        line for line in (
+            skeleton(piece.body.split("\n")[0]) for piece in segments
+            if piece.kind in VERSE_KINDS and piece.body.strip()
+        ) if line
+    }
+    matched = sum(1 for line in front if line in matlaas)
+    if matched < minimum:
+        return [
+            f"only {matched} of {len(front)} front-matter verse lines match a "
+            f"poem's matlaa (baseline: {minimum}) — matlaa detection has "
+            f"regressed. This is a floor, not a census: the فہرست indexes only "
+            f"part of the book."
+        ]
+    return []

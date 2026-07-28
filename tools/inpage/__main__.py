@@ -21,6 +21,8 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .checks import (
+    KULLIYAT_VOLUMES,
+    TOC_FIRST_LINE_BASELINE,
     VERSE_KINDS,
     clear_unverifiable_sections,
     completeness_errors,
@@ -28,11 +30,14 @@ from .checks import (
     flag_decode_garbage,
     lexicon_report,
     roundtrip_errors,
+    segmentation_groundtruth_errors,
     toc_count_errors,
+    toc_first_line_baseline_errors,
     verse_errors,
 )
+from .classify import running_headers
 from .decode import decode, excluded_report
-from .emit import write_book, write_segments
+from .emit import resolve_book_records, write_book, write_segments
 from .groundtruth import (
     EXPECTED_LINES_TOTAL,
     MIN_LINES_MATCHED,
@@ -164,6 +169,49 @@ def cmd_segment(book_slug: str) -> None:
         + flag_decode_garbage(segments, lexicon)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(paragraphs, segments)
+        # The کلیات-only gates. Both are wired by slug for the same reason
+        # gate C above is not wired per book at all: the 11 ground-truth
+        # ghazals exist only in these two volumes, so running the
+        # segmentation gate against تجاوز would report 0 of 11 every single
+        # run, and a gate that always fails is a gate nobody reads. Each
+        # volume is asked only for its own share of the 11 (KULLIYAT_VOLUMES)
+        # and against its own measured index floor (TOC_FIRST_LINE_BASELINE).
+        + segmentation_groundtruth_errors(
+            segments, KULLIYAT_VOLUMES.get(book_slug, ())
+        )
+        + (
+            toc_first_line_baseline_errors(
+                paragraphs, segments, TOC_FIRST_LINE_BASELINE[book_slug]
+            )
+            if book_slug in TOC_FIRST_LINE_BASELINE
+            else []
+        )
+        + [
+            # A threshold that misfires must be visible: too low and a real
+            # section heading stops breaking runs, too high and 972 page
+            # headers start splitting ghazals.
+            f"{len(running_headers(paragraphs))} heading text(s) read as "
+            f"running page headers: "
+            + (", ".join(sorted(running_headers(paragraphs))) or "none"),
+            # This phase is the first real exercise of the nazm path, so a
+            # wrong nazm/ghazal split has to be legible at a glance.
+            "pieces by kind: "
+            + ", ".join(
+                f"{kind} {n}"
+                for kind, n in sorted(
+                    collections.Counter(s.kind for s in segments).items()
+                )
+            ),
+            "poems per collection: "
+            + (", ".join(
+                f"{name or '(none)'} {n}"
+                for name, n in sorted(
+                    collections.Counter(
+                        s.collection for s in segments if s.kind in VERSE_KINDS
+                    ).items()
+                )
+            ) or "none"),
+        ]
     )
     if dropped_unknowns:
         # The spec says unknown is flagged and retained, never dropped — but
@@ -217,11 +265,37 @@ def cmd_segment(book_slug: str) -> None:
     _, slugs, problems = write_segments(segments, book_slug, out)
     gate_output.extend(problems)
     book_contents, book_slugs = book_contents_and_slugs(segments, slugs)
-    write_book(
-        Book(title=TITLES[book_slug], slug=book_slug, contents=book_contents),
-        book_slugs,
-        out,
-    )
+
+    # Group pieces and their resolved slugs together, positionally. write_book
+    # requires the two lists to correspond index for index.
+    pieces_by: dict[str, list[Segment]] = {}
+    slugs_by: dict[str, list[str]] = {}
+    for piece, slug in zip(book_contents, book_slugs):
+        pieces_by.setdefault(piece.collection, []).append(piece)
+        slugs_by.setdefault(piece.collection, []).append(slug)
+
+    # Which records this staging tree gets is decided in exactly one place —
+    # `resolve_book_records` — because the approval hash and `promote` must
+    # agree with this loop file for file. They did not: this grew one record
+    # per collection while both of those still addressed a single
+    # books/<book_slug>.yaml. A collection with no usable slug, or two that
+    # slugify alike, come back as reported problems rather than a silently
+    # missing or silently overwritten record.
+    records, record_problems = resolve_book_records(segments, book_slug)
+    gate_output.extend(record_problems)
+    for collection, record_slug in records:
+        # collection "" means no running headers — تجاوز, باغِ نشاط,
+        # کلیات جلد ۱. The book is its own single record, under its own title.
+        write_book(
+            Book(
+                title=collection or TITLES[book_slug],
+                slug=record_slug,
+                collected_in=book_slug if collection else "",
+                contents=pieces_by.get(collection, []),
+            ),
+            slugs_by.get(collection, []),
+            out,
+        )
     (out / "segments.json").write_text(
         json.dumps([asdict(s) for s in segments], ensure_ascii=False, indent=2),
         encoding="utf-8",

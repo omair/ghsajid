@@ -10,7 +10,7 @@ import hashlib
 import re
 from pathlib import Path
 
-from .emit import resolve_slugs
+from .emit import book_record_slugs, resolve_slugs
 from .models import VERSE_KINDS, Segment
 
 APPROVAL_HEADING = "## Approval"
@@ -33,19 +33,29 @@ def _staged_digests(
 ) -> list[str]:
     """`<relative path>\x1f<sha256 of its bytes>` for everything promote copies.
 
-    Derived from `segments` (via the same `resolve_slugs` the writer and
-    `promote` use), never from what happens to be on disk — a directory walk
-    would let a file nobody described join the digest, and `promote` refuses
-    to copy such a file anyway. A named file that is not there digests as
-    `absent`, which is a different value from any content, so staging a piece
-    after approval invalidates the approval exactly as editing one does.
+    Derived from `segments` (via the same `resolve_slugs` and
+    `resolve_book_records` the writer and `promote` use), never from what
+    happens to be on disk — a directory walk would let a file nobody
+    described join the digest, and `promote` refuses to copy such a file
+    anyway. A named file that is not there digests as `absent`, which is a
+    different value from any content, so staging a piece after approval
+    invalidates the approval exactly as editing one does.
+
+    EVERY book record goes in, not just one named after the book. کلیات
+    جلد ۲ gathers six separately-published collections and `cmd_segment`
+    writes a record for each; this digested only `books/<book_slug>.yaml`,
+    a file that book never writes, so all six digested as `absent` and their
+    titles and contents rows could be rewritten after sign-off with the
+    approval still reading valid.
     """
     slugs, _ = resolve_slugs(segments)
     relative = [
         f"{segment.kind}/{slug}.md" for segment, slug in zip(segments, slugs)
     ]
-    if book_slug:
-        relative.append(f"books/{book_slug}.yaml")
+    relative.extend(
+        f"books/{record_slug}.yaml"
+        for record_slug in book_record_slugs(segments, book_slug)
+    )
     lines = []
     for name in relative:
         path = staging / name
@@ -66,8 +76,8 @@ def segmentation_hash(
     """A stable digest of the boundaries this report describes.
 
     With `staging`, the digest also covers the bytes of every staged file
-    `promote` would copy — each piece's .md and the book record named by
-    `book_slug`. This is the whole point of the binding: the report describes
+    `promote` would copy — each piece's .md and every book record the
+    segments name. This is the whole point of the binding: the report describes
     a segmentation, but `promote` copies FILES, and hashing only segments.json
     left the gap where an approved staged file could be edited afterwards and
     promoted with the approval still reading as valid. Digesting the files

@@ -10,7 +10,7 @@ import json
 import shutil
 from pathlib import Path
 
-from .emit import resolve_slugs
+from .emit import resolve_book_records, resolve_slugs
 from .groundtruth import skeleton
 from .models import Segment
 from .report import is_approved
@@ -110,22 +110,50 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
         shutil.copyfile(source, target)
         written.append(target)
 
-    # Derived from `book_slug`, never globbed. A directory walk copied
+    # Derived from the segments, never globbed. A directory walk copied
     # whatever yaml happened to sit in staging — a file no approval described
     # and, before the hash covered the record's bytes, one whose title and
     # contents rows could be rewritten after sign-off and still promote. The
-    # one record this book is allowed to publish is the one named after it,
-    # and `is_approved` above has already checked its bytes.
-    record = book_staging / "books" / f"{book_slug}.yaml"
-    if record.is_file():
-        target = content / "books" / record.name
+    # records this book may publish are the ones `resolve_book_records`
+    # names — one per collection for a کلیات volume, one named after the book
+    # otherwise — and `is_approved` above has already checked their bytes.
+    #
+    # This addressed exactly `books/<book_slug>.yaml`, which a
+    # multi-collection book never writes, and the copy was guarded with no
+    # `else`: کلیات جلد ۲'s 561 poems would have landed in content/ with no
+    # /kitab page at all, and not one word said about it.
+    records, record_problems = resolve_book_records(segments, book_slug)
+    problems.extend(record_problems)
+    for _, record_slug in records:
+        source = book_staging / "books" / f"{record_slug}.yaml"
+        if not source.is_file():
+            problems.append(
+                f"book record named by segments.json but missing from staging: "
+                f"{source}"
+            )
+            continue
+        target = content / "books" / source.name
         if target.exists():
             problems.append(
                 f"book record already in the archive, skipped: {target.relative_to(content)}"
             )
-        else:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(record, target)
-            written.append(target)
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+        written.append(target)
+
+    # A yaml nothing described is exactly what the hash cannot see: the digest
+    # is derived from the segments, so an extra file in staging/books changes
+    # no hash and voids no approval. It is never copied — but staying silent
+    # about it hid the fact that something had put it there.
+    expected = {f"{record_slug}.yaml" for _, record_slug in records}
+    books_dir = book_staging / "books"
+    if books_dir.is_dir():
+        for stray in sorted(books_dir.iterdir()):
+            if stray.name not in expected:
+                problems.append(
+                    f"unexpected file in staging/books, described by nothing and "
+                    f"not promoted: {stray}"
+                )
 
     return written, problems

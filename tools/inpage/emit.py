@@ -6,7 +6,7 @@ from tools.migrate.emit import frontmatter
 from tools.migrate.models import Piece
 from tools.migrate.urdu import slugify
 
-from .models import Book, Segment
+from .models import VERSE_KINDS, Book, Segment
 
 # A filesystem-safe ceiling on the generated slug. An over-long "title" (a
 # misdetected paragraph run with no line break — see segment.MAX_TITLE_LENGTH)
@@ -113,6 +113,87 @@ def resolve_slugs(segments: list[Segment]) -> tuple[list[str], list[str]]:
     return slugs, problems
 
 
+def resolve_book_records(
+    segments: list[Segment], book_slug: str
+) -> tuple[list[tuple[str, str]], list[str]]:
+    """Resolve which book records this segmentation has, as (collection, slug).
+
+    This is the single source of truth for "which yaml files does this
+    staging tree hold" — `cmd_segment` writes exactly these, `report`
+    digests exactly these, and `promote` copies exactly these. All three
+    used to name the record independently, and they drifted: `cmd_segment`
+    grew one record per collection while the hash and the copy still
+    addressed a single `books/<book_slug>.yaml`. کلیات جلد ۲'s six records
+    therefore digested as `absent` (rewritable after sign-off) and `promote`
+    copied none of them, silently.
+
+    Derived from the SEGMENTS, never from a directory walk: a walk would let
+    a yaml nobody described join the digest, and `promote` must refuse to
+    copy a record nothing described.
+
+    A book whose verse carries no collection (تجاوز, باغِ نشاط, کلیات جلد ۱)
+    is its own single record, named after the book — collection `""`. A book
+    with running page headers gets one record per named collection, in the
+    order the collections first appear, and the uncollected run before the
+    first header gets none.
+
+    Two collections that slugify alike would silently overwrite each other's
+    yaml, losing a whole contents list with no report — unlike segment
+    titles, which `resolve_slugs` disambiguates. They are disambiguated the
+    same way here, and reported.
+    """
+    collections: list[str] = []
+    for segment in segments:
+        if segment.kind in VERSE_KINDS and segment.collection not in collections:
+            collections.append(segment.collection)
+    if not collections:
+        return [], []
+    if collections == [""]:
+        # `book_slug` may legitimately be empty — `segmentation_hash` is
+        # called with `""` when only the boundary digest is wanted — and
+        # `books/.yaml` is not a record.
+        return ([("", book_slug)], []) if book_slug else ([], [])
+
+    records: list[tuple[str, str]] = []
+    problems: list[str] = []
+    slug_counts: dict[str, int] = {}
+    first_collection_for_slug: dict[str, str] = {}
+    for collection in collections:
+        if not collection:
+            continue
+        base_slug = _cap_slug(slugify(collection))
+        if not base_slug:
+            problems.append(
+                f'collection "{collection}" slugifies to nothing — no book '
+                f"record written for its poems"
+            )
+            continue
+        count = slug_counts.get(base_slug, 0)
+        slug_counts[base_slug] = count + 1
+        if count == 0:
+            first_collection_for_slug[base_slug] = collection
+            records.append((collection, base_slug))
+        else:
+            slug = f"{base_slug}-{count + 1}"
+            problems.append(
+                f'book record collision: "{first_collection_for_slug[base_slug]}" '
+                f'and "{collection}" both slugify to "{base_slug}" — wrote the '
+                f"second as {slug}.yaml"
+            )
+            records.append((collection, slug))
+    return records, problems
+
+
+def book_record_slugs(segments: list[Segment], book_slug: str) -> list[str]:
+    """Just the record slugs from `resolve_book_records`, in the same order.
+
+    What `report` digests and `promote` copies; both go through this rather
+    than deriving a path of their own.
+    """
+    records, _ = resolve_book_records(segments, book_slug)
+    return [slug for _, slug in records]
+
+
 def write_segments(
     segments: list[Segment], book_slug: str, root: Path
 ) -> tuple[list[Path], list[str], list[str]]:
@@ -149,8 +230,8 @@ def write_book(book: Book, slugs: list[str], root: Path) -> Path:
         lines.append(f'publisher: "{book.publisher}"')
     if book.year is not None:
         lines.append(f"year: {book.year}")
-    if book.volume_of:
-        lines.append(f'volume_of: "{book.volume_of}"')
+    if book.collected_in:
+        lines.append(f'collected_in: "{book.collected_in}"')
     lines.append("contents:")
     for segment, slug in zip(book.contents, slugs, strict=True):
         section = f' section: "{segment.section}",' if segment.section else ""
