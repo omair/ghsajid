@@ -13,6 +13,7 @@ implementation detail.
 
 import collections
 import re
+from collections.abc import Iterable
 
 from .groundtruth import skeleton
 from .models import Paragraph
@@ -89,6 +90,38 @@ SECTION_HEADINGS = frozenset({
 # source heading (گُل سیمیا) still records the section as گل سیمیا, matching
 # SECTION_HEADINGS rather than whatever spelling the source happened to use.
 NORMALISED_HEADINGS = {skeleton(heading): heading for heading in SECTION_HEADINGS}
+
+
+def heading_map(sections: Iterable[str] = ()) -> dict[str, str]:
+    """Normalised heading text → the section name to record for it.
+
+    `SECTION_HEADINGS` above are forms of address that recur across books —
+    غزلیں, نعت, a کلیات volume's own collection names. `sections` are names
+    that exist only in ONE book's printed index: موسم's بہار، سعیر، برشگال،
+    خزاں، زمہریر، قدیم and عناصر's مٹّی، پانی، آگ، ہَوا، خواب, transcribed
+    in `printed_index`.
+
+    They are passed in per book rather than added to the frozenset because
+    they are ordinary Urdu words. Nothing licenses reading آگ as a section
+    heading in a book whose index never declared one, and جلد ۲ prints a
+    bare خواب of its own at ¶32. Measured across all four books, none of
+    these names occurs anywhere in تجاوز or باغِ نشاط — both promoted, both
+    required to stay byte-identical — and the empty default keeps every
+    existing caller's classification unchanged.
+
+    `حمدِ <section>` maps to the SECTION, not to itself. Each of موسم's six
+    sections opens with a حمد the index titles that way, and the poem needs
+    the section it belongs to; its own title comes from its matlaa like
+    every other poem in the archive. Being a heading at all is the point —
+    `_bridge_lines_enclosed_by_verse` was absorbing these lines into the
+    previous ghazal, which cost the heading, the following poem's boundary,
+    and six poems from موسم's count.
+    """
+    mapping = dict(NORMALISED_HEADINGS)
+    for name in sections:
+        mapping[skeleton(name)] = name
+        mapping[skeleton(f"حمدِ {name}")] = name
+    return mapping
 
 # Measured across all four books, counting EVERY short body paragraph that
 # repeats — no name list involved. The twelve collection names of the two
@@ -283,14 +316,19 @@ def _is_colophon(text: str) -> bool:
     return bool(MONTH_YEAR.search(text)) and not WHOLLY_BRACKETED.fullmatch(text)
 
 
-def _kind(text: str, in_body: bool, running: set[str]) -> str:
+def _kind(
+    text: str,
+    in_body: bool,
+    running: set[str],
+    headings: dict[str, str] | None = None,
+) -> str:
     if text == SEPARATOR_TEXT:
         return SEPARATOR
     if TOC_LINE.fullmatch(text):
         return TOC
     if in_body and text in running:
         return RUNNING_HEADER
-    if skeleton(text) in NORMALISED_HEADINGS:
+    if skeleton(text) in (NORMALISED_HEADINGS if headings is None else headings):
         return HEADING
     if _is_colophon(text):
         return COLOPHON
@@ -459,12 +497,19 @@ def _bridge_lines_enclosed_by_verse(
         index = end
 
 
-def classify(paragraphs: list[Paragraph]) -> list[str]:
-    """Return one kind per paragraph, in order."""
+def classify(
+    paragraphs: list[Paragraph], sections: Iterable[str] = ()
+) -> list[str]:
+    """Return one kind per paragraph, in order.
+
+    `sections` names the headings known only from this book's printed
+    index — see `heading_map`. Omitting it classifies exactly as before.
+    """
     start = body_start_index(paragraphs)
     running = running_headers(paragraphs)
+    headings = heading_map(sections)
     kinds = [
-        _kind(para.text.strip(), index >= start, running)
+        _kind(para.text.strip(), index >= start, running, headings)
         for index, para in enumerate(paragraphs)
     ]
     _bridge_lines_enclosed_by_verse(kinds, paragraphs)

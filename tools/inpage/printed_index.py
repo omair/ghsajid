@@ -200,6 +200,15 @@ BY_NAME: dict[str, PrintedCollection] = {c.name: c for c in VOLUME_1}
 
 YEARS: dict[str, int] = {c.name: c.year for c in VOLUME_1}
 
+# Section names to hand `classify` for a given book slug — see
+# `classify.heading_map` for why these are passed per book instead of joining
+# the global SECTION_HEADINGS set. A slug that is absent gets `()`, which
+# classifies exactly as the pipeline did before this table existed; that is
+# what keeps تجاوز and باغِ نشاط byte-identical.
+SECTION_NAMES_BY_BOOK: dict[str, tuple[str, ...]] = {
+    "kulliyat-jild-1": tuple(s.name for c in VOLUME_1 for s in c.sections),
+}
+
 # What each collection's verse count must be. Supersedes the two entries
 # `checks.DECLARED_COLLECTION_COUNTS` carried for موسم and عناصر, which
 # counted غزلیں only and so read six swallowed حمد as a clean pass.

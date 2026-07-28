@@ -10,11 +10,12 @@ goes to staging with a report, and a human resolves every flag.
 """
 
 import re
+from collections.abc import Iterable
 
 from .classify import (
-    COLOPHON, HEADING, NORMALISED_HEADINGS, PROSE, RUNNING_HEADER,
+    COLOPHON, HEADING, PROSE, RUNNING_HEADER,
     SECOND_MISRA_GEOMETRY, SEPARATOR, TOC, UNKNOWN, VERSE, body_start_index,
-    classify,
+    classify, heading_map,
 )
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
@@ -384,6 +385,7 @@ def segment(
     gathered_collections: dict[str, tuple[str, str]] | None = None,
     collection_boundaries: list[tuple[int, str]] | None = None,
     collection_boundary_problems: list[str] | None = None,
+    sections: Iterable[str] = (),
 ) -> list[Segment]:
     """Assemble classified paragraphs into pieces.
 
@@ -461,7 +463,8 @@ def segment(
     # reporting it as dropped after it reached a piece would be a false
     # alarm. Reconciled against `consumed` at the end.
     pending_drops: list[tuple[int, str]] = []
-    kinds = classify(paragraphs)
+    headings = heading_map(sections)
+    kinds = classify(paragraphs, sections)
     collections = collections_at(paragraphs, kinds)
     # The book's very first running header, if it has one at all — see
     # `_position_collection`. تجاوز, باغِ نشاط and کلیات جلد ۱ have none, so
@@ -475,6 +478,20 @@ def segment(
     body_start = body_start_index(paragraphs)
     pieces: list[Segment] = []
     section = ""
+    # `section` persists until the next heading, and in a کلیات volume that
+    # can be several collections later: عناصر's last section خواب was
+    # inherited by all 93 pieces of کتابِ صبح, and موسم's قدیم by the first
+    # three of عناصر. A section never crosses a collection boundary — the
+    # next collection has its own sections or none.
+    #
+    # Which collection a heading belongs to cannot be read at the heading:
+    # موسم is never named by a page header before its poems, so its pieces
+    # are re-stamped from the volume's title pages AFTER assembly. What is
+    # stable either way is the FIRST PIECE the heading governs, so each
+    # piece records that piece's order and the comparison is made below,
+    # once every collection is final.
+    section_owner = 0
+    section_owner_of: dict[int, int] = {}
     # How many pieces had already been formed when the first BODY heading was
     # reached, or None if the book has no body heading at all. Those pieces
     # precede every section the book declares (باغِ نشاط's epigraph couplet
@@ -504,7 +521,7 @@ def segment(
     def add(
         kind: str, title: str, body: str, flags: list[str], collection: str,
     ) -> Segment:
-        nonlocal pending_colophon, pending_colophon_index
+        nonlocal pending_colophon, pending_colophon_index, section_owner
         if len(title) > MAX_TITLE_LENGTH:
             flags = flags + ["over-long-title"]
         piece = Segment(
@@ -521,6 +538,10 @@ def segment(
             consumed.add(pending_colophon_index)
             pending_colophon = ""
             pending_colophon_index = -1
+        if section:
+            if not section_owner:
+                section_owner = piece.order
+            section_owner_of[piece.order] = section_owner
         pieces.append(piece)
         return piece
 
@@ -546,7 +567,8 @@ def segment(
             # its pieces inherited غزلیں from them. That label happened to be
             # right, but nothing in the evidence said so.
             if index >= body_start:
-                section = NORMALISED_HEADINGS[skeleton(para.text)]
+                section = headings[skeleton(para.text)]
+                section_owner = 0
                 if pieces_before_first_heading is None:
                     pieces_before_first_heading = len(pieces)
             boundary = index + 1
@@ -727,6 +749,13 @@ def segment(
             collection_boundary_problems.extend(problems)
         if position_attributed is not None:
             position_attributed.clear()
+    # Every collection is final now, so a section can be checked against the
+    # collection its heading actually governed (see `section_owner_of`).
+    by_order = {piece.order: piece for piece in pieces}
+    for piece in pieces:
+        owner = section_owner_of.get(piece.order)
+        if owner and by_order[owner].collection != piece.collection:
+            piece.section = ""
     return pieces
 
 
