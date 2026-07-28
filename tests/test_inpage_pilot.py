@@ -1,5 +1,6 @@
 import collections
 import re
+from dataclasses import replace
 import shutil
 import tempfile
 import unittest
@@ -10,14 +11,15 @@ from tools.inpage import __main__ as cli
 from tools.inpage.checks import (
     COLLECTION_INDEX_BASELINE, DECLARED_COLLECTION_COUNTS, KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE, collection_index_errors, completeness_errors,
-    conservation_errors, declared_collection_count_errors, roundtrip_errors,
+    conservation_errors, declared_collection_count_errors,
+    flag_decode_garbage, roundtrip_errors,
     segmentation_groundtruth_errors, toc_count_errors,
     toc_first_line_baseline_errors,
 )
 from tools.inpage.classify import running_headers, toc_count
 from tools.inpage.decode import decode
 from tools.inpage.emit import resolve_book_records
-from tools.inpage.groundtruth import skeleton
+from tools.inpage.groundtruth import corpus_lexicon, skeleton
 from tools.inpage.ole import read_text_stream
 from tools.inpage.printed_index import (
     SECTION_NAMES_BY_BOOK,
@@ -520,19 +522,30 @@ class TestKulliyatJild1Collections(unittest.TestCase):
     def test_anasir_yields_the_100_the_fihrist_declares(self):
         self.assertEqual(_distribution(self.segments)["عناصر"], 100)
 
-    def test_five_of_six_collections_match_the_printed_fihrist_exactly(self):
-        # Five of six are exact. روداد is not, and the reason is known and
-        # unrelated to segmentation: the volume's back matter — آرا (p.901)
-        # and تعارف (p.911), which the printed index lists as prose — is
-        # classified as verse, so critics' opinions and the bibliography
-        # ("(الف) اردو کتابیں:", "اعزازات:") read as one more poem. Fixing
-        # that means teaching the classifier about back matter, which is a
-        # separate defect from a fused ghazal.
+    def test_every_collection_matches_the_printed_fihrist_exactly(self):
+        # All six, poem for poem, against the printed فہرست.
         #
-        # Asserted as the exact remaining discrepancy rather than skipped, so
-        # the day back matter is handled this test fails and says so.
+        # `flag_decode_garbage` runs first because the count gate reads its
+        # flags — the same order cmd_segment uses. جلد ۱'s stream ends in
+        # nine lines of scratch that segment as a `nazm` inside روداد, and
+        # counting it made روداد read 125 against a declared 124.
+        flag_decode_garbage(self.segments, corpus_lexicon())
+        self.assertEqual(
+            declared_collection_count_errors(
+                self.segments, DECLARED_COLLECTION_COUNTS["kulliyat-jild-1"]
+            ),
+            [],
+        )
+
+    def test_the_count_gate_depends_on_the_garbage_flag_running_first(self):
+        # The ordering above is load-bearing, so it is asserted rather than
+        # left as a comment: unflagged, the scratch piece counts as one of
+        # روداد's poems and the gate reports a book that is in fact complete.
+        unflagged = [
+            replace(piece, flags=[]) for piece in self.segments
+        ]
         errors = declared_collection_count_errors(
-            self.segments, DECLARED_COLLECTION_COUNTS["kulliyat-jild-1"]
+            unflagged, DECLARED_COLLECTION_COUNTS["kulliyat-jild-1"]
         )
         self.assertEqual(len(errors), 1, errors)
         self.assertIn("روداد", errors[0])

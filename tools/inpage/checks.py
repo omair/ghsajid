@@ -148,6 +148,36 @@ GARBAGE_LEXICON_SHARE = 0.4
 # makes the division safe: an empty body has no words and is never scored.
 MIN_WORDS_FOR_GARBAGE_CHECK = 12
 
+# The second, independent reading of the same evidence. The lexicon share
+# above asks whether a piece's words are WORDS; this asks whether they are
+# even word-shaped. A mis-decode shatters text into one- and two-character
+# fragments, and those fragments are exactly what the lexicon cannot judge:
+# ی, و, د and کے are all real Urdu, so a body made of them scores as known
+# and passes. کلیات جلد ۱ order 593 — nine lines of end-of-stream scratch —
+# reads 48% known and sailed through, then counted as one of روداد's poems.
+#
+# Measured over all 1,308 staged pieces of the four books, as the share of
+# words at most two characters long:
+#
+#     corpus median                              0.32
+#     99th percentile                            0.46
+#     highest real poem (تجاوز order 51,
+#       باغِ نشاط order 73, جلد ۲ order 318)     0.48
+#     جلد ۲ order 532 scratch (already flagged)  0.54
+#     جلد ۱ order 593 scratch                    0.74
+#
+# 0.6 sits in the 0.26-wide gap above every real poem in the corpus and below
+# the piece this exists to catch — 1.25x above the worst real poem, 1.23x
+# below the garbage. Placed between them rather than against either, so it
+# stays a test of the next book rather than a record of these four.
+GARBAGE_FRAGMENT_SHARE = 0.6
+
+# What counts as a fragment. Two characters, not one: a decode that leaves
+# only single letters is already caught by everything else, and it is the
+# two-character wreckage (ہے → ہ ے, کہا → ک ہا) that a one-character test
+# misses while a reader can see at a glance the text is broken.
+MAX_FRAGMENT_LENGTH = 2
+
 
 def flag_decode_garbage(segments: list[Segment], lexicon: set[str]) -> list[str]:
     """Flag pieces whose text is probably mis-decoded, and name them.
@@ -164,29 +194,45 @@ def flag_decode_garbage(segments: list[Segment], lexicon: set[str]) -> list[str]
     miss it. Mutates `flags`, like `clear_unverifiable_sections` mutates
     `section` — the finding has to travel with the piece into the report.
     """
-    flagged: list[tuple[Segment, float, int]] = []
+    flagged: list[tuple[Segment, str]] = []
     for segment in segments:
         words = skeleton(segment.body).split()
         if len(words) < MIN_WORDS_FOR_GARBAGE_CHECK:
             continue
-        share = sum(1 for word in words if word in lexicon) / len(words)
-        if share >= GARBAGE_LEXICON_SHARE:
+        known = sum(1 for word in words if word in lexicon) / len(words)
+        fragments = sum(
+            1 for word in words if len(word) <= MAX_FRAGMENT_LENGTH
+        ) / len(words)
+        # Two independent readings, either of which condemns the piece. A
+        # body of one- and two-letter fragments scores as KNOWN, because the
+        # fragments are themselves real Urdu words, so the lexicon share
+        # alone cannot see it — see GARBAGE_FRAGMENT_SHARE.
+        if known < GARBAGE_LEXICON_SHARE:
+            evidence = f"{known:.0%} of {len(words)} words known"
+        elif fragments > GARBAGE_FRAGMENT_SHARE:
+            evidence = (
+                f"{fragments:.0%} of {len(words)} words are "
+                f"{MAX_FRAGMENT_LENGTH} characters or shorter"
+            )
+        else:
             continue
         if GARBAGE_FLAG not in segment.flags:
             segment.flags.append(GARBAGE_FLAG)
-        flagged.append((segment, share, len(words)))
+        flagged.append((segment, evidence))
     if not flagged:
         return []
     listed = "; ".join(
         f"order {segment.order} ({segment.kind}) {segment.title[:30]!r} — "
-        f"{share:.0%} of {count} words known"
-        for segment, share, count in flagged
+        f"{evidence}"
+        for segment, evidence in flagged
     )
     return [
-        f"{len(flagged)} piece(s) flagged {GARBAGE_FLAG}: under "
+        f"{len(flagged)} piece(s) flagged {GARBAGE_FLAG}: their text is "
+        f"probably mis-decoded rather than written — under "
         f"{GARBAGE_LEXICON_SHARE:.0%} of their words appear anywhere in the "
-        f"archive, so they are probably mis-decoded rather than written. Kept, "
-        f"not dropped — read them before approving: {listed}"
+        f"archive, or over {GARBAGE_FRAGMENT_SHARE:.0%} of them are too short "
+        f"to be words. Kept, not dropped — read them before approving: "
+        f"{listed}"
     ]
 
 
@@ -352,9 +398,20 @@ def declared_collection_count_errors(
     count as the delta rather than passing silently — that is the shape a
     broken boundary detector would take, and a gate that goes quiet when its
     subject disappears is not a gate.
+
+    A piece already flagged as decode garbage is not counted. The فہرست
+    declares poems, and end-of-stream scratch is not one: کلیات جلد ۱ ends in
+    nine lines of it, which segmented as a `nazm` inside روداد and made that
+    collection read 125 against a declared 124. Excluding it is only honest
+    because the flag is loud — `flag_decode_garbage` names every piece it
+    marks in the same gate output a reviewer signs, so nothing is quietly
+    written out of the count. Run this AFTER `flag_decode_garbage`, or the
+    flags are not yet on the pieces.
     """
     counts = collections.Counter(
-        piece.collection for piece in segments if piece.kind in VERSE_KINDS
+        piece.collection
+        for piece in segments
+        if piece.kind in VERSE_KINDS and GARBAGE_FLAG not in piece.flags
     )
     errors = []
     for name, expected in declared.items():

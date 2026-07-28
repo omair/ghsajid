@@ -130,6 +130,19 @@ class TestDecodeGarbageFlag(unittest.TestCase):
         body = "ٹھڈ ککک ںںں ابلی تاَیِ ئنے\nمعےما کیھا فاوں کری نجج دل"
         return Segment(kind="reviews", title="ں آابلی", body=body, order=order)
 
+    def _fragments(self, order=3):
+        """Scratch whose fragments are themselves real words.
+
+        The blind spot, isolated: every word here is in the lexicon, so the
+        share reads a perfect 1.0 and condemns nothing, while five sixths of
+        the body is two characters long. کلیات جلد ۱ order 593 is this case
+        in the wild — ی, و, د and کے are all real Urdu, so nine lines of
+        end-of-stream wreckage scored 48% known and counted as a poem of
+        روداد.
+        """
+        body = "دل دل دل دل دل خواب\nدل دل دل دل دل جان"
+        return Segment(kind="nazms", title="۲ے ر ہے خ", body=body, order=order)
+
     def test_flags_a_piece_almost_none_of_whose_words_are_known(self):
         piece = self._garbage()
         checks.flag_decode_garbage([piece], self.LEXICON)
@@ -188,6 +201,40 @@ class TestDecodeGarbageFlag(unittest.TestCase):
         checks.flag_decode_garbage([piece], self.LEXICON)
         checks.flag_decode_garbage([piece], self.LEXICON)
         self.assertEqual(piece.flags.count(checks.GARBAGE_FLAG), 1)
+
+    def test_the_lexicon_share_alone_cannot_see_shattered_text(self):
+        # Why a second signal exists. Every word of this piece is in the
+        # lexicon, so the share is a perfect 1.0 and condemns nothing.
+        piece = self._fragments()
+        words = checks.skeleton(piece.body).split()
+        known = sum(1 for word in words if word in self.LEXICON) / len(words)
+        self.assertGreaterEqual(known, checks.GARBAGE_LEXICON_SHARE)
+
+    def test_flags_a_piece_whose_words_are_mostly_fragments(self):
+        piece = self._fragments()
+        report = checks.flag_decode_garbage([piece], self.LEXICON)
+        self.assertIn(checks.GARBAGE_FLAG, piece.flags)
+        self.assertEqual(len(report), 1)
+        self.assertIn("characters or shorter", report[0])
+        self.assertIn("order 3", report[0])
+
+    def test_a_real_poem_is_not_flagged_as_fragments(self):
+        # Real verse does use short words; the ceiling has to clear them.
+        piece = self._real()
+        words = checks.skeleton(piece.body).split()
+        share = sum(
+            1 for word in words
+            if len(word) <= checks.MAX_FRAGMENT_LENGTH
+        ) / len(words)
+        self.assertLessEqual(share, checks.GARBAGE_FRAGMENT_SHARE)
+        self.assertEqual(checks.flag_decode_garbage([piece], self.LEXICON), [])
+
+    def test_the_fragment_ceiling_clears_both_measured_extremes(self):
+        # Measured over all 1,308 staged pieces of the four books: the
+        # highest real poem sits at 0.48 and the scratch this catches at
+        # 0.74. Real margin on both sides, hugging neither.
+        self.assertGreater(checks.GARBAGE_FRAGMENT_SHARE, 0.48 * 1.2)
+        self.assertLess(checks.GARBAGE_FRAGMENT_SHARE, 0.74 / 1.2)
 
 
 class TestSingleLinePieceFlag(unittest.TestCase):
