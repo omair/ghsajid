@@ -87,6 +87,21 @@ def body_start_index(paragraphs: list[Paragraph]) -> int:
 
     Uses raw character length rather than the VERSE kind: VERSE itself depends
     on the body having started, so the other way round would be circular.
+
+    The ghazal-shaped run locates the body, but it is not where the body
+    begins: both pilot books close their critic's essay with a ۰۰۰, and
+    باغِ نشاط then prints the epigraph couplet it is named after and the
+    opening four lines of its نعت before the first run the search can see.
+    Starting at the run classified all six as front_matter and dropped them.
+    The boundary therefore lands just after the LAST separator preceding the
+    run — in تجاوز that separator is at 84 and the run at 85, so nothing
+    moves; in باغِ نشاط the separator is at 128 and the run at 136, and the
+    six paragraphs become body. With no separator before the run, the run's
+    own index stands.
+
+    The backward search stops at prose (see `_last_separator_before`): an
+    essay is front matter however it is fenced, and reaching back over one
+    would put the critic inside the poems.
     """
     for index in range(len(paragraphs) - MIN_BODY_RUN + 1):
         run = paragraphs[index:index + MIN_BODY_RUN]
@@ -95,8 +110,28 @@ def body_start_index(paragraphs: list[Paragraph]) -> int:
             and (para.geometry == SECOND_MISRA_GEOMETRY) == (offset % 2 == 1)
             for offset, para in enumerate(run)
         ):
-            return index
+            return _last_separator_before(paragraphs, index)
     return len(paragraphs)
+
+
+def _last_separator_before(paragraphs: list[Paragraph], index: int) -> int:
+    """One past the last ۰۰۰ before `index`, or `index` if there is none.
+
+    The walk stops at the first prose-length paragraph, which is the critic's
+    essay. Both pilot books close that essay with its own ۰۰۰, so the walk
+    never reaches it — but a book that did not would otherwise have the body
+    start at the separator that OPENS the essay, putting the whole essay
+    inside the poems and swallowing the first ghazal along with it (see
+    tests.test_inpage_segment.TestEssayRegion). Prose before the poems is
+    front matter however it is fenced.
+    """
+    for earlier in range(index - 1, -1, -1):
+        text = paragraphs[earlier].text.strip()
+        if text == SEPARATOR_TEXT:
+            return earlier + 1
+        if len(text) >= PROSE_MIN:
+            break
+    return index
 
 
 def _kind(text: str, in_body: bool) -> str:

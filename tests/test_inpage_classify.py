@@ -37,6 +37,43 @@ class TestBodyStart(unittest.TestCase):
         ]
         self.assertEqual(classify.body_start_index(paras), len(paras))
 
+    def test_body_starts_after_the_separator_preceding_the_run(self):
+        # باغِ نشاط's shape: the critic's essay is closed by ۰۰۰, and the
+        # epigraph couplet the book is named after, plus the opening lines of
+        # its نعت, sit between that separator and the first ghazal-shaped
+        # run. They are body, not front matter, so the boundary belongs at
+        # the separator.
+        paras = [
+            para("سرورق", 20),
+            para("۰۰۰", 1),
+            para("باغِ نشاط کی طرف اپنے قدم نہیں بڑھے", 77),
+            para("جب سے ہمارے کھوج میں بادِ صبا نہیں رہی", 1),
+            para("نعت", 1),
+        ] + BODY
+        self.assertEqual(classify.body_start_index(paras), 2)
+
+    def test_body_starts_at_the_run_when_no_separator_precedes_it(self):
+        paras = [para("سرورق", 20), para("ناشر", 32)] + BODY
+        self.assertEqual(classify.body_start_index(paras), 2)
+
+    def test_the_search_for_a_separator_does_not_reach_back_over_prose(self):
+        # An unclosed essay: the only ۰۰۰ is the one that opens it. Reaching
+        # back to that separator would put the critic's prose inside the
+        # poems, so the boundary stays at the run.
+        paras = [
+            para("سرورق", 20),
+            para("۰۰۰", 80),
+            para("الف" * 60, 67),
+            para("شمع خیالِ سبز کی رنگ جما نہیں رہی", 73),
+        ] + BODY
+        self.assertEqual(classify.body_start_index(paras), 4)
+
+    def test_only_a_separator_before_the_run_moves_the_boundary(self):
+        # A ۰۰۰ *after* the run has nothing to say about where the body
+        # begins, and the boundary must not jump forward to it.
+        paras = [para("سرورق", 20)] + BODY + [para("۰۰۰", 1)]
+        self.assertEqual(classify.body_start_index(paras), 1)
+
     def test_a_sher_shaped_publisher_block_does_not_start_the_body(self):
         # تجاوز's own front matter: رنگِ ادب پبلی کیشنز (19 chars, geometry
         # 81) followed by its کراچی office address (38 chars, geometry 1) —
