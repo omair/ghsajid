@@ -344,8 +344,22 @@ JILD_1_COLLECTIONS = (
 # that collection's title page, and reading through it welded the نظم جادو
 # onto the collection's own title poem (‘‘مجھے مدّت سے گہری نیند میں چلنے کی
 # عادت ہے’’) as one piece belonging to no collection.
+#
+# نیند میں چلتے ہوئے then moved 21 → 31 when a colophon stopped being missed
+# because InPage had stripped its digits (see classify._is_colophon). A
+# colophon CLOSES the poem it follows, so 52 unrecognised ones in this volume
+# were welding consecutive نظمیں into single pieces: the largest نظم piece was
+# 365 lines and is now 234, and the ten pieces this collection gains are whole
+# poems with their own titles and their own dates — جنگ کے دِنوںمیں,
+# اُنچاس برس کے بعد, کچھ لفظ تھے, سمندر پی لِیا اُس نے, ابھی صبح ہو گی,
+# ٹی وی پر, افسانۂ شہر, ڈیزی کَٹر, گُلزار سے, جادو.
+#
+# The other five collections do not move by a single poem, and neither does
+# any collection's ghazal count (348 across the volume, before and after).
+# That is the control again: a colophon ends a نظم, and only a نظم — so a
+# change that moved a ghazal count would be a change doing something else.
 JILD_2_COLLECTIONS = {
-    "نیند میں چلتے ہوئے": 21,
+    "نیند میں چلتے ہوئے": 31,
     "چہار دریا": 51,
     "ہست و  ُبود": 98,
     "اِعادہ": 101,

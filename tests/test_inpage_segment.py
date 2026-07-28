@@ -301,6 +301,28 @@ class TestSegmentBook(unittest.TestCase):
         pieces = segment(FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1)])
         self.assertEqual(pieces[0].written_note, "۱۷، مئی ۲۰۱۰ئ۔ لاہور")
 
+    def test_a_digit_stripped_colophon_closes_the_nazm_and_dates_it(self):
+        # The consequence the four-digit rule was costing: a colophon whose
+        # digits InPage stripped classified as VERSE, so it neither ended the
+        # نظم it follows nor became its written_note — the next poem ran
+        # straight on into it. جلد ۲'s largest نظم piece was 365 lines of
+        # welded-together poems for exactly this reason.
+        second = [
+            para("دُھند میں لپٹا ہوا", 47), para("وہ ایک شہر تھا کہیں", 97),
+        ]
+        # The leading colophon is the one whose digits survived; it is there
+        # only so یاد touches verse on one side and can be read as a title,
+        # exactly as in test_a_non_alternating_run_becomes_one_nazm above.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("یاد", 1)] + self.NAZM
+            + [para("دسمبر ئ۔ لاہور", 1), para("خواب", 1)] + second
+        )
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual([p.title for p in nazms], ["یاد", "خواب"])
+        self.assertEqual(nazms[0].written_note, "دسمبر ئ۔ لاہور")
+        self.assertNotIn("دسمبر ئ۔ لاہور", nazms[0].body.split("\n"))
+
     def test_a_heading_inside_the_body_sets_the_section(self):
         # The heading has to sit after body_start_index to be a real section
         # heading: here the first ghazal establishes the body, so the نعت

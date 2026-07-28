@@ -52,6 +52,29 @@ TOC_LINE = re.compile(r"^[۰-۹۔\s]+$")
 YEAR = re.compile(r"[۰-۹]{4}\s*[ئء]")
 COLOPHON_MAX = 50
 
+# The Gregorian months as the poet writes them. Every colophon in the corpus
+# names one.
+MONTHS = (
+    "جنوری", "فروری", "مارچ", "اپریل", "مئی", "جون",
+    "جولائی", "اگست", "ستمبر", "اکتوبر", "نومبر", "دسمبر",
+)
+
+# A month name followed by the year marker in the position a year occupies:
+# nothing between them but digits, spaces and the punctuation that separates
+# a date — `مئی ۲۰۱۰ئ` when the digits survived, `دسمبرئ`, `دسمبر ئ`,
+# `جنوری، ئ` when they did not. The longest real gap measured is five
+# characters (` ۲۰۰۴`, جلد ۲ ¶4114); six is allowed, and widening it to eight
+# changes no line in any of the four books.
+MONTH_YEAR = re.compile(
+    "(?:" + "|".join(MONTHS) + r")[۰-۹\s،,\-]{0,6}[ئء]"
+)
+
+# A date bracketed as a WHOLE line is a publisher's imprint on a collection's
+# title page, not a poem's signature (see `_is_colophon`). The whole line, not
+# a bracket anywhere in it: جلد ۲ ¶2036 `، اپریل ئ۔لاہور (کرفیو کا ایک دن)` is
+# a genuine colophon that happens to end in a parenthetical.
+WHOLLY_BRACKETED = re.compile(r"\(.*\)")
+
 SECTION_HEADINGS = frozenset({
     "غزلیں", "نعت", "نظمیں", "حمد", "قطعات", "رباعیات",
     "نیند میں چلتے ہوئے", "چہار دریا", "ہست و بود", "اعادہ", "حقیقت", "گل سیمیا",
@@ -201,6 +224,65 @@ def running_headers(paragraphs: list[Paragraph]) -> set[str]:
     return {text for text, n in counts.items() if n > RUNNING_HEADER_MIN}
 
 
+def _is_colophon(text: str) -> bool:
+    """A short line signing a poem with the date and place it was written.
+
+    Two independent ways in, because InPage stores digits separately from the
+    text and they do not always survive decoding. A colophon does two jobs —
+    it becomes the piece's `written_note`, and it CLOSES the poem it follows —
+    so a missed one does not merely lose metadata, it welds the next poem onto
+    the last. جلد ۲'s largest نظم piece was 365 lines for that reason.
+
+    `YEAR` — four Urdu digits then ء/ئ — is the original rule and is kept
+    unchanged: it catches every colophon whose digits did survive (117 in
+    کلیات جلد ۲, 11 in جلد ۱, 1 in تجاوز) and does not depend on a month
+    being named at all.
+
+    `MONTH_YEAR` is the added path, for the colophons whose digits vanished:
+    `یکم دسمبرئ۔ لاہور`, `، اپریل ئ۔ لاہور`, `دسمبر ئ۔ لاہور`. It finds 52
+    more in کلیات جلد ۲, 1 in جلد ۱, and 0 in either promoted book — neither
+    تجاوز nor باغِ نشاط has a digit-stripped colophon anywhere, so neither can
+    move, and a before/after dump of both confirms they do not.
+
+    Both the month AND the year marker are required, never either alone:
+
+    * A month alone is not evidence. A poem may simply name one, and the
+      count of month-naming lines in جلد ۲ (179) is three times the count of
+      colophons among them.
+    * ء/ئ alone is far weaker still — کوئی and ہوئی each carry one, so the
+      letter says nothing about a line.
+    * Nor is "a month somewhere and a hamza somewhere" enough. Requiring the
+      marker in the YEAR'S OWN POSITION — separated from the month only by
+      the digits that vanished and their punctuation — is what excludes
+      جلد ۲ ¶1090, a real line of verse that contains both: گُلِ غیب کی آگ سے
+      رنگ لیتی ہوئی سُرمئی بے کلی (سُرمئی holds مئی, and its own ئ). That is
+      the single false positive the loose form admits, and the tight one
+      admits none.
+
+    The length bound stays for the same reason it was there: جلد ۱'s اعتذار
+    and the biographical note are 333-722 character essays that name months
+    and carry a stray ئ, and an essay is not a signature.
+
+    A wholly-bracketed line is refused by the new path only. کلیات جلد ۱
+    prints four publisher imprints shaped almost like colophons — ¶248, ¶2125,
+    ¶6789, ¶7874, e.g. (یکم اکتوبر ئ،اورینٹ پبلشرز،لاہور) — each sitting on a
+    collection's title page between its name and its dedication. اورینٹ
+    پبلشرز is not where a poem was written, so calling one a colophon would
+    stamp a publisher onto the preceding ghazal's `written_note`; and those
+    lines are part of the title-page block `attribute_gathered_collections`
+    reads to place collection boundaries, which must not move. Brackets are
+    the shape that separates the two: none of جلد ۲'s 52 digit-stripped
+    colophons is bracketed, and every bracketed date that IS a colophon
+    (تجاوز ¶83 (۵-مئی ۲۰۲۳ئ), جلد ۱ ¶264, ¶5294) kept its four digits, so the
+    `YEAR` path still claims it and the exclusion costs nothing.
+    """
+    if len(text) > COLOPHON_MAX:
+        return False
+    if YEAR.search(text):
+        return True
+    return bool(MONTH_YEAR.search(text)) and not WHOLLY_BRACKETED.fullmatch(text)
+
+
 def _kind(text: str, in_body: bool, running: set[str]) -> str:
     if text == SEPARATOR_TEXT:
         return SEPARATOR
@@ -210,7 +292,7 @@ def _kind(text: str, in_body: bool, running: set[str]) -> str:
         return RUNNING_HEADER
     if skeleton(text) in NORMALISED_HEADINGS:
         return HEADING
-    if len(text) <= COLOPHON_MAX and YEAR.search(text):
+    if _is_colophon(text):
         return COLOPHON
     if len(text) >= PROSE_MIN:
         return PROSE

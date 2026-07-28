@@ -112,6 +112,82 @@ class TestKinds(unittest.TestCase):
             self.kinds([para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1)] + BODY)[0], classify.COLOPHON
         )
 
+    def test_a_colophon_whose_digits_were_stripped_is_a_colophon(self):
+        # InPage stores digits separately and they do not always survive
+        # decoding. The four-digit rule above misses every such line — 52 of
+        # them in کلیات جلد ۲, where a colophon is what closes the نظم it
+        # follows. The month name and the year's hamza are what is left.
+        self.assertEqual(
+            self.kinds([para("یکم دسمبرئ۔ لاہور", 1)] + BODY)[0], classify.COLOPHON
+        )
+
+    def test_a_month_with_a_space_before_the_year_marker_is_a_colophon(self):
+        # The vanished digits leave a gap of their own: `، اپریل ئ۔ لاہور`.
+        self.assertEqual(
+            self.kinds([para("، اپریل ئ۔ لاہور", 1)] + BODY)[0], classify.COLOPHON
+        )
+
+    def test_a_verse_line_naming_a_month_is_not_a_colophon(self):
+        # A month alone is not evidence: a poem may simply name one. Without
+        # the year marker in the year's own position this stays verse.
+        self.assertEqual(
+            self.kinds(BODY + [para("اپریل کی شام ڈھلی تو مجھے یاد آیا", 1)])[-1],
+            classify.VERSE,
+        )
+
+    def test_a_month_far_from_the_year_marker_is_not_a_colophon(self):
+        # ء/ئ is far too common a letter to accept anywhere in the line —
+        # کوئی alone carries one. The marker must sit where the year sits,
+        # separated from the month only by the digits that vanished and their
+        # punctuation. کلیات جلد ۲ ¶1090, a real line of verse, is the
+        # measured case: گُلِ غیب کی آگ سے رنگ لیتی ہوئی سُرمئی بے کلی
+        # contains both مئی and ئ and must stay verse.
+        self.assertEqual(
+            self.kinds(
+                BODY + [para("گُلِ غیب کی آگ سے رنگ لیتی ہوئی سُرمئی بے کلی", 1)]
+            )[-1],
+            classify.VERSE,
+        )
+
+    def test_a_year_marker_without_a_month_is_not_a_colophon_by_this_path(self):
+        # The new path adds nothing on its own to a line with no month name;
+        # only the four-digit rule can classify such a line.
+        self.assertEqual(
+            self.kinds(BODY + [para("کوئی صورت نظر نہیں آتی ئ", 1)])[-1],
+            classify.VERSE,
+        )
+
+    def test_a_bracketed_publisher_imprint_is_not_a_colophon(self):
+        # Shaped like a colophon but printed on a collection's title page:
+        # کلیات جلد ۱ has four (¶248, ¶2125, ¶6789, ¶7874), each sitting
+        # between the collection's name and its dedication. A publisher is
+        # not where a poem was written, and those lines are part of the
+        # title-page block `attribute_gathered_collections` reads. A whole
+        # line in brackets is the shape that marks them: none of جلد ۲'s 52
+        # digit-stripped colophons is bracketed, and every bracketed date
+        # that IS a colophon (تجاوز ¶83, جلد ۱ ¶264, ¶5294) kept its four
+        # digits and is still caught by the rule above.
+        self.assertEqual(
+            self.kinds([para("(یکم اکتوبر ئ،اورینٹ پبلشرز،لاہور)", 1)] + BODY)[0],
+            classify.FRONT_MATTER,
+        )
+
+    def test_a_bracketed_colophon_that_kept_its_digits_is_still_a_colophon(self):
+        # تجاوز ¶83. The bracket rule narrows only the new month path.
+        self.assertEqual(
+            self.kinds([para("(۵-مئی ۲۰۲۳ئ)", 1)] + BODY)[0], classify.COLOPHON
+        )
+
+    def test_a_long_line_naming_a_month_and_a_year_is_not_a_colophon(self):
+        # The length bound stays: جلد ۱'s biographical note and اعتذار are
+        # prose paragraphs of 333-722 characters that name months and carry
+        # a stray ئ, and they are essays, not signatures.
+        self.assertEqual(
+            self.kinds([para("یہ جنوری ئ کی کسی سرد شام کا واقعہ ہے۔ " * 12, 67)]
+                       + BODY)[0],
+            classify.PROSE,
+        )
+
     def test_long_paragraph_is_prose(self):
         self.assertEqual(self.kinds([para("ا" * 300, 67)] + BODY)[0], classify.PROSE)
 
