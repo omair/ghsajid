@@ -11,6 +11,7 @@ digits-only — so the ORDER below is part of the specification, not an
 implementation detail.
 """
 
+import collections
 import re
 
 from .groundtruth import skeleton
@@ -24,6 +25,7 @@ PROSE = "prose"
 VERSE = "verse"
 FRONT_MATTER = "front_matter"
 UNKNOWN = "unknown"
+RUNNING_HEADER = "running_header"
 
 VERSE_MIN = 15
 VERSE_MAX = 62
@@ -64,6 +66,12 @@ SECTION_HEADINGS = frozenset({
 # source heading (گُل سیمیا) still records the section as گل سیمیا, matching
 # SECTION_HEADINGS rather than whatever spelling the source happened to use.
 NORMALISED_HEADINGS = {skeleton(heading): heading for heading in SECTION_HEADINGS}
+
+# Measured across all four books. A body heading occurs either 1-5 times
+# (نعت 5, غزلیں 2, حمد 1, نظمیں 1) or 89-209 (نیند میں چلتے ہوئے 209,
+# گُلِ سیمیا 197, اِعادہ 179, ہست و بود 158, حقیقت 137, چہار دریا 89) —
+# a gap 84 wide. 10 sits in the middle of it, tuned to neither edge.
+RUNNING_HEADER_MIN = 10
 
 
 def _is_verse_length(text: str) -> bool:
@@ -134,11 +142,28 @@ def _last_separator_before(paragraphs: list[Paragraph], index: int) -> int:
     return index
 
 
-def _kind(text: str, in_body: bool) -> str:
+def running_headers(paragraphs: list[Paragraph]) -> set[str]:
+    """Heading texts that are page furniture rather than section markers.
+
+    Counted only inside the body: a فہرست lists section names too, and those
+    are front matter, not evidence of a running header.
+    """
+    start = body_start_index(paragraphs)
+    counts = collections.Counter(
+        para.text.strip()
+        for para in paragraphs[start:]
+        if skeleton(para.text.strip()) in NORMALISED_HEADINGS
+    )
+    return {text for text, n in counts.items() if n > RUNNING_HEADER_MIN}
+
+
+def _kind(text: str, in_body: bool, running: set[str]) -> str:
     if text == SEPARATOR_TEXT:
         return SEPARATOR
     if TOC_LINE.fullmatch(text):
         return TOC
+    if in_body and text in running:
+        return RUNNING_HEADER
     if skeleton(text) in NORMALISED_HEADINGS:
         return HEADING
     if len(text) <= COLOPHON_MAX and YEAR.search(text):
@@ -159,8 +184,9 @@ def _kind(text: str, in_body: bool) -> str:
 def classify(paragraphs: list[Paragraph]) -> list[str]:
     """Return one kind per paragraph, in order."""
     start = body_start_index(paragraphs)
+    running = running_headers(paragraphs)
     return [
-        _kind(para.text.strip(), index >= start)
+        _kind(para.text.strip(), index >= start, running)
         for index, para in enumerate(paragraphs)
     ]
 
