@@ -44,6 +44,7 @@ from .ole import read_text_stream
 from .promote import promote
 from .report import render, restamp_report
 from .segment import segment as segment_paragraphs
+from tools.migrate.urdu import slugify
 
 SOURCES = {
     "tajawuz": Path("inp/TAJAWUZ.INP"),
@@ -217,11 +218,38 @@ def cmd_segment(book_slug: str) -> None:
     _, slugs, problems = write_segments(segments, book_slug, out)
     gate_output.extend(problems)
     book_contents, book_slugs = book_contents_and_slugs(segments, slugs)
-    write_book(
-        Book(title=TITLES[book_slug], slug=book_slug, contents=book_contents),
-        book_slugs,
-        out,
-    )
+
+    # Group pieces and their resolved slugs together, positionally. write_book
+    # requires the two lists to correspond index for index.
+    pieces_by: dict[str, list[Segment]] = {}
+    slugs_by: dict[str, list[str]] = {}
+    for piece, slug in zip(book_contents, book_slugs):
+        pieces_by.setdefault(piece.collection, []).append(piece)
+        slugs_by.setdefault(piece.collection, []).append(slug)
+
+    if list(pieces_by) == [""]:
+        # No running headers — تجاوز, باغِ نشاط, کلیات جلد ۱. The book is its
+        # own single record.
+        write_book(
+            Book(title=TITLES[book_slug], slug=book_slug, contents=book_contents),
+            book_slugs,
+            out,
+        )
+    else:
+        for collection, pieces in pieces_by.items():
+            if not collection:
+                # Front matter, and anything before the first page header.
+                continue
+            write_book(
+                Book(
+                    title=collection,
+                    slug=slugify(collection),
+                    collected_in=book_slug,
+                    contents=pieces,
+                ),
+                slugs_by[collection],
+                out,
+            )
     (out / "segments.json").write_text(
         json.dumps([asdict(s) for s in segments], ensure_ascii=False, indent=2),
         encoding="utf-8",

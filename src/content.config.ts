@@ -68,7 +68,9 @@ export const collections = {
       publisher: z.string().optional(),
       // Omitted until the InPage digit codes are mapped; never guessed.
       year: z.number().int().optional(),
-      volume_of: z.string().optional(),
+      // Which کلیات volume a collection was read from — provenance, not
+      // authorship. The collection is the book a reader means.
+      collected_in: z.string().optional(),
       contents: z.array(
         z.object({
           section: z.string().optional(),

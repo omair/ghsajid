@@ -63,5 +63,8 @@ class Book:
     slug: str
     publisher: str = ""
     year: int | None = None
-    volume_of: str = ""
+    # Which کلیات volume this collection was read from. Provenance, not
+    # authorship: کلیات جلد ۲ gathered نیند میں چلتے ہوئے, it did not publish
+    # it, and the collection is the book a reader means.
+    collected_in: str = ""
     contents: list[Segment] = field(default_factory=list)

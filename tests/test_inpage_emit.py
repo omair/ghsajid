@@ -429,3 +429,25 @@ class TestPromoteAcceptsReviews(unittest.TestCase):
 
         self.assertNotIn("front_matter", KNOWN_KINDS)
         self.assertNotIn("toc", KNOWN_KINDS)
+
+
+class TestBookPerCollection(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def test_the_record_names_the_volume_it_was_collected_in(self):
+        book = Book(
+            title="نیند میں چلتے ہوئے",
+            slug="nind-mein-chalte-hoe",
+            collected_in="kulliyat-jild-2",
+        )
+        text = write_book(book, [], self.root).read_text(encoding="utf-8")
+        self.assertIn('collected_in: "kulliyat-jild-2"', text)
+
+    def test_collected_in_is_omitted_when_absent(self):
+        book = Book(title="تجاوز", slug="tajawuz")
+        text = write_book(book, [], self.root).read_text(encoding="utf-8")
+        self.assertNotIn("collected_in", text)

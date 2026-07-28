@@ -149,8 +149,8 @@ def write_book(book: Book, slugs: list[str], root: Path) -> Path:
         lines.append(f'publisher: "{book.publisher}"')
     if book.year is not None:
         lines.append(f"year: {book.year}")
-    if book.volume_of:
-        lines.append(f'volume_of: "{book.volume_of}"')
+    if book.collected_in:
+        lines.append(f'collected_in: "{book.collected_in}"')
     lines.append("contents:")
     for segment, slug in zip(book.contents, slugs, strict=True):
         section = f' section: "{segment.section}",' if segment.section else ""
