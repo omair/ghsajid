@@ -21,6 +21,8 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .checks import (
+    KULLIYAT_VOLUMES,
+    TOC_FIRST_LINE_BASELINE,
     VERSE_KINDS,
     clear_unverifiable_sections,
     completeness_errors,
@@ -28,7 +30,9 @@ from .checks import (
     flag_decode_garbage,
     lexicon_report,
     roundtrip_errors,
+    segmentation_groundtruth_errors,
     toc_count_errors,
+    toc_first_line_baseline_errors,
     verse_errors,
 )
 from .decode import decode, excluded_report
@@ -165,6 +169,23 @@ def cmd_segment(book_slug: str) -> None:
         + flag_decode_garbage(segments, lexicon)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(paragraphs, segments)
+        # The کلیات-only gates. Both are wired by slug for the same reason
+        # gate C above is not wired per book at all: the 11 ground-truth
+        # ghazals exist only in these two volumes, so running the
+        # segmentation gate against تجاوز would report 0 of 11 every single
+        # run, and a gate that always fails is a gate nobody reads. Each
+        # volume is asked only for its own share of the 11 (KULLIYAT_VOLUMES)
+        # and against its own measured index floor (TOC_FIRST_LINE_BASELINE).
+        + segmentation_groundtruth_errors(
+            segments, KULLIYAT_VOLUMES.get(book_slug, ())
+        )
+        + (
+            toc_first_line_baseline_errors(
+                paragraphs, segments, TOC_FIRST_LINE_BASELINE[book_slug]
+            )
+            if book_slug in TOC_FIRST_LINE_BASELINE
+            else []
+        )
     )
     if dropped_unknowns:
         # The spec says unknown is flagged and retained, never dropped — but

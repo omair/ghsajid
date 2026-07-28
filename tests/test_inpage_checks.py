@@ -2,7 +2,10 @@ import unittest
 
 from tools.inpage import checks
 from tools.inpage.checks import conservation_errors, toc_count_errors
-from tools.inpage.groundtruth import EXPECTED_LINES_TOTAL, MIN_LINES_MATCHED, MIN_WHOLE_GHAZALS
+from tools.inpage.groundtruth import (
+    EXPECTED_LINES_TOTAL, KNOWN_GHAZALS, MIN_LINES_MATCHED,
+    MIN_WHOLE_GHAZALS, site_text, skeleton,
+)
 from tools.inpage.models import Paragraph, Segment
 
 
@@ -379,6 +382,124 @@ class TestConservationGate(unittest.TestCase):
             ),
         ]
         self.assertEqual(conservation_errors(paragraphs, segments), [])
+
+
+class TestSegmentationGroundTruth(unittest.TestCase):
+    """Gate 1 — each of the 11 known ghazals must be exactly one piece.
+
+    The pieces here are built from the committed site text itself, so the
+    fixture is the same ground truth the gate reads in production rather than
+    a paraphrase of it.
+    """
+
+    def _pieces(self):
+        return [
+            Segment(kind="ghazals", title=slug, body=site_text(slug), order=i)
+            for i, slug in enumerate(KNOWN_GHAZALS, start=1)
+        ]
+
+    def test_silent_when_every_ghazal_is_exactly_one_piece(self):
+        self.assertEqual(
+            checks.segmentation_groundtruth_errors(self._pieces()), []
+        )
+
+    def test_reports_a_ghazal_no_piece_holds(self):
+        errors = checks.segmentation_groundtruth_errors(
+            [Segment(kind="ghazals", title="x", body="ا" * 40, order=1)]
+        )
+        self.assertEqual(len(errors), len(KNOWN_GHAZALS))
+        self.assertIn(KNOWN_GHAZALS[0], errors[0])
+        self.assertIn("0", errors[0])
+
+    def test_reports_a_ghazal_split_across_two_pieces(self):
+        # The failure a running page header causes: the opening survives in
+        # one piece and the rest lands in the next.
+        pieces = self._pieces()
+        victim = pieces[0]
+        lines = [ln for ln in victim.body.splitlines() if skeleton(ln)]
+        half = len(lines) // 2
+        victim.body = "\n".join(lines[:half])
+        pieces.append(
+            Segment(kind="ghazals", title="tail", order=99,
+                    body="\n".join(lines[half:]))
+        )
+        errors = checks.segmentation_groundtruth_errors(pieces)
+        self.assertEqual(len(errors), 1)
+        self.assertIn(KNOWN_GHAZALS[0], errors[0])
+        self.assertIn("2", errors[0])
+
+    def test_reports_a_ghazal_fused_behind_another(self):
+        # Fusion, which a bare holder count cannot see: both ghazals are in
+        # one piece, so each has exactly one holder. Only the second one
+        # fails to open its piece.
+        pieces = self._pieces()
+        first, second = pieces[0], pieces[1]
+        first.body = f"{first.body}\n{second.body}"
+        pieces.remove(second)
+        errors = checks.segmentation_groundtruth_errors(pieces)
+        self.assertEqual(len(errors), 1)
+        self.assertIn(KNOWN_GHAZALS[1], errors[0])
+
+    def test_the_volume_map_covers_every_known_ghazal_exactly_once(self):
+        # The per-book wiring narrows the gate to one volume's share. If that
+        # map ever drifts from KNOWN_GHAZALS, a ghazal silently stops being
+        # gated anywhere — the failure this whole gate exists to prevent.
+        listed = [
+            slug for slugs in checks.KULLIYAT_VOLUMES.values() for slug in slugs
+        ]
+        self.assertEqual(sorted(listed), sorted(KNOWN_GHAZALS))
+        self.assertEqual(len(listed), len(set(listed)))
+
+    def test_a_prose_piece_quoting_a_ghazal_is_not_a_second_holder(self):
+        # The فہرست and the critic's essay both reproduce lines of these
+        # ghazals. Counting them would report a false split on every run.
+        pieces = self._pieces()
+        pieces.append(
+            Segment(kind="reviews", title="essay", order=98,
+                    body=site_text(KNOWN_GHAZALS[0]))
+        )
+        self.assertEqual(checks.segmentation_groundtruth_errors(pieces), [])
+
+
+class TestKulliyatIndexBaseline(unittest.TestCase):
+    """Gate 2 — the partial index as a floor, explicitly not a census."""
+
+    FRONT = [
+        vpara("جسم کی خوشبو الگ سے", 80),
+        vpara("چاٹ لیتی ہے یہ فکر و خیال", 80),
+    ]
+    BODY = [
+        vpara("جسم کی خوشبو الگ سے", 73), vpara("میرے دل کا جادو الگ", 1),
+        vpara("چاٹ لیتی ہے یہ فکر", 89), vpara("ہو نہ جائے تو الگ", 1),
+    ]
+
+    def _fixture(self):
+        paragraphs = self.FRONT + self.BODY
+        segments = [
+            Segment(
+                kind="ghazals", title="t", order=1,
+                body="جسم کی خوشبو الگ سے\nمیرے دل کا جادو الگ",
+            )
+        ]
+        return paragraphs, segments
+
+    def test_silent_when_the_floor_is_met(self):
+        paragraphs, segments = self._fixture()
+        self.assertEqual(
+            checks.toc_first_line_baseline_errors(paragraphs, segments, 1), []
+        )
+
+    def test_reports_when_the_baseline_falls_below_the_floor(self):
+        paragraphs, segments = self._fixture()
+        errors = checks.toc_first_line_baseline_errors(paragraphs, segments, 2)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("1", errors[0])
+        self.assertIn("2", errors[0])
+
+    def test_the_message_denies_being_a_census(self):
+        paragraphs, segments = self._fixture()
+        errors = checks.toc_first_line_baseline_errors(paragraphs, segments, 2)
+        self.assertIn("census", errors[0])
 
 
 if __name__ == "__main__":
