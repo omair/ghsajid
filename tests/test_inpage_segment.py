@@ -4,6 +4,7 @@ from unittest import mock
 from tools.inpage.models import Paragraph, Segment
 from tools.inpage.segment import (
     KULLIYAT_JILD_1_COLLECTIONS, MAX_TITLE_LENGTH, _is_ghazal_shaped,
+    _position_collection,
     attribute_gathered_collections, collection_boundary_dedication, is_matla,
     pair_shers, run_rhyme, segment, split_ghazals,
 )
@@ -509,38 +510,46 @@ class TestRunningHeadersInAssembly(unittest.TestCase):
         elsewhere = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
         return FRONT + GHAZAL + shers[:4] + [para(self.HEADER, 60)] + shers[4:] + elsewhere
 
-    def test_a_page_header_does_not_split_a_ghazal(self):
+    def test_a_page_header_ends_the_run_it_interrupts(self):
+        # This used to assert the opposite, on the reasoning that 972 running
+        # headers in کلیات vol 2 would cut a ghazal at every page turn. That
+        # count is of the whole book and is almost entirely the back-of-book
+        # فہرست, where every index line prints its collection's name.
+        # Measured where it matters — a header sitting BETWEEN two verse
+        # paragraphs — there are six such sites in the whole corpus (four in
+        # جلد ۱, two in جلد ۲) and every one is a collection's title page,
+        # exactly where a piece must end. Reading through them welded موسم's
+        # last ghazal onto عناصر's title page and جادو onto نیند میں چلتے
+        # ہوئے's title poem.
         pieces = [p for p in segment(self._with_header_mid_ghazal())
                   if p.kind == "ghazals"]
-        # The header falls between the sher numbered 2 and the sher numbered
-        # 3. If it split the run, those two shers would land in different
-        # pieces; this is the exact scenario -- a ghazal spanning a page
-        # boundary -- that 972 running headers in vol 2 would otherwise cut
-        # in half. (Not checked by exact sher count: `_clean_shers`' distinct
-        # per-sher endings are deliberately non-rhyming, so once merged with
-        # a real preceding ghazal in one continuous run, `run_rhyme`'s
-        # look-ahead window -- a property of split_ghazals/run_rhyme, not of
-        # this task's header handling -- dilutes past MIN_RHYME and the
-        # whole run lands in a single piece rather than a piece of exactly
-        # four. That is a stronger result than "not split", not a weaker
-        # one, so the piece-identity check below is what actually matters.)
         before = [p for p in pieces if "نمبر 2" in p.body]
         after = [p for p in pieces if "نمبر 3" in p.body]
         self.assertTrue(before, "sher 2 reached no ghazal piece")
         self.assertTrue(after, "sher 3 reached no ghazal piece")
-        self.assertIs(before[0], after[0], "the ghazal was split across the header")
+        self.assertIsNot(
+            before[0], after[0], "the header did not end the run"
+        )
 
-    def test_a_header_mid_ghazal_does_not_relabel_a_piece_that_starts_before_it(self):
-        # This piece is the whole run merged into one (see the dilution note
-        # above): its own first line is GHAZAL's, which sits before the
-        # header, so it must take the collection in force there -- "" -- not
-        # the header seen later in the same run. Stamping it with the header
-        # is exactly کلیات جلد ۲'s bug: a running variable advanced past the
-        # header and every piece in the run inherited the LAST header seen,
-        # not the one where the piece's own lines actually sit.
+    def test_no_piece_holds_text_from_both_sides_of_a_header(self):
+        # The structural form of the "last header wins" guard: کلیات جلد ۲'s
+        # bug was a piece whose own lines straddled a header inheriting the
+        # LAST header seen rather than the one in force where its lines sit.
+        # A piece can no longer straddle a header at all — a verse run ends
+        # at one and an essay region is closed by one — so no piece can be
+        # stamped with a name its own earlier lines never saw.
+        pieces = segment(self._with_header_mid_ghazal())
+        for piece in pieces:
+            with self.subTest(order=piece.order):
+                self.assertFalse(
+                    "نمبر 2" in piece.body and "نمبر 3" in piece.body
+                )
+
+    def test_the_piece_after_the_header_takes_its_name(self):
         pieces = [p for p in segment(self._with_header_mid_ghazal())
                   if p.kind == "ghazals"]
-        self.assertEqual(pieces[-1].collection, "")
+        after = [p for p in pieces if "نمبر 3" in p.body]
+        self.assertEqual(after[0].collection, self.HEADER)
 
     def test_a_real_section_heading_still_breaks_the_run(self):
         pieces = segment(FRONT + GHAZAL + [para("نعت", 60)] + _clean_shers(1, 2))
@@ -636,8 +645,8 @@ class TestPositionAttributedCollection(unittest.TestCase):
         self.assertEqual(pieces[0].collection, self.HEADER)
 
     def test_a_book_with_no_running_headers_leaves_collections_empty(self):
-        # تجاوز, باغِ نشاط and کلیات جلد ۱'s shape: no running header
-        # anywhere, so nothing is attributed and every collection stays "".
+        # تجاوز and باغِ نشاط's shape: no line repeats often enough to be a
+        # header, so nothing is attributed and every collection stays "".
         pieces = segment(FRONT + GHAZAL)
         self.assertEqual([p.collection for p in pieces], [""])
 
@@ -650,23 +659,35 @@ class TestPositionAttributedCollection(unittest.TestCase):
         self.assertEqual(attributed, [pieces[0]])
 
     def test_a_piece_straddling_the_first_header_is_not_relabeled(self):
-        # The exact TestRunningHeadersInAssembly fixture: one ghazal-shaped
-        # run continues across the book's very first header. Its own first
-        # line sits before that header, but its own last line sits after
-        # it — it must keep "", not inherit the header seen partway through
-        # its own text.
-        from tools.inpage.classify import RUNNING_HEADER_MIN
-        shers = _clean_shers(1, 4)
-        elsewhere = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
-        paragraphs = (
-            FRONT + GHAZAL + shers[:4] + [para(self.HEADER, 60)] + shers[4:]
-            + elsewhere
+        # The rule itself, exercised directly on `_position_collection`. It
+        # used to be reachable through segment(): a ghazal-shaped run ran
+        # across the book's first header and the whole run became one piece
+        # whose own first line sat before it. A header now ends the run it
+        # interrupts (see TestRunningHeadersInAssembly), so no piece in any
+        # book can straddle one any more — the invariant is enforced by
+        # structure, and this is what still guards the rule that enforced it.
+        natural, attributed = _position_collection(
+            "", last_index=12, first_header_index=8,
+            first_header_name=self.HEADER,
         )
-        attributed: list = []
-        pieces = [p for p in segment(paragraphs, None, None, attributed)
-                  if p.kind == "ghazals"]
-        self.assertEqual(pieces[-1].collection, "")
-        self.assertEqual(attributed, [])
+        self.assertEqual(natural, "")
+        self.assertFalse(attributed)
+
+    def test_a_piece_wholly_before_the_first_header_is_backfilled(self):
+        natural, attributed = _position_collection(
+            "", last_index=4, first_header_index=8,
+            first_header_name=self.HEADER,
+        )
+        self.assertEqual(natural, self.HEADER)
+        self.assertTrue(attributed)
+
+    def test_a_piece_with_its_own_name_is_left_alone(self):
+        natural, attributed = _position_collection(
+            "چہار دریا", last_index=4, first_header_index=8,
+            first_header_name=self.HEADER,
+        )
+        self.assertEqual(natural, "چہار دریا")
+        self.assertFalse(attributed)
 
 
 class TestRunningHeaderClosesEssayRegion(unittest.TestCase):

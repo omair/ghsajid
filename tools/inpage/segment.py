@@ -151,11 +151,17 @@ def collections_at(paragraphs: list[Paragraph], kinds: list[str]) -> list[str]:
 
 # --- کلیات جلد ۱: the books it gathers, and how it delimits them -----------
 #
-# کلیات جلد ۲ prints the current collection's name atop every page, so
-# `collections_at` reads a poem's collection straight off the page. کلیات
-# جلد ۱ prints no running header at all — `running_headers` returns the empty
-# set for it — and its 570 poems were therefore attributed to nothing: one
-# book record for six separately-published books.
+# `collections_at` reads a poem's collection off the page headers, and both
+# کلیات volumes have them. That is NOT enough for جلد ۱, and the reason is
+# specific: موسم is the volume's first collection and its name is never
+# printed as a paragraph before its poems — the first موسم paragraph in the
+# book is at index 9796, in the back-of-book فہرست, long after its 130
+# ghazals are done. Every other collection's name is printed once, on its
+# title page, where its poems begin. With headers alone the 130 موسم poems
+# are backfilled with the earliest header that does exist, عناصر, which then
+# reads 231 poems instead of the 100 its own فہرست declares. The title pages
+# below are what name موسم and where عناصر actually starts. This is what
+# this path contributes over the general one, and the whole of it.
 #
 # It delimits those books the way the printed books themselves do. Each one
 # opens, INSIDE the body, with its own title page: an imprint (month, year,
@@ -493,9 +499,9 @@ def segment(
 
         if kind == RUNNING_HEADER:
             # Page furniture: it names the collection (already captured for
-            # every paragraph by `collections`, computed up front) and is
-            # otherwise invisible. Emphatically no flush — 972 of these in
-            # کلیات vol 2 would cut a ghazal at every page turn.
+            # every paragraph by `collections`, computed up front) and forms
+            # no piece of its own. It does END the verse run it interrupts —
+            # see the VERSE branch below for the measurement.
             index += 1
             continue
 
@@ -578,7 +584,21 @@ def segment(
 
         if kind == VERSE:
             start = index
-            while index < len(paragraphs) and kinds[index] in (VERSE, RUNNING_HEADER):
+            # A RUNNING_HEADER ends the run. It used to be read through, on
+            # the reasoning that 972 of them in کلیات vol 2 would cut a
+            # ghazal at every page turn — but that count is of the whole
+            # book, and almost all of it is the back-of-book فہرست, where
+            # each index line prints its collection's name. Measured where
+            # it matters, a header sits BETWEEN two verse paragraphs 4 times
+            # in کلیات جلد ۱ (عناصر، کتابِ صبح، معاملہ، روداد) and twice in
+            # جلد ۲ (نیند میں چلتے ہوئے، چہار دریا) — six sites in the whole
+            # corpus, and every one of them is a collection's title page,
+            # exactly where a piece must end. Reading through them welded
+            # موسم's last ghazal onto عناصر's title page (which then took
+            # the ghazal's own کے لیے radif for عناصر's dedication and lost
+            # the attribution of all 100 of its poems) and welded the نظم
+            # جادو onto نیند میں چلتے ہوئے's title poem.
+            while index < len(paragraphs) and kinds[index] == VERSE:
                 index += 1
             # `run` and `run_collections` are built in the same pass, kept
             # parallel: `split_ghazals` returns groups of shers, each 1 or 2
@@ -586,14 +606,9 @@ def segment(
             # lockstep with those groups is what lets each piece take the
             # collection where its OWN first line sits, rather than the
             # collection in force once the whole run has been scanned.
-            run: list[Paragraph] = []
-            run_collections: list[str] = []
-            run_indices: list[int] = []
-            for i in range(start, index):
-                if kinds[i] == VERSE:
-                    run.append(paragraphs[i])
-                    run_collections.append(collections[i])
-                    run_indices.append(i)
+            run: list[Paragraph] = list(paragraphs[start:index])
+            run_collections: list[str] = collections[start:index]
+            run_indices: list[int] = list(range(start, index))
             if _is_ghazal_shaped(run):
                 # A ghazal is titled by its matlaa, never by title_candidate —
                 # a pending candidate here is moot and reaches no piece.

@@ -203,6 +203,37 @@ class TestRunningHeaders(unittest.TestCase):
         paras = [para("نعت", 60)] * 20 + self.body()
         self.assertEqual(classify.running_headers(paras), set())
 
+    def test_a_repeated_line_is_a_header_whatever_its_text(self):
+        # کلیات جلد ۱ prints موسم، عناصر، کتابِ صبح، آیندہ، معاملہ، روداد
+        # atop its pages — none of them a name any list here anticipated.
+        # Detection is by repetition, not by recognising the name.
+        paras = self.body(
+            [para("موسم", 60)] * (classify.RUNNING_HEADER_MIN + 1)
+        )
+        self.assertIn("موسم", classify.running_headers(paras))
+        self.assertEqual(classify.classify(paras)[-1], classify.RUNNING_HEADER)
+
+    def test_the_separator_is_never_a_running_header(self):
+        # ۰۰۰ repeats freely (11 times in کلیات جلد ۲) and is punctuation.
+        paras = self.body(
+            [para(classify.SEPARATOR_TEXT, 60)]
+            * (classify.RUNNING_HEADER_MIN + 1)
+        )
+        self.assertEqual(classify.running_headers(paras), set())
+        self.assertEqual(classify.classify(paras)[-1], classify.SEPARATOR)
+
+    def test_a_prose_length_repeat_is_not_a_running_header(self):
+        # A page header is a short line. Prose is never page furniture.
+        prose = "ا" * classify.PROSE_MIN
+        paras = self.body([para(prose, 60)] * (classify.RUNNING_HEADER_MIN + 1))
+        self.assertEqual(classify.running_headers(paras), set())
+
+    def test_the_threshold_clears_the_measured_noise(self):
+        # The real headers run 89-209 across the two کلیات volumes; the
+        # highest non-header repeat measured anywhere is فہرست at 26.
+        self.assertGreater(classify.RUNNING_HEADER_MIN, 26)
+        self.assertLess(classify.RUNNING_HEADER_MIN, 89)
+
 
 if __name__ == "__main__":
     unittest.main()

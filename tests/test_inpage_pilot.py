@@ -230,10 +230,11 @@ class TestHumareBeechCollection(unittest.TestCase):
         self.assertIn("ساجد", other.body.split("\n\n")[-1])
 
 
-# کلیات جلد ۱ prints no running page header, so no page names the collection
-# a poem belongs to. It gathers six separately-published books all the same,
-# each introduced inside the body by its own title page — an imprint and a
-# dedication. The ranges below are the poems BETWEEN those title pages; the
+# کلیات جلد ۱ gathers six separately-published books, each introduced inside
+# the body by its own title page — an imprint and a dedication. Its page
+# headers name five of the six, but never موسم, the first (see
+# test_the_headers_alone_still_cannot_name_موسم), so the title pages are what
+# resolve the volume. The ranges below are the poems BETWEEN them; the
 # title page itself is neither book's poem and is left unattributed.
 #
 # موسم and عناصر are the two the volume's own فہرست counts: بہار / سعیر /
@@ -254,8 +255,16 @@ JILD_1_COLLECTIONS = (
 # Spelled exactly as the source prints them, diacritics and all — InPage puts
 # the pesh of ہست و بُود and گُلِ سیمیا before its letter rather than over it,
 # and the header text is taken verbatim.
+#
+# نیند میں چلتے ہوئے reads 92, not the 90 it read while a page header was
+# read straight through a verse run: the header at paragraph 1150 is that
+# collection's title page, and reading through it welded the نظم جادو onto
+# the collection's own title poem (‘‘مجھے مدّت سے گہری نیند میں چلنے کی عادت
+# ہے’’) as one piece belonging to no collection. Ending the run at the header
+# separates them and gives each its name. This is the only piece in the
+# volume the change moves.
 JILD_2_COLLECTIONS = {
-    "نیند میں چلتے ہوئے": 90,
+    "نیند میں چلتے ہوئے": 92,
     "چہار دریا": 51,
     "ہست و  ُبود": 100,
     "اِعادہ": 102,
@@ -298,10 +307,32 @@ class TestKulliyatJild1Collections(unittest.TestCase):
                 self.assertNotEqual(at, -1, f"{name} is not on the title page")
         self.assertEqual(positions, sorted(positions), "and in this order")
 
-    def test_the_volume_prints_no_running_header(self):
-        # The premise of this whole path: جلد ۲'s mechanism cannot work here.
+    def test_the_volume_does_print_page_headers_after_all(self):
+        # This used to assert the opposite. `running_headers` recognised
+        # only names on a hardcoded list, and none of جلد ۱'s six are on it,
+        # so the volume looked headerless and 941 of its paragraphs fell
+        # through to UNKNOWN. Detected by repetition instead, all six come
+        # out — which is what makes the title-page path below a supplement
+        # rather than the volume's only source of attribution.
         paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
-        self.assertEqual(running_headers(paragraphs), set())
+        self.assertEqual(
+            running_headers(paragraphs),
+            {name for name, _, _, _, _ in JILD_1_COLLECTIONS},
+        )
+
+    def test_the_headers_alone_still_cannot_name_موسم(self):
+        # Why `attribute_gathered_collections` stays. موسم is the volume's
+        # FIRST collection and its name is never printed as a paragraph of
+        # its own before its poems — the first موسم paragraph in the book is
+        # at index 9796, in the back-of-book فہرست, long after موسم's 130
+        # ghazals are done. Every other collection's name is printed once,
+        # on its title page, where its poems begin. So the header path
+        # backfills موسم's poems with the first header it CAN see — عناصر —
+        # and reads 231 poems into عناصر unless the title pages correct it.
+        paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
+        header_only = _distribution(segment(paragraphs))
+        self.assertEqual(header_only["موسم"], 0)
+        self.assertEqual(header_only["عناصر"], 231)
 
     def test_every_title_page_is_found_and_named(self):
         self.assertEqual(

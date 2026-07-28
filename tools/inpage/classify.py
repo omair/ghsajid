@@ -67,11 +67,33 @@ SECTION_HEADINGS = frozenset({
 # SECTION_HEADINGS rather than whatever spelling the source happened to use.
 NORMALISED_HEADINGS = {skeleton(heading): heading for heading in SECTION_HEADINGS}
 
-# Measured across all four books. A body heading occurs either 1-5 times
-# (نعت 5, غزلیں 2, حمد 1, نظمیں 1) or 89-209 (نیند میں چلتے ہوئے 209,
-# گُلِ سیمیا 197, اِعادہ 179, ہست و بود 158, حقیقت 137, چہار دریا 89) —
-# a gap 84 wide. 10 sits in the middle of it, tuned to neither edge.
-RUNNING_HEADER_MIN = 10
+# Measured across all four books, counting EVERY short body paragraph that
+# repeats — no name list involved. The twelve collection names of the two
+# کلیات volumes run 89-209 (نیند میں چلتے ہوئے 209, موسم 182, گُلِ سیمیا 197,
+# اِعادہ 179, روداد 168, ہست و بود 158, عناصر 149, کتابِ صبح 149, آیندہ 143,
+# حقیقت 137, معاملہ 93, چہار دریا 89). Everything else tops out at 26:
+# فہرست (26 in vol 2, 18 in vol 1), a refrain repeated 15 times inside one
+# poem of vol 2, آرا 10 in vol 1. تجاوز and باغِ نشاط, which name no
+# collection anywhere, have no repeat at all. That is a gap 63 wide, and 55
+# sits inside it — 29 clear of the highest noise, 34 clear of the lowest
+# real name.
+#
+# Where the repetition comes from is worth stating, because it is not what
+# the name of this constant suggests. Almost every occurrence is in the
+# back-of-book فہرست, where each index line prints the collection its entry
+# belongs to: of عناصر's 149, some 135 are there. In the poems themselves
+# each name is printed roughly once, on the collection's title page. So what
+# this threshold really asks is "does the book's own index treat this text
+# as a collection", and the answer is what lets `collections_at` read the
+# single in-body occurrence as the point where that collection begins.
+#
+# This one threshold does both jobs the old name-keyed threshold of 10 did.
+# It still separates a SECTION heading from a collection name (نعت 5 times,
+# غزلیں 2 in vol 1) — those are far below 55 — so the two are not distinct
+# concerns needing two constants: a section heading is printed where its
+# section starts and nowhere else, a collection name is printed again on
+# every line of the index, and any cut inside the 26-89 gap tells them apart.
+RUNNING_HEADER_MIN = 55
 
 
 def _is_verse_length(text: str) -> bool:
@@ -142,17 +164,39 @@ def _last_separator_before(paragraphs: list[Paragraph], index: int) -> int:
     return index
 
 
+def _could_be_header(text: str) -> bool:
+    """A page header is a short line of text, not prose and not punctuation.
+
+    The separator is excluded by name: ۰۰۰ repeats freely (11 times in the
+    body of کلیات جلد ۲) and is punctuation, not a heading. Digit-only lines
+    go with it — a page-number column is furniture of a different kind, and
+    `_kind` resolves both before it ever consults this set, so admitting them
+    here would only misreport what the book's headers are.
+    """
+    return bool(text) and len(text) < PROSE_MIN and text != SEPARATOR_TEXT \
+        and not TOC_LINE.fullmatch(text)
+
+
 def running_headers(paragraphs: list[Paragraph]) -> set[str]:
-    """Heading texts that are page furniture rather than section markers.
+    """Texts that are page furniture rather than anything a piece contains.
+
+    A header is any sufficiently-repeated short line — NOT a line whose text
+    some list here recognises. Keying this on SECTION_HEADINGS worked for
+    کلیات جلد ۲, whose six collection names happen to sit in that set, and
+    hid کلیات جلد ۱'s six entirely: موسم، عناصر، کتابِ صبح، آیندہ، معاملہ،
+    روداد are printed 884 times between them and every one of those
+    paragraphs fell through to UNKNOWN, reaching no piece. A book names
+    collections this pipeline has never seen, and repetition is what marks
+    them out.
 
     Counted only inside the body: a فہرست lists section names too, and those
     are front matter, not evidence of a running header.
     """
     start = body_start_index(paragraphs)
     counts = collections.Counter(
-        para.text.strip()
+        text
         for para in paragraphs[start:]
-        if skeleton(para.text.strip()) in NORMALISED_HEADINGS
+        if _could_be_header(text := para.text.strip())
     )
     return {text for text, n in counts.items() if n > RUNNING_HEADER_MIN}
 

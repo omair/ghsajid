@@ -140,16 +140,26 @@ def cmd_segment(book_slug: str) -> None:
         if piece.kind == "reviews":
             piece.reviewed_book = TITLES[book_slug]
 
-    # کلیات جلد ۱ gathers six separately-published books and prints no running
-    # page header, so `collections_at` has nothing to read. Its collections are
-    # read instead from the title page each gathered book opens with, inside
-    # the body (see segment.attribute_gathered_collections). Runs before every
+    # کلیات جلد ۱ gathers six separately-published books, and the first of
+    # them — موسم — is never named by a page header before its poems, so
+    # `collections_at` reads the other five and backfills موسم's 130 with the
+    # wrong name. Its collections are corrected from the title page each
+    # gathered book opens with, inside the body (see
+    # segment.attribute_gathered_collections). Runs before every
     # gate below, because `collection` is what the count gate counts, what the
     # "poems per collection" line reports, and what `resolve_book_records`
     # groups by. A book not keyed into GATHERED_COLLECTIONS is untouched.
+    table = GATHERED_COLLECTIONS.get(book_slug, {})
     boundaries, boundary_problems = attribute_gathered_collections(
-        segments, GATHERED_COLLECTIONS.get(book_slug, {})
+        segments, table
     )
+    if table:
+        # Every piece has just been re-stamped from the title pages, so
+        # nothing in this book carries a collection attributed by position
+        # any more. Leaving the list filled would report 130 of موسم's poems
+        # as "attributed by POSITION" when the volume's own title page names
+        # them — the opposite of what that line exists to warn about.
+        position_attributed.clear()
 
     # Gate C (ground truth) is a property of the codepage, not of any one
     # book: the 11 ground-truth ghazals exist only in the کلیات volumes, so
@@ -218,8 +228,10 @@ def cmd_segment(book_slug: str) -> None:
         )
         + [
             # A threshold that misfires must be visible: too low and a real
-            # section heading stops breaking runs, too high and 972 page
-            # headers start splitting ghazals.
+            # section heading (نعت, 5 times) or a contents heading (فہرست,
+            # 26) is read as page furniture, too high and a book's real
+            # headers (89-209) vanish and its poems are attributed to
+            # nothing, which is what happened to کلیات جلد ۱.
             f"{len(running_headers(paragraphs))} heading text(s) read as "
             f"running page headers: "
             + (", ".join(sorted(running_headers(paragraphs))) or "none"),
@@ -359,8 +371,8 @@ def cmd_segment(book_slug: str) -> None:
     records, record_problems = resolve_book_records(segments, book_slug)
     gate_output.extend(record_problems)
     for collection, record_slug in records:
-        # collection "" means no running headers — تجاوز, باغِ نشاط,
-        # کلیات جلد ۱. The book is its own single record, under its own title.
+        # collection "" means the book names no collection at all — تجاوز and
+        # باغِ نشاط. The book is its own single record, under its own title.
         write_book(
             Book(
                 title=collection or TITLES[book_slug],
