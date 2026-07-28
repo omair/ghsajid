@@ -168,20 +168,30 @@ class TestPromote(unittest.TestCase):
         self.assertEqual(written, [])
         self.assertTrue(problems)
 
-    def _stage_approved(self, book_slug, segments):
-        """Write segments + an approved, current report into staging."""
+    def _stage_approved(self, book_slug, segments, book=None):
+        """Write segments + an approved, current report into staging.
+
+        The report is rendered LAST and against the staging tree, exactly as
+        cmd_segment does: the stamped hash now covers the staged files' bytes,
+        so anything written afterwards would void the approval it stamped.
+        """
         book_staging = self.staging / book_slug
-        for segment in segments:
-            write_segment(segment, book_slug, book_staging)
+        _, slugs, _ = write_segments(segments, book_slug, book_staging)
+        if book is not None:
+            write_book(book, [s for s, seg in zip(slugs, segments)
+                              if seg.kind in ("ghazals", "nazms")], book_staging)
         segments_path = book_staging / "segments.json"
         segments_path.write_text(
             json.dumps([asdict(s) for s in segments]), encoding="utf-8"
         )
-        report_text = render(book_slug, segments, []).replace(
+        self._approve(book_slug, segments, book_staging)
+        return book_staging
+
+    def _approve(self, book_slug, segments, book_staging):
+        report_text = render(book_slug, segments, [], book_staging).replace(
             "approved: false", "approved: true"
         )
         (book_staging / "report.md").write_text(report_text, encoding="utf-8")
-        return book_staging
 
     def test_skips_existing_piece_with_identical_text(self):
         segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
@@ -212,9 +222,8 @@ class TestPromote(unittest.TestCase):
 
     def test_copies_book_record_when_absent(self):
         segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
-        book_staging = self._stage_approved("tajawuz", [segment])
         book = Book(title="تجاوز", slug="tajawuz", contents=[segment])
-        write_book(book, ["pahli-nazm"], book_staging)
+        self._stage_approved("tajawuz", [segment], book)
 
         written, problems = promote("tajawuz", self.staging, self.content)
 
@@ -225,9 +234,8 @@ class TestPromote(unittest.TestCase):
 
     def test_does_not_overwrite_an_existing_book_record(self):
         segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
-        book_staging = self._stage_approved("tajawuz", [segment])
         book = Book(title="تجاوز", slug="tajawuz", contents=[segment])
-        write_book(book, ["pahli-nazm"], book_staging)
+        self._stage_approved("tajawuz", [segment], book)
 
         target = self.content / "books" / "tajawuz.yaml"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -251,10 +259,7 @@ class TestPromote(unittest.TestCase):
         segments_path.write_text(
             json.dumps([asdict(s) for s in (first, second)]), encoding="utf-8"
         )
-        report_text = render("tajawuz", [first, second], []).replace(
-            "approved: false", "approved: true"
-        )
-        (book_staging / "report.md").write_text(report_text, encoding="utf-8")
+        self._approve("tajawuz", [first, second], book_staging)
 
         written, problems = promote("tajawuz", self.staging, self.content)
 
@@ -278,10 +283,7 @@ class TestPromote(unittest.TestCase):
         segments_path.write_text(
             json.dumps([asdict(first)]), encoding="utf-8"
         )
-        report_text = render("tajawuz", [first], []).replace(
-            "approved: false", "approved: true"
-        )
-        (book_staging / "report.md").write_text(report_text, encoding="utf-8")
+        self._approve("tajawuz", [first], book_staging)
 
         written, problems = promote("tajawuz", self.staging, self.content)
 
@@ -296,16 +298,113 @@ class TestPromote(unittest.TestCase):
         book_staging.mkdir(parents=True)
         segments_path = book_staging / "segments.json"
         segments_path.write_text(json.dumps([asdict(segment)]), encoding="utf-8")
-        report_text = render("tajawuz", [segment], []).replace(
-            "approved: false", "approved: true"
-        )
-        (book_staging / "report.md").write_text(report_text, encoding="utf-8")
+        self._approve("tajawuz", [segment], book_staging)
         # Deliberately never wrote pahli-nazm.md into staging.
 
         written, problems = promote("tajawuz", self.staging, self.content)
 
         self.assertEqual(written, [])
         self.assertTrue(any("missing" in p and "pahli-nazm" in p for p in problems))
+
+
+class TestPromoteIsBoundToTheStagedBytes(unittest.TestCase):
+    """The approval must cover the bytes promote copies, not just the boundaries.
+
+    The hash digested segments.json while promote copied the staged .md files,
+    so an edit made after sign-off promoted text no report had described. The
+    book record was worse: promote found it by globbing the staging directory
+    and no hash covered it at all.
+    """
+
+    def setUp(self):
+        self.staging = Path(tempfile.mkdtemp())
+        self.content = Path(tempfile.mkdtemp())
+        self.segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
+        self.book_staging = self.staging / "tajawuz"
+        _, slugs, _ = write_segments([self.segment], "tajawuz", self.book_staging)
+        write_book(
+            Book(title="تجاوز", slug="tajawuz", contents=[self.segment]),
+            slugs,
+            self.book_staging,
+        )
+        (self.book_staging / "segments.json").write_text(
+            json.dumps([asdict(self.segment)]), encoding="utf-8"
+        )
+        (self.book_staging / "report.md").write_text(
+            render("tajawuz", [self.segment], [], self.book_staging).replace(
+                "approved: false", "approved: true"
+            ),
+            encoding="utf-8",
+        )
+        self.piece = self.book_staging / "ghazals" / "pahli-nazm.md"
+        self.record = self.book_staging / "books" / "tajawuz.yaml"
+
+    def tearDown(self):
+        shutil.rmtree(self.staging)
+        shutil.rmtree(self.content)
+
+    def test_an_untouched_approved_tree_still_promotes(self):
+        written, problems = promote("tajawuz", self.staging, self.content)
+        self.assertEqual(problems, [])
+        self.assertEqual(
+            sorted(p.name for p in written), ["pahli-nazm.md", "tajawuz.yaml"]
+        )
+
+    def test_editing_a_staged_piece_after_approval_voids_it(self):
+        self.piece.write_text(
+            self.piece.read_text(encoding="utf-8").replace("دوم", "کچھ اور"),
+            encoding="utf-8",
+        )
+        written, problems = promote("tajawuz", self.staging, self.content)
+        self.assertEqual(written, [])
+        self.assertTrue(any("not approved" in p for p in problems))
+        self.assertFalse((self.content / "ghazals").exists())
+
+    def test_editing_a_staged_piece_frontmatter_after_approval_voids_it(self):
+        self.piece.write_text(
+            self.piece.read_text(encoding="utf-8").replace(
+                'language: "urdu"', 'language: "punjabi"'
+            ),
+            encoding="utf-8",
+        )
+        written, problems = promote("tajawuz", self.staging, self.content)
+        self.assertEqual(written, [])
+        self.assertTrue(any("not approved" in p for p in problems))
+
+    def test_editing_the_staged_book_record_after_approval_voids_it(self):
+        self.record.write_text(
+            self.record.read_text(encoding="utf-8").replace("تجاوز", "کوئی اور"),
+            encoding="utf-8",
+        )
+        written, problems = promote("tajawuz", self.staging, self.content)
+        self.assertEqual(written, [])
+        self.assertTrue(any("not approved" in p for p in problems))
+        self.assertFalse((self.content / "books").exists())
+
+    def test_adding_a_contents_row_to_the_staged_record_voids_it(self):
+        self.record.write_text(
+            self.record.read_text(encoding="utf-8")
+            + '  - { kind: "ghazals", slug: "smuggled" }\n',
+            encoding="utf-8",
+        )
+        written, problems = promote("tajawuz", self.staging, self.content)
+        self.assertEqual(written, [])
+        self.assertTrue(any("not approved" in p for p in problems))
+
+    def test_a_stray_yaml_in_staging_is_not_promoted(self):
+        # The record path is derived from book_slug, so a second yaml dropped
+        # into staging/books is neither hashed nor copied — promote used to
+        # glob the directory and would have copied this.
+        stray = self.record.parent / "smuggled.yaml"
+        stray.write_text('title: "چوری"\nslug: "smuggled"\ncontents:\n', encoding="utf-8")
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(problems, [])
+        self.assertEqual(
+            sorted(p.name for p in written), ["pahli-nazm.md", "tajawuz.yaml"]
+        )
+        self.assertFalse((self.content / "books" / "smuggled.yaml").exists())
 
 
 if __name__ == "__main__":

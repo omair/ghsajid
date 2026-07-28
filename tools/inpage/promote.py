@@ -45,8 +45,15 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
     raw = json.loads(segments_path.read_text(encoding="utf-8"))
     segments = [Segment(**item) for item in raw]
 
-    if not is_approved(report_text, segments):
-        return [], [f"{report_path} is not approved, or was re-segmented after approval"]
+    # The staging directory and the book slug go in too: the approval binds to
+    # the BYTES this function is about to copy, not merely to the boundaries
+    # segments.json records. Editing an approved staged .md — or the book
+    # record, which no hash covered at all — voids the approval.
+    if not is_approved(report_text, segments, book_staging, book_slug):
+        return [], [
+            f"{report_path} is not approved, or the segmentation or a staged "
+            f"file changed after approval"
+        ]
 
     # Drive the copy loop from segments.json — the thing the approval gate
     # actually bound its hash to — never from whatever files happen to sit
@@ -92,17 +99,22 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
         shutil.copyfile(source, target)
         written.append(target)
 
-    books_staging = book_staging / "books"
-    if books_staging.exists():
-        for source in sorted(books_staging.glob("*.yaml")):
-            target = content / "books" / source.name
-            if target.exists():
-                problems.append(
-                    f"book record already in the archive, skipped: {target.relative_to(content)}"
-                )
-                continue
+    # Derived from `book_slug`, never globbed. A directory walk copied
+    # whatever yaml happened to sit in staging — a file no approval described
+    # and, before the hash covered the record's bytes, one whose title and
+    # contents rows could be rewritten after sign-off and still promote. The
+    # one record this book is allowed to publish is the one named after it,
+    # and `is_approved` above has already checked its bytes.
+    record = book_staging / "books" / f"{book_slug}.yaml"
+    if record.is_file():
+        target = content / "books" / record.name
+        if target.exists():
+            problems.append(
+                f"book record already in the archive, skipped: {target.relative_to(content)}"
+            )
+        else:
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, target)
+            shutil.copyfile(record, target)
             written.append(target)
 
     return written, problems

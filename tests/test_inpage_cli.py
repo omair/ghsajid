@@ -38,6 +38,31 @@ class TestBookContentsAndSlugs(unittest.TestCase):
         self.assertTrue(all(s.kind != "reviews" for s in contents))
 
 
+class TestCmdPromoteValidatesItsSlug(unittest.TestCase):
+    """`promote` must reject a slug that is not a known book.
+
+    cmd_segment validates via _load; cmd_promote did not, so
+    `promote ../../x` joined an arbitrary path onto out/staging and read
+    whatever it found there as an approved staging tree.
+    """
+
+    def test_an_unknown_slug_exits(self):
+        with self.assertRaises(SystemExit) as caught:
+            cli.cmd_promote("no-such-book")
+        self.assertIn("unknown book", str(caught.exception))
+
+    def test_a_traversal_slug_exits(self):
+        with self.assertRaises(SystemExit) as caught:
+            cli.cmd_promote("../../x")
+        self.assertIn("unknown book", str(caught.exception))
+
+    def test_it_rejects_before_touching_the_filesystem(self):
+        with mock.patch.object(cli, "promote") as promoted:
+            with self.assertRaises(SystemExit):
+                cli.cmd_promote("../../x")
+        promoted.assert_not_called()
+
+
 @unittest.skipUnless(TAJAWUZ.exists(), "inp/ sources not present")
 class TestCmdSegmentStaging(unittest.TestCase):
     def setUp(self):

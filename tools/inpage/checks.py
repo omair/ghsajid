@@ -22,6 +22,7 @@ from .groundtruth import (
     MIN_LINES_MATCHED,
     MIN_WHOLE_GHAZALS,
     line_match_report,
+    skeleton,
 )
 from .models import VERSE_KINDS, Paragraph, Segment
 
@@ -109,6 +110,79 @@ def lexicon_report(paragraphs: list[Paragraph], lexicon: set[str]) -> list[str]:
         if word not in lexicon
     )
     return [f"{word} ({n}x)" for word, n in counts.most_common(50)]
+
+
+# The flag a piece carries when its text is not believable as text at all.
+GARBAGE_FLAG = "likely-decode-garbage"
+
+# The share of a piece's words that must already appear in the archive's own
+# lexicon (`groundtruth.corpus_lexicon`) before the piece reads as language.
+# Measured across both books:
+#
+#     piece                          words   1-char tokens   in lexicon
+#     باغِ نشاط's critical essay      1659           0.009        0.794
+#     تجاوز's critical essay          1695           0.014        0.784
+#     the weakest real ghazal           86               -        0.767
+#     باغِ نشاط's order-88 scratch      35           0.229        0.143
+#
+# Real text — prose and verse alike — never fell below 0.767; the one piece
+# that is not text sits at 0.143, a gap of better than 5x. 0.4 is placed
+# roughly in the middle of that gap on a ratio scale: 1.9x below the weakest
+# real piece and 2.8x above the garbage, so neither a poet's unusually private
+# vocabulary nor a lexicon that grows as the archive does can push a real
+# piece across it, and a partial mis-decode has to be genuinely half-readable
+# before it escapes. Hugging either measured figure would make the gate a
+# record of these two books rather than a test of the next one.
+GARBAGE_LEXICON_SHARE = 0.4
+
+# Below this many words the share is too coarse to mean anything: a two-line
+# قطعہ can be 8 words, where a single unfamiliar name already moves the score
+# by 12 points. The shortest real piece in either book — باغِ نشاط's epigraph
+# couplet — is 17 words, and the garbage piece is 35, so the exemption covers
+# only pieces shorter than anything the gate could honestly judge. It also
+# makes the division safe: an empty body has no words and is never scored.
+MIN_WORDS_FOR_GARBAGE_CHECK = 12
+
+
+def flag_decode_garbage(segments: list[Segment], lexicon: set[str]) -> list[str]:
+    """Flag pieces whose text is probably mis-decoded, and name them.
+
+    باغِ نشاط's stream ends in scratch material that segmented into a
+    190-character `reviews` piece at order 88 — 35 "words", 23% of them a
+    single character, 14% of them known to the archive. It is not text.
+
+    It is still kept. Nothing this pipeline does not understand may be
+    dropped: that rule has already caught three separate poem-loss bugs, and a
+    decoder that discards what it cannot read is exactly how they happened. So
+    the piece is flagged (`GARBAGE_FLAG`, which the report prints beside it)
+    and named in the gate output, where a reviewer signing the approval cannot
+    miss it. Mutates `flags`, like `clear_unverifiable_sections` mutates
+    `section` — the finding has to travel with the piece into the report.
+    """
+    flagged: list[tuple[Segment, float, int]] = []
+    for segment in segments:
+        words = skeleton(segment.body).split()
+        if len(words) < MIN_WORDS_FOR_GARBAGE_CHECK:
+            continue
+        share = sum(1 for word in words if word in lexicon) / len(words)
+        if share >= GARBAGE_LEXICON_SHARE:
+            continue
+        if GARBAGE_FLAG not in segment.flags:
+            segment.flags.append(GARBAGE_FLAG)
+        flagged.append((segment, share, len(words)))
+    if not flagged:
+        return []
+    listed = "; ".join(
+        f"order {segment.order} ({segment.kind}) {segment.title[:30]!r} — "
+        f"{share:.0%} of {count} words known"
+        for segment, share, count in flagged
+    )
+    return [
+        f"{len(flagged)} piece(s) flagged {GARBAGE_FLAG}: under "
+        f"{GARBAGE_LEXICON_SHARE:.0%} of their words appear anywhere in the "
+        f"archive, so they are probably mis-decoded rather than written. Kept, "
+        f"not dropped — read them before approving: {listed}"
+    ]
 
 
 def toc_count_errors(

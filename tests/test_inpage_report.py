@@ -1,6 +1,10 @@
+import shutil
+import tempfile
 import unittest
+from pathlib import Path
 
-from tools.inpage.models import Segment
+from tools.inpage.emit import write_book, write_segments
+from tools.inpage.models import Book, Segment
 from tools.inpage.report import is_approved, render, segmentation_hash
 
 SEGMENTS = [
@@ -88,6 +92,84 @@ class TestSegmentationHash(unittest.TestCase):
             Segment(kind="ghazals", title="بستر لگا ہوا", body="ج", order=2, flags=["odd-line-count"]),
         ]
         self.assertNotEqual(segmentation_hash(SEGMENTS), segmentation_hash(changed))
+
+
+class TestHashCoversTheStagedBytes(unittest.TestCase):
+    """The approval must bind to the bytes `promote` will actually copy.
+
+    The hash used to digest segments.json alone while `promote` copied the
+    staged .md files, so editing an approved staged file promoted text no
+    report had ever described — and the hash still matched.
+    """
+
+    def setUp(self):
+        self.staging = Path(tempfile.mkdtemp())
+        self.segments = [
+            Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1),
+        ]
+        _, slugs, _ = write_segments(self.segments, "tajawuz", self.staging)
+        write_book(
+            Book(title="تجاوز", slug="tajawuz", contents=self.segments),
+            slugs,
+            self.staging,
+        )
+        self.piece = self.staging / "ghazals" / "pahli-nazm.md"
+        self.record = self.staging / "books" / "tajawuz.yaml"
+
+    def tearDown(self):
+        shutil.rmtree(self.staging)
+
+    def _hash(self):
+        return segmentation_hash(self.segments, self.staging, "tajawuz")
+
+    def test_editing_a_staged_piece_changes_the_hash(self):
+        before = self._hash()
+        self.piece.write_text(
+            self.piece.read_text(encoding="utf-8") + "\nسوم\n", encoding="utf-8"
+        )
+        self.assertNotEqual(before, self._hash())
+
+    def test_editing_the_staged_book_record_changes_the_hash(self):
+        before = self._hash()
+        self.record.write_text(
+            self.record.read_text(encoding="utf-8").replace("تجاوز", "کچھ اور"),
+            encoding="utf-8",
+        )
+        self.assertNotEqual(before, self._hash())
+
+    def test_an_untouched_tree_hashes_the_same_twice(self):
+        self.assertEqual(self._hash(), self._hash())
+
+    def test_a_missing_staged_piece_is_not_the_same_as_a_present_one(self):
+        before = self._hash()
+        self.piece.unlink()
+        self.assertNotEqual(before, self._hash())
+
+    def test_the_staged_hash_differs_from_the_segments_only_hash(self):
+        self.assertNotEqual(segmentation_hash(self.segments), self._hash())
+
+    def test_approval_does_not_survive_an_edit_to_a_staged_piece(self):
+        text = render("tajawuz", self.segments, [], self.staging).replace(
+            "approved: false", "approved: true"
+        )
+        self.assertTrue(
+            is_approved(text, self.segments, self.staging, "tajawuz")
+        )
+        self.piece.write_text("---\ntitle: \"x\"\n---\n\nبدلا ہوا\n", encoding="utf-8")
+        self.assertFalse(
+            is_approved(text, self.segments, self.staging, "tajawuz")
+        )
+
+    def test_approval_does_not_survive_an_edit_to_the_book_record(self):
+        text = render("tajawuz", self.segments, [], self.staging).replace(
+            "approved: false", "approved: true"
+        )
+        self.record.write_text(
+            'title: "کوئی اور کتاب"\nslug: "tajawuz"\ncontents:\n', encoding="utf-8"
+        )
+        self.assertFalse(
+            is_approved(text, self.segments, self.staging, "tajawuz")
+        )
 
 
 if __name__ == "__main__":

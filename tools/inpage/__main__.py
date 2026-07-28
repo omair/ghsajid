@@ -21,6 +21,7 @@ from .checks import (
     clear_unverifiable_sections,
     completeness_errors,
     conservation_errors,
+    flag_decode_garbage,
     lexicon_report,
     roundtrip_errors,
     toc_count_errors,
@@ -57,13 +58,24 @@ TITLES = {
 }
 
 
-def _load(book_slug: str):
+def _source(book_slug: str) -> Path:
+    """Resolve a book slug to its source file, or exit.
+
+    Split out of `_load` so `cmd_promote` can run the same validation without
+    re-reading the OLE stream it has no use for. The slug is a path component
+    — `STAGING / book_slug` — so an unvalidated one walks out of the staging
+    tree: `promote ../../x` read an arbitrary directory as approved staging.
+    """
     source = SOURCES.get(book_slug)
     if source is None:
         sys.exit(f"unknown book: {book_slug}. known: {', '.join(sorted(SOURCES))}")
     if not source.exists():
         sys.exit(f"missing source file: {source}")
-    return read_text_stream(source)
+    return source
+
+
+def _load(book_slug: str):
+    return read_text_stream(_source(book_slug))
 
 
 def book_contents_and_slugs(
@@ -113,6 +125,10 @@ def cmd_segment(book_slug: str) -> None:
     # tests/test_inpage_groundtruth.py instead; the report states that
     # baseline rather than re-running the check per book.
     isolated_pairs, isolated_mapped = excluded_report(data)
+    # Read once and shared: the garbage flag and the outlier report below both
+    # measure against the archive's own vocabulary, and it walks every file in
+    # content/ to build.
+    lexicon = corpus_lexicon()
     gate_output = (
         completeness_errors(data)
         + roundtrip_errors(paragraphs)[:20]
@@ -132,6 +148,10 @@ def cmd_segment(book_slug: str) -> None:
         # The count gate is unaffected by the erasure by construction — it
         # reads position, not the section string.
         + clear_unverifiable_sections(segments)
+        # Also mutates the segments — it adds a flag, which the report prints
+        # beside the piece. Nothing is removed: a flagged piece is still
+        # staged, still counted by the gates below, still promotable.
+        + flag_decode_garbage(segments, lexicon)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(paragraphs, segments)
     )
@@ -168,7 +188,7 @@ def cmd_segment(book_slug: str) -> None:
             repr(para.text[:40]) for _, para in unreached[:5]
         )
         gate_output.append(f"  first few unreached: {sample}")
-    outliers = lexicon_report(paragraphs, corpus_lexicon())
+    outliers = lexicon_report(paragraphs, lexicon)
     if outliers:
         gate_output.append("lexicon outliers (review for clustered mis-decodes): "
                            + ", ".join(outliers[:20]))
@@ -198,12 +218,17 @@ def cmd_segment(book_slug: str) -> None:
         newline="\n",
     )
     report_path = out / "report.md"
+    # Rendered last, and against `out`: the stamped hash covers the bytes of
+    # every staged file promote would copy, so it can only be computed once
+    # they are all on disk. Anything written into staging after this point
+    # voids the approval the reviewer is about to give.
     with open(report_path, "w", encoding="utf-8", newline="\n") as handle:
-        handle.write(render(book_slug, segments, gate_output))
+        handle.write(render(book_slug, segments, gate_output, out))
     print(f"{len(segments)} pieces staged. Review and approve: {report_path}")
 
 
 def cmd_promote(book_slug: str) -> None:
+    _source(book_slug)   # validate the slug before it is joined onto a path
     written, problems = promote(book_slug, STAGING, CONTENT)
     for problem in problems:
         print(f"  {problem}")

@@ -106,6 +106,87 @@ class TestLexicon(unittest.TestCase):
         self.assertIn("قققق", report[0])
 
 
+class TestDecodeGarbageFlag(unittest.TestCase):
+    """A piece that is not text at all must be flagged, never dropped.
+
+    باغِ نشاط's stream ends in mis-decoded scratch material that became a
+    190-character `reviews` piece at order 88. Nothing may be dropped — that
+    rule has already caught three separate poem-loss bugs on this pipeline —
+    so the piece is kept, flagged, and named in the gate output.
+    """
+
+    LEXICON = {"دل", "جان", "شام", "چراغ", "خواب", "آنکھ"}
+
+    def _real(self, order=1):
+        # 12 words, all but one in the lexicon: 0.92 — a believable piece.
+        body = "دل جان شام چراغ خواب آنکھ\nدل جان شام چراغ خواب قققق"
+        return Segment(kind="ghazals", title="اصلی", body=body, order=order)
+
+    def _garbage(self, order=2):
+        # 12 words, one in the lexicon: 0.08 — the shape of the real case.
+        body = "ٹھڈ ککک ںںں ابلی تاَیِ ئنے\nمعےما کیھا فاوں کری نجج دل"
+        return Segment(kind="reviews", title="ں آابلی", body=body, order=order)
+
+    def test_flags_a_piece_almost_none_of_whose_words_are_known(self):
+        piece = self._garbage()
+        checks.flag_decode_garbage([piece], self.LEXICON)
+        self.assertIn(checks.GARBAGE_FLAG, piece.flags)
+
+    def test_does_not_flag_a_real_piece(self):
+        piece = self._real()
+        checks.flag_decode_garbage([piece], self.LEXICON)
+        self.assertEqual(piece.flags, [])
+
+    def test_the_flagged_piece_is_not_dropped_from_the_list(self):
+        segments = [self._real(1), self._garbage(2)]
+        checks.flag_decode_garbage(segments, self.LEXICON)
+        self.assertEqual(len(segments), 2)
+        self.assertEqual([s.order for s in segments], [1, 2])
+
+    def test_the_gate_output_names_the_flagged_piece(self):
+        messages = checks.flag_decode_garbage(
+            [self._real(1), self._garbage(88)], self.LEXICON
+        )
+        self.assertEqual(len(messages), 1)
+        self.assertIn(checks.GARBAGE_FLAG, messages[0])
+        self.assertIn("88", messages[0])
+
+    def test_silent_when_every_piece_is_believable(self):
+        self.assertEqual(
+            checks.flag_decode_garbage([self._real(1), self._real(2)], self.LEXICON),
+            [],
+        )
+
+    def test_an_empty_body_does_not_divide_by_zero(self):
+        piece = Segment(kind="ghazals", title="خالی", body="", order=1)
+        self.assertEqual(checks.flag_decode_garbage([piece], self.LEXICON), [])
+        self.assertEqual(piece.flags, [])
+
+    def test_a_very_short_piece_is_exempt(self):
+        # A two-line قطعہ has too few words for the share to mean anything:
+        # at 6 words one unusual word already moves it by 17 points.
+        piece = Segment(kind="ghazals", title="قطعہ", body="ٹھڈ ککک ںںں\nابلی تاَیِ ئنے", order=1)
+        self.assertLess(
+            len(checks.skeleton(piece.body).split()),
+            checks.MIN_WORDS_FOR_GARBAGE_CHECK,
+        )
+        self.assertEqual(checks.flag_decode_garbage([piece], self.LEXICON), [])
+        self.assertEqual(piece.flags, [])
+
+    def test_the_threshold_clears_both_measured_extremes(self):
+        # Measured on the two books: the weakest real piece (a ghazal) sits at
+        # 0.767 and the garbage piece at 0.143. The threshold must have real
+        # margin on both sides, not hug either figure.
+        self.assertLess(checks.GARBAGE_LEXICON_SHARE, 0.767 / 1.5)
+        self.assertGreater(checks.GARBAGE_LEXICON_SHARE, 0.143 * 1.5)
+
+    def test_flagging_twice_does_not_duplicate_the_flag(self):
+        piece = self._garbage()
+        checks.flag_decode_garbage([piece], self.LEXICON)
+        checks.flag_decode_garbage([piece], self.LEXICON)
+        self.assertEqual(piece.flags.count(checks.GARBAGE_FLAG), 1)
+
+
 class TestTocCountGate(unittest.TestCase):
     def test_reports_a_mismatch_with_the_delta(self):
         segments = [Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں")]
