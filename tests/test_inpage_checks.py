@@ -693,3 +693,32 @@ class TestDeclaredCollectionCounts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestCountGateSkipsAGathering(unittest.TestCase):
+    """A کلیات volume has no whole-book numbering to read.
+
+    جلد ۲'s numeric index yields 124 against 561 poems — it numbers one
+    collection's contents, not the volume's — so the gate reported a
+    guaranteed `delta +437` on every report, and جلد ۱ reported "could not
+    run". A gate a reviewer learns to ignore is worse than no gate.
+    `declared_collection_count_errors` is the equivalent for a gathering.
+    """
+
+    def paras(self):
+        return [vpara("۱۔۲۔", 80),
+                vpara("جسم کی خوشبو الگ", 73), vpara("کا جادو الگ ہے", 1),
+                vpara("چاٹ لیتی ہے یہ فکر", 89), vpara("ہو نہ جائے تو الگ", 1)]
+
+    def test_a_single_book_is_still_counted(self):
+        segs = [Segment(kind="ghazals", title="t", body="b", order=1)]
+        errors = toc_count_errors(self.paras(), segs)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("2", errors[0])
+
+    def test_a_gathering_is_not_counted_against_a_partial_index(self):
+        segs = [
+            Segment(kind="ghazals", title="t", body="b", order=1,
+                    collection="نیند میں چلتے ہوئے"),
+        ]
+        self.assertEqual(toc_count_errors(self.paras(), segs), [])

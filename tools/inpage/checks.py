@@ -238,6 +238,16 @@ def toc_count_errors(
     count is read from the file rather than judged. This turns "866 pieces
     looks wrong" into arithmetic.
 
+    **Only for a book that is one book.** A gathering — a کلیات volume whose
+    pieces carry a `collection` — has no whole-book numbering to read: جلد ۲'s
+    numeric index yields 124 against 561 poems (it numbers one collection's
+    contents, not the volume's), and جلد ۱ has no numeric index at all. Running
+    this there produced a guaranteed `delta +437` on every report and a "could
+    not run" on the other, which is noise a reviewer has to learn to ignore —
+    and a gate a reviewer learns to ignore is worse than no gate. The
+    equivalent for a gathering is `declared_collection_count_errors`, which
+    asserts each collection against the count the volume declares for it.
+
     Counted against the poems, not every piece. Read in the source, each
     فہرست sits under the heading غزلیں and its numbering ends before the
     critical foreword that follows it — تجاوز's numbers run out at paragraph
@@ -269,6 +279,10 @@ def toc_count_errors(
     the book record, still promotable, just not counted against a فہرست that
     never numbered it.
     """
+    if any(segment.collection for segment in segments):
+        # A gathering. See the docstring: declared_collection_count_errors is
+        # the gate that applies, and it runs per collection.
+        return []
     expected = toc_count(paragraphs)
     if expected is None:
         return ["no فہرست found: the piece-count gate could not run"]
