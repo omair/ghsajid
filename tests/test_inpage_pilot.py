@@ -292,8 +292,17 @@ JILD_1_COLLECTIONS = (
     ("کتابِ صبح", 238, 92, 240, 331),
     ("آیندہ", 332, 104, 334, 437),
     ("معاملہ", 438, 15, 440, 454),
-    ("روداد", 455, 124, 457, 581),
+    ("روداد", 455, 123, 457, 580),
 )
+# روداد reads 123, not the 124 it read while a short line enclosed by two
+# verse lines still classified UNKNOWN and broke the run (see
+# classify._bridge_short_verse_lines). The one piece the change removes from
+# this volume is the last: order 581, whose entire body was
+# ‘‘ب گینیگایںقرا ۔ ا  کج’’ — the scratch material at the end of the stream,
+# flagged both likely-decode-garbage and single-line-piece. It is now a line
+# of order 580 rather than a poem of its own. Every other piece in جلد ۱ is
+# byte-identical, and موسم's 130 and عناصر's 100 — the two counts the
+# volume's own فہرست declares — are untouched.
 
 # What کلیات جلد ۲ reads off its running page headers. Held here so a change
 # to جلد ۱'s title-page path that leaked into the header path fails loudly.
@@ -301,20 +310,47 @@ JILD_1_COLLECTIONS = (
 # the pesh of ہست و بُود and گُلِ سیمیا before its letter rather than over it,
 # and the header text is taken verbatim.
 #
-# نیند میں چلتے ہوئے reads 92, not the 90 it read while a page header was
-# read straight through a verse run: the header at paragraph 1150 is that
-# collection's title page, and reading through it welded the نظم جادو onto
-# the collection's own title poem (‘‘مجھے مدّت سے گہری نیند میں چلنے کی عادت
-# ہے’’) as one piece belonging to no collection. Ending the run at the header
-# separates them and gives each its name. This is the only piece in the
-# volume the change moves.
+# Every count here fell when a short line enclosed by two verse lines stopped
+# breaking the verse run (see classify._bridge_short_verse_lines). جلد ۲ is
+# where the volume's free verse lives — 214 of its 576 pieces were نظمیں —
+# and a نظم's lines are much shorter than a ghazal's misra, so 255 of its
+# paragraphs were falling out of their own poem's run and being emitted as
+# separate pieces. Reassembling them is the whole point of that change:
+#
+#     collection            was    now      نظمیں was/now   غزلیں was/now
+#     نیند میں چلتے ہوئے     92     21         91 → 20          1 → 1
+#     چہار دریا              51     51          1 →  1         50 → 50
+#     ہست و  ُبود           100     98         95 → 93          5 → 5
+#     اِعادہ                102    101          2 →  1        100 → 100
+#     حقیقت                  76     70          9 →  3         67 → 67
+#     ُگلِ سیمیا            141    127         16 →  2        125 → 125
+#
+# The GHAZAL count of every collection is unchanged, to the poem. That is the
+# control on the whole change: a ghazal's misras run 28-42 characters and
+# never fall under VERSE_MIN, so no ghazal has an enclosed short line to
+# bridge, and every piece that moved is free verse — which is exactly the
+# defect. چہار دریا, 50 ghazals and one نظم, does not move at all.
+#
+# The 33 one-line "poems" this volume used to emit are down to 5, and the
+# paragraphs reaching no piece at all from 103 to 45. The cost is stated in
+# tests.test_inpage_segment.TestSegmentBook.
+# test_a_short_line_enclosed_by_verse_joins_the_poem: a نظم's TITLE printed
+# with verse on both sides is read as a line too, so consecutive نظمیں can
+# now share a piece. Nothing is lost either way — conservation is silent —
+# and staged output is reviewed by a human before promotion.
+#
+# Before that, نیند میں چلتے ہوئے moved 90 → 92 when a page header stopped
+# being read straight through a verse run: the header at paragraph 1150 is
+# that collection's title page, and reading through it welded the نظم جادو
+# onto the collection's own title poem (‘‘مجھے مدّت سے گہری نیند میں چلنے کی
+# عادت ہے’’) as one piece belonging to no collection.
 JILD_2_COLLECTIONS = {
-    "نیند میں چلتے ہوئے": 92,
+    "نیند میں چلتے ہوئے": 21,
     "چہار دریا": 51,
-    "ہست و  ُبود": 100,
-    "اِعادہ": 102,
-    "حقیقت": 76,
-    "ُگلِ سیمیا": 141,
+    "ہست و  ُبود": 98,
+    "اِعادہ": 101,
+    "حقیقت": 70,
+    "ُگلِ سیمیا": 127,
 }
 
 
@@ -485,6 +521,77 @@ class TestSingleBooksAttributeNothing(unittest.TestCase):
                      if collection_boundary_dedication(s)],
                     [],
                 )
+
+
+# One نظم of کلیات جلد ۲, paragraphs 865-884, in source order. Half of these
+# lines are shorter than a ghazal's misra — سُکڑ کر is 7 characters against a
+# measured VERSE_MIN of 15 — so every one of them used to classify UNKNOWN,
+# break the verse run, and cut the poem into fragments that segment() emitted
+# as separate pieces. They are printed here verbatim so the test asserts the
+# poem, not a count.
+SHATTERED_NAZM = [
+    "سو اُس لمحے",
+    "مرا دِل ڈوبتا تھا",
+    "زمیں میرے برابر سے، مِری قامت سے اُٹھ کر",
+    "چھتوں کو اور محرابوں کو چُھو کر",
+    "فناہے، سب فنا ہے",
+    "اوّل و آخر فنا ہے، کا ترانہ گا رہی تھی",
+    "مری ظلمت سے میری روشنی",
+    "گہنا رہی تھی",
+    "مِرا دِل ڈوبتا تھا",
+    "مِرا دِل ڈوبتا تھا اور یاد آنے لگے تھے تُم",
+    "کہیں کچھ تھا",
+    "جو شاید مشترک تھا",
+    "اِس کہانی میں",
+    "کشف کی رات",
+    "بہت دن بعد",
+    "جب مجھ میں کھڑے ہونے کی طاقت بھی نہیں تھی",
+    "مِرے کاندھے",
+    "اُداسی، رنجِ محرومی کی تہ در تہ دبازت سے",
+    "سُکڑ کر",
+    "کہیں اندر ہی اندر جُھک رہے تھے",
+]
+
+
+@unittest.skipUnless(
+    KULLIYAT["kulliyat-jild-2"].exists(), "inp/ sources not present"
+)
+class TestFreeVerseReassembles(unittest.TestCase):
+    """The نظم above must be ONE piece, with its short lines in place."""
+
+    @classmethod
+    def setUpClass(cls):
+        paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-2"]))
+        cls.segments = segment(paragraphs)
+
+    def _holders(self):
+        """Pieces holding the whole poem.
+
+        `all`, not `any`: three of these lines are short enough to recur
+        verbatim elsewhere in the volume (بہت دن بعد is a hemistich of a
+        ghazal 61 pieces later), so a per-line holder count reports splits
+        that are really coincidences of the language. A shattered poem holds
+        no piece here at all, which is the failure this asserts against.
+        """
+        return [
+            piece for piece in self.segments
+            if all(line in piece.body for line in SHATTERED_NAZM)
+        ]
+
+    def test_the_whole_nazm_is_one_piece(self):
+        self.assertEqual(len(self._holders()), 1)
+
+    def test_every_line_survives_in_source_order(self):
+        body = [
+            line.strip() for line in self._holders()[0].body.split("\n")
+            if line.strip()
+        ]
+        positions = [body.index(line) for line in SHATTERED_NAZM]
+        self.assertEqual(positions, sorted(positions))
+        self.assertEqual(
+            [body[i] for i in range(positions[0], positions[-1] + 1)],
+            SHATTERED_NAZM,
+        )
 
 
 class TestSegmentDirectCallMatchesThePipeline(unittest.TestCase):

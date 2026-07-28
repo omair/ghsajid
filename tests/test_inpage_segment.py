@@ -258,15 +258,40 @@ class TestSegmentBook(unittest.TestCase):
         second = [para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1)]
         self.assertEqual(len(segment(FRONT + GHAZAL + second)), 2)
 
+    NAZM = [
+        para("مَیں چل رہا تھا", 47), para("سنہرے تانبے کی طشتری پر", 97),
+        para("کوئی نہیں تھا یہاں", 53), para("قریب مجھ سے یا دُور", 51),
+    ]
+
     def test_a_non_alternating_run_becomes_one_nazm(self):
-        nazm = [
-            para("مَیں چل رہا تھا", 47), para("سنہرے تانبے کی طشتری پر", 97),
-            para("کوئی نہیں تھا یہاں", 53), para("قریب مجھ سے یا دُور", 51),
-        ]
-        pieces = segment(FRONT + GHAZAL + [para("یاد", 1)] + nazm)
+        # The title sits after the previous poem's colophon, which is where
+        # کلیات جلد ۲ actually prints one: paragraph 783 is
+        # ‘‘۱۹، مئی ۲۰۱۰ئ۔ لاہور’’, 784 is the title نیلو فر, and 785 opens
+        # the نظم. A colophon is not VERSE, so the title touches verse on one
+        # side only — the position classify.py deliberately leaves UNKNOWN
+        # (see _bridge_short_verse_lines) precisely so it can still be read as
+        # a title here.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("یاد", 1)] + self.NAZM
+        )
         nazms = [p for p in pieces if p.kind == "nazms"]
         self.assertEqual(len(nazms), 1)
         self.assertEqual(nazms[0].title, "یاد")
+
+    def test_a_short_line_enclosed_by_verse_joins_the_poem(self):
+        # The cost of that rule, stated rather than left to be discovered: a
+        # title printed with verse on BOTH sides is indistinguishable from a
+        # line of free verse — کلیات جلد ۲ prints سٹَیٹَس کُو (11 chars, ¶802)
+        # and دِیمک (5, ¶846) exactly like it prints سُکڑ کر (7, ¶883), which
+        # is a line of the نظم around it. classify() reads the enclosed
+        # position as verse, so the run is not broken here and the two poems
+        # become one piece carrying the title as a line. Nothing is lost —
+        # conservation holds and the text still reaches a reviewer — but the
+        # boundary is not found, and this locks which way the trade was made.
+        pieces = segment(FRONT + GHAZAL + [para("یاد", 1)] + self.NAZM)
+        self.assertEqual(len(pieces), 1)
+        self.assertIn("یاد", pieces[0].body.split("\n"))
 
     def test_prose_becomes_a_review(self):
         pieces = segment(FRONT + GHAZAL + [para("ا" * 300, 67)])

@@ -225,14 +225,60 @@ def _kind(text: str, in_body: bool, running: set[str]) -> str:
     return UNKNOWN
 
 
+def _bridge_short_verse_lines(kinds: list[str]) -> None:
+    """Reclassify UNKNOWN paragraphs enclosed by VERSE on BOTH sides.
+
+    VERSE_MIN was measured on ghazals, whose misras run 28-42 characters. A
+    نظم is free verse and its lines are not that: کلیات جلد ۲ prints سُکڑ کر
+    (7 chars), کشف کی رات (10), مِرے کاندھے (11) as whole lines of one poem.
+    Every one of them falls under the floor, classifies UNKNOWN, and breaks
+    the verse run it sits in — so `segment` emits the fragments either side as
+    separate pieces. That is where جلد ۲'s 33 one-line "nazms" came from, and
+    much of its 103 unknown paragraphs reaching no piece at all.
+
+    Lowering VERSE_MIN is not the fix. `body_start_index`, the
+    front-matter/verse boundary and nazm titling all read that constant, and a
+    nazm's TITLE is short in exactly the same way its lines are — dropping the
+    floor would make every title verse. What separates the two is not length,
+    which is identical, but position: a title sits at the EDGE of a run, a
+    line of the poem sits INSIDE it. So the run's interior is what this
+    reclassifies, and only that.
+
+    A gap of any length is bridged, not only a single line — ¶877-879
+    (اِس کہانی میں / کشف کی رات / بہت دن بعد) are three consecutive lines of
+    one نظم, and a one-line rule would still have cut the poem there.
+
+    A paragraph TOUCHING a run on one side only is deliberately left UNKNOWN.
+    That position is genuinely ambiguous and it is where a nazm title lives
+    (یاد, 3 chars, immediately before its poem); `segment` reads UNKNOWN as
+    its one title candidate, so sweeping those in would retitle nazms by
+    their own first line and gain nothing that context can vouch for.
+    Measured, both promoted books have ZERO enclosed cases — تجاوز 0 of 8
+    UNKNOWN, باغِ نشاط 0 of 4 — so neither can move; جلد ۲ has 148.
+    """
+    index = 0
+    while index < len(kinds):
+        if kinds[index] != UNKNOWN:
+            index += 1
+            continue
+        end = index
+        while end < len(kinds) and kinds[end] == UNKNOWN:
+            end += 1
+        if index and kinds[index - 1] == VERSE and kinds[end:end + 1] == [VERSE]:
+            kinds[index:end] = [VERSE] * (end - index)
+        index = end
+
+
 def classify(paragraphs: list[Paragraph]) -> list[str]:
     """Return one kind per paragraph, in order."""
     start = body_start_index(paragraphs)
     running = running_headers(paragraphs)
-    return [
+    kinds = [
         _kind(para.text.strip(), index >= start, running)
         for index, para in enumerate(paragraphs)
     ]
+    _bridge_short_verse_lines(kinds)
+    return kinds
 
 
 URDU_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789")

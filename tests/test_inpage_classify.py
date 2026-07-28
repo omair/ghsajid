@@ -146,6 +146,66 @@ class TestKinds(unittest.TestCase):
         self.assertEqual(len(self.kinds(paras)), len(paras))
 
 
+class TestShortLinesBetweenVerse(unittest.TestCase):
+    """VERSE_MIN was measured on ghazals; free verse runs shorter than that.
+
+    A nazm's line can be 7 characters where a misra is 28-42, so length alone
+    files it UNKNOWN, the verse run breaks, and segment() emits the fragments
+    as separate pieces. Position is the evidence length cannot supply: a short
+    paragraph with VERSE on BOTH sides is inside a poem.
+    """
+
+    def kinds(self, extra):
+        return classify.classify(list(BODY) + list(extra))
+
+    def test_a_short_line_between_two_verse_lines_is_verse(self):
+        kinds = self.kinds([para("سُکڑ کر", 1), para("ا" * 30, 1)])
+        self.assertEqual(kinds[-2], classify.VERSE)
+
+    def test_a_run_of_three_short_lines_between_verse_lines_is_verse(self):
+        # کلیات جلد ۲ ¶877-879 — اِس کہانی میں / کشف کی رات / بہت دن بعد, three
+        # consecutive lines of one poem. The gap may be any length.
+        kinds = self.kinds([
+            para("اِس کہانی میں", 1),
+            para("کشف کی رات", 1),
+            para("بہت دن بعد", 1),
+            para("ا" * 30, 1),
+        ])
+        self.assertEqual(kinds[-4:-1], [classify.VERSE] * 3)
+
+    def test_a_short_line_touching_verse_on_the_right_only_stays_unknown(self):
+        # DECIDED: left as UNKNOWN. A nazm's title sits exactly here — یاد, 3
+        # chars, immediately before its poem — and segment() reads UNKNOWN as
+        # its one title candidate. Verse on one side is not evidence of
+        # anything; verse on both is.
+        kinds = self.kinds([
+            para("۰۰۰", 1), para("یاد", 1), para("ا" * 30, 1),
+        ])
+        self.assertEqual(kinds[-2], classify.UNKNOWN)
+
+    def test_a_short_line_touching_verse_on_the_left_only_stays_unknown(self):
+        kinds = self.kinds([para("سُکڑ کر", 1), para("۰۰۰", 1)])
+        self.assertEqual(kinds[-2], classify.UNKNOWN)
+
+    def test_a_short_line_with_no_verse_neighbour_stays_unknown(self):
+        kinds = self.kinds([para("۰۰۰", 1), para("سُکڑ کر", 1), para("۰۰۰", 1)])
+        self.assertEqual(kinds[-2], classify.UNKNOWN)
+
+    def test_a_running_header_between_verse_lines_is_not_bridged(self):
+        # Page furniture is not a short line of the poem, and it is not
+        # UNKNOWN either — the bridge must leave the kind it already has.
+        header = [para("موسم", 60)] * (classify.RUNNING_HEADER_MIN + 1)
+        kinds = self.kinds([para("ا" * 30, 1)] + header + [para("ب" * 30, 1)])
+        self.assertEqual(kinds[-2], classify.RUNNING_HEADER)
+
+    def test_a_short_line_before_the_body_is_still_front_matter(self):
+        # The bridge only ever rewrites UNKNOWN, which exists only in the body.
+        kinds = classify.classify(
+            [para("ا" * 30, 1), para("یاد", 1), para("ب" * 30, 1)] + list(BODY)
+        )
+        self.assertEqual(kinds[1], classify.FRONT_MATTER)
+
+
 class TestTocCount(unittest.TestCase):
     def test_reads_the_highest_entry_number(self):
         paras = [para("۱۔۲۔۳۔", 80), para("۴۔۵۔", 86)] + BODY
