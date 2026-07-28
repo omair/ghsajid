@@ -35,6 +35,7 @@ from .checks import (
     toc_first_line_baseline_errors,
     verse_errors,
 )
+from .classify import running_headers
 from .decode import decode, excluded_report
 from .emit import write_book, write_segments
 from .groundtruth import (
@@ -186,6 +187,32 @@ def cmd_segment(book_slug: str) -> None:
             if book_slug in TOC_FIRST_LINE_BASELINE
             else []
         )
+        + [
+            # A threshold that misfires must be visible: too low and a real
+            # section heading stops breaking runs, too high and 972 page
+            # headers start splitting ghazals.
+            f"{len(running_headers(paragraphs))} heading text(s) read as "
+            f"running page headers: "
+            + (", ".join(sorted(running_headers(paragraphs))) or "none"),
+            # This phase is the first real exercise of the nazm path, so a
+            # wrong nazm/ghazal split has to be legible at a glance.
+            "pieces by kind: "
+            + ", ".join(
+                f"{kind} {n}"
+                for kind, n in sorted(
+                    collections.Counter(s.kind for s in segments).items()
+                )
+            ),
+            "poems per collection: "
+            + (", ".join(
+                f"{name or '(none)'} {n}"
+                for name, n in sorted(
+                    collections.Counter(
+                        s.collection for s in segments if s.kind in VERSE_KINDS
+                    ).items()
+                )
+            ) or "none"),
+        ]
     )
     if dropped_unknowns:
         # The spec says unknown is flagged and retained, never dropped — but
