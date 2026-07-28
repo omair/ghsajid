@@ -12,8 +12,9 @@ goes to staging with a report, and a human resolves every flag.
 import re
 
 from .classify import (
-    COLOPHON, HEADING, NORMALISED_HEADINGS, PROSE, SECOND_MISRA_GEOMETRY,
-    SEPARATOR, TOC, UNKNOWN, VERSE, body_start_index, classify,
+    COLOPHON, HEADING, NORMALISED_HEADINGS, PROSE, RUNNING_HEADER,
+    SECOND_MISRA_GEOMETRY, SEPARATOR, TOC, UNKNOWN, VERSE, body_start_index,
+    classify,
 )
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
@@ -167,6 +168,7 @@ def segment(
     body_start = body_start_index(paragraphs)
     pieces: list[Segment] = []
     section = ""
+    collection = ""
     # How many pieces had already been formed when the first BODY heading was
     # reached, or None if the book has no body heading at all. Those pieces
     # precede every section the book declares (باغِ نشاط's epigraph couplet
@@ -203,6 +205,7 @@ def segment(
             body=body,
             order=len(pieces) + 1,
             section=section,
+            collection=collection,
             flags=flags,
         )
         if pending_colophon:
@@ -217,6 +220,14 @@ def segment(
     while index < len(paragraphs):
         kind = kinds[index]
         para = paragraphs[index]
+
+        if kind == RUNNING_HEADER:
+            # Page furniture: it names the collection and is otherwise
+            # invisible. Emphatically no flush — 972 of these in کلیات vol 2
+            # would cut a ghazal at every page turn.
+            collection = para.text
+            index += 1
+            continue
 
         if kind == HEADING:
             # Only a heading inside the body names a section. Before the body
@@ -268,10 +279,21 @@ def segment(
             start, end = _essay_region(
                 kinds, index, boundary, emitted_end, body_start
             )
+            # A running header can fall inside a long essay region — the
+            # critic's quotations span pages too — and the region is
+            # consumed in one jump below, never passing through the
+            # RUNNING_HEADER branch. Without this, the header's own
+            # collection change is silently skipped, and its text would
+            # otherwise leak into the review body as though it were prose.
+            for header_index in range(start, end):
+                if kinds[header_index] == RUNNING_HEADER:
+                    collection = paragraphs[header_index].text
             piece = _add_review(
                 add, paragraphs[start:end], kinds[start:end], index, paragraphs
             )
-            consumed.update(range(start, end))
+            consumed.update(
+                i for i in range(start, end) if kinds[i] != RUNNING_HEADER
+            )
             if title_candidate:
                 pending_drops.append((title_candidate_index, title_candidate))
             title_candidate = ""
@@ -282,9 +304,12 @@ def segment(
 
         if kind == VERSE:
             start = index
-            while index < len(paragraphs) and kinds[index] == VERSE:
+            while index < len(paragraphs) and kinds[index] in (VERSE, RUNNING_HEADER):
+                if kinds[index] == RUNNING_HEADER:
+                    collection = paragraphs[index].text
                 index += 1
-            run = paragraphs[start:index]
+            run = [p for p, k in zip(paragraphs[start:index], kinds[start:index])
+                   if k == VERSE]
             if _is_ghazal_shaped(run):
                 # A ghazal is titled by its matlaa, never by title_candidate —
                 # a pending candidate here is moot and reaches no piece.
@@ -368,8 +393,12 @@ def _add_review(
     paragraphs: list[Paragraph],
 ) -> Segment:
     """Emit one `reviews` piece for a whole essay region, in source order."""
+    # A running header inside the region is page furniture, exactly as it
+    # is everywhere else — it names the collection (handled by the caller
+    # before this runs) and must not become literal essay text.
     body_lines = [
-        p.text for p, k in zip(region, region_kinds) if k != COLOPHON
+        p.text for p, k in zip(region, region_kinds)
+        if k not in (COLOPHON, RUNNING_HEADER)
     ]
     first_prose = next(
         (i for i, k in enumerate(region_kinds) if k == PROSE), 0
@@ -377,7 +406,7 @@ def _add_review(
     heading_lines = [
         p.text
         for p, k in zip(region[:first_prose], region_kinds[:first_prose])
-        if k != COLOPHON
+        if k not in (COLOPHON, RUNNING_HEADER)
     ]
     title, author, resolved = _split_byline(heading_lines)
     if not title:

@@ -41,6 +41,11 @@ class Segment:
     # (see checks.clear_unverifiable_sections) and the count gate must not
     # move when it is.
     precedes_first_heading: bool = False
+    # The named collection this piece belongs to, read from the running page
+    # header. Distinct from `section`, which is a form heading (غزلیں, نعت)
+    # inside a book: کلیات جلد ۲ gathers six separately-published collections,
+    # and a poem belongs to one of them regardless of its form.
+    collection: str = ""
     written_note: str = ""          # date and place, verbatim from the source
     # Only for `reviews`: who wrote the criticism, and which book it prefaces.
     # `reviewed_book` is filled by the CLI, which is what knows a book's title;

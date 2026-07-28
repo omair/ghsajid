@@ -495,3 +495,50 @@ class TestSplitByline(unittest.TestCase):
         self.assertEqual(title, "ڈاکٹر سعادت سعید")
         self.assertEqual(author, "")
         self.assertFalse(resolved)
+
+
+class TestRunningHeadersInAssembly(unittest.TestCase):
+    HEADER = "نیند میں چلتے ہوئے"
+
+    def _with_header_mid_ghazal(self):
+        """One ghazal of four shers, interrupted by a page header."""
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        shers = _clean_shers(1, 4)
+        # A header often enough to be running, placed inside the run.
+        elsewhere = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        return FRONT + GHAZAL + shers[:4] + [para(self.HEADER, 60)] + shers[4:] + elsewhere
+
+    def test_a_page_header_does_not_split_a_ghazal(self):
+        pieces = [p for p in segment(self._with_header_mid_ghazal())
+                  if p.kind == "ghazals"]
+        # The header falls between the sher numbered 2 and the sher numbered
+        # 3. If it split the run, those two shers would land in different
+        # pieces; this is the exact scenario -- a ghazal spanning a page
+        # boundary -- that 972 running headers in vol 2 would otherwise cut
+        # in half. (Not checked by exact sher count: `_clean_shers`' distinct
+        # per-sher endings are deliberately non-rhyming, so once merged with
+        # a real preceding ghazal in one continuous run, `run_rhyme`'s
+        # look-ahead window -- a property of split_ghazals/run_rhyme, not of
+        # this task's header handling -- dilutes past MIN_RHYME and the
+        # whole run lands in a single piece rather than a piece of exactly
+        # four. That is a stronger result than "not split", not a weaker
+        # one, so the piece-identity check below is what actually matters.)
+        before = [p for p in pieces if "نمبر 2" in p.body]
+        after = [p for p in pieces if "نمبر 3" in p.body]
+        self.assertTrue(before, "sher 2 reached no ghazal piece")
+        self.assertTrue(after, "sher 3 reached no ghazal piece")
+        self.assertIs(before[0], after[0], "the ghazal was split across the header")
+
+    def test_the_page_header_names_the_collection(self):
+        pieces = [p for p in segment(self._with_header_mid_ghazal())
+                  if p.kind == "ghazals"]
+        self.assertEqual(pieces[-1].collection, self.HEADER)
+
+    def test_a_real_section_heading_still_breaks_the_run(self):
+        pieces = segment(FRONT + GHAZAL + [para("نعت", 60)] + _clean_shers(1, 2))
+        sections = [p.section for p in pieces if p.kind == "ghazals"]
+        self.assertIn("نعت", sections)
+
+    def test_collection_is_empty_before_any_page_header(self):
+        pieces = segment(FRONT + GHAZAL)
+        self.assertEqual(pieces[0].collection, "")
