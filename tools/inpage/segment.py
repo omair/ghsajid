@@ -617,7 +617,13 @@ def segment(
                         (title_candidate_index, title_candidate)
                     )
                 cursor = 0
-                for group in split_ghazals(pair_shers(run)):
+                # Orphans are rejoined BEFORE the run is split into ghazals,
+                # so a maqtaa whose second misra lost its geometry marker is
+                # one sher everywhere downstream: `split_ghazals` no longer
+                # has to read that bare second misra as a candidate matlaa,
+                # the ghazal's rhyme is measured with it included, and the
+                # line-count cursor below counts it as the two lines it is.
+                for group in split_ghazals(merge_orphan_shers(pair_shers(run))):
                     flags = ["half-sher"] if any(not s[1] for s in group) else []
                     group_end = cursor + sum(
                         2 if second else 1 for _, second in group
@@ -775,6 +781,57 @@ def pair_shers(run: list[Paragraph]) -> list[tuple[str, str]]:
             shers.append((first.text, ""))
             index += 1
     return shers
+
+
+def merge_orphan_shers(
+    shers: list[tuple[str, str]],
+) -> list[tuple[str, str]]:
+    """Rejoin two adjacent half shers into the one sher they were.
+
+    `pair_shers` reads the second misra off `geometry == 1`, and some second
+    misras in the source simply do not carry the marker. The line then pairs
+    with nothing, its partner pairs with nothing either, and one couplet is
+    emitted as two half shers side by side.
+
+    Measured across the whole corpus, every such adjacency is one sher: کلیات
+    جلد ۲ has 45 of them and باغِ نشاط 1, and all 46 sit at the very last
+    position of their ghazal, 44 of them carrying the takhallus ساجدؔ. They
+    are maqtaas — the closing sher — whose second misra lost its marker. There
+    is not one mid-poem adjacency anywhere in the four books, so the rule is
+    stated generally (two adjacent half shers are one sher) rather than
+    restricted to the close: nothing in the evidence contradicts it, and a
+    positional restriction would only be a guess about text not yet seen.
+
+    Merging is greedy and left to right, the same discipline `pair_shers`
+    itself follows: three half shers in a row become one sher and one half
+    sher, and the odd line out stays flagged rather than being welded onto a
+    couplet it does not belong to. A lone half sher is left exactly as it is —
+    a genuinely single line is a real thing (a فرد, a truncated poem) and must
+    keep reaching the reviewer.
+
+    No line is ever moved between shers or dropped; the merged sher holds both
+    original lines verbatim, in order.
+
+    Deliberately NOT applied inside `_is_ghazal_shaped`. That gate measures
+    how cleanly a run pairs in order to tell a ghazal from a nazm, and a
+    nazm's run is mostly half shers — merging them pairwise first would score
+    every nazm 100% clean and file the whole lot as ghazals.
+    """
+    merged: list[tuple[str, str]] = []
+    index = 0
+    while index < len(shers):
+        first, second = shers[index]
+        if (
+            not second
+            and index + 1 < len(shers)
+            and not shers[index + 1][1]
+        ):
+            merged.append((first, shers[index + 1][0]))
+            index += 2
+        else:
+            merged.append((first, second))
+            index += 1
+    return merged
 
 
 def _rhyme_key(text: str) -> str:

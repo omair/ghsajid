@@ -6,7 +6,7 @@ from tools.inpage.segment import (
     KULLIYAT_JILD_1_COLLECTIONS, MAX_TITLE_LENGTH, _is_ghazal_shaped,
     _position_collection,
     attribute_gathered_collections, collection_boundary_dedication, is_matla,
-    pair_shers, run_rhyme, segment, split_ghazals,
+    merge_orphan_shers, pair_shers, run_rhyme, segment, split_ghazals,
 )
 
 
@@ -58,6 +58,48 @@ class TestPairShers(unittest.TestCase):
         # Never drop a line: the second element is empty, and the caller flags it.
         run = [para("ا", 73), para("ب", 1), para("ج", 89)]
         self.assertEqual(pair_shers(run), [("ا", "ب"), ("ج", "")])
+
+
+class TestMergeOrphanShers(unittest.TestCase):
+    def test_two_adjacent_half_shers_become_one_sher(self):
+        shers = [("ا", "ب"), ("ج", ""), ("د", "")]
+        self.assertEqual(merge_orphan_shers(shers), [("ا", "ب"), ("ج", "د")])
+
+    def test_a_lone_half_sher_stays_a_half_sher(self):
+        shers = [("ا", "ب"), ("ج", ""), ("د", "ہ")]
+        self.assertEqual(merge_orphan_shers(shers), [("ا", "ب"), ("ج", ""), ("د", "ہ")])
+
+    def test_a_trailing_lone_half_sher_stays_a_half_sher(self):
+        shers = [("ا", "ب"), ("ج", "")]
+        self.assertEqual(merge_orphan_shers(shers), [("ا", "ب"), ("ج", "")])
+
+    def test_three_in_a_row_pair_the_first_two_and_leave_the_third(self):
+        # Greedy, left to right — the same rule `pair_shers` itself follows.
+        # The odd line out is kept and stays flagged rather than being welded
+        # onto a couplet it does not belong to.
+        shers = [("ا", ""), ("ب", ""), ("ج", "")]
+        self.assertEqual(merge_orphan_shers(shers), [("ا", "ب"), ("ج", "")])
+
+    def test_no_line_is_ever_lost(self):
+        for shers in (
+            [("ا", "ب"), ("ج", ""), ("د", "")],
+            [("ا", "ب"), ("ج", ""), ("د", "ہ")],
+            [("ا", ""), ("ب", ""), ("ج", "")],
+            [("ا", ""), ("ب", ""), ("ج", ""), ("د", "")],
+        ):
+            before = [line for sher in shers for line in sher if line]
+            after = [line for sher in merge_orphan_shers(shers) for line in sher if line]
+            self.assertEqual(before, after)
+
+    def test_a_ghazal_of_clean_shers_is_untouched(self):
+        shers = [("ا", "ب"), ("ج", "د")]
+        self.assertEqual(merge_orphan_shers(shers), shers)
+
+    def test_the_merged_sher_is_flagged_no_longer_but_the_lone_one_is(self):
+        # The half-sher flag is raised on any sher with an empty second misra,
+        # so merging clears it for the pair and leaves it for the orphan.
+        merged = merge_orphan_shers([("ا", ""), ("ب", ""), ("ج", "")])
+        self.assertEqual([bool(second) for _, second in merged], [True, False])
 
 
 class TestIsMatla(unittest.TestCase):
