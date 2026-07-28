@@ -607,6 +607,67 @@ class TestRunningHeadersInAssembly(unittest.TestCase):
         self.assertEqual(after.collection, HEADER2)
 
 
+class TestPositionAttributedCollection(unittest.TestCase):
+    """کلیات جلد ۲'s Defect 1: 82 opening poems precede the volume's first
+    running header by 900 paragraphs and so carried collection == "".
+
+    A piece whose own last line still sits before the very first running
+    header in the whole book has no earlier collection to belong to, so it
+    takes that header's name. A piece that STRADDLES the header (its own
+    run continues past it, as when split_ghazals fails to separate two
+    collections' poems — see TestRunningHeadersInAssembly) must not be
+    relabeled this way: that is exactly the "last header wins" bug this
+    fix must not reintroduce.
+    """
+
+    HEADER = "نیند میں چلتے ہوئے"
+
+    def _book_with_a_leading_ghazal_before_the_only_header(self):
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        second = [para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1)]
+        # RUNNING_HEADER_MIN+1 occurrences: running_headers() only counts a
+        # text as page furniture past a strict majority, not at the count.
+        headers = [para(self.HEADER, 60)] * (RUNNING_HEADER_MIN + 1)
+        return FRONT + GHAZAL + headers + second
+
+    def test_a_piece_entirely_before_the_first_header_takes_its_name(self):
+        pieces = segment(self._book_with_a_leading_ghazal_before_the_only_header())
+        self.assertEqual(pieces[0].collection, self.HEADER)
+
+    def test_a_book_with_no_running_headers_leaves_collections_empty(self):
+        # تجاوز, باغِ نشاط and کلیات جلد ۱'s shape: no running header
+        # anywhere, so nothing is attributed and every collection stays "".
+        pieces = segment(FRONT + GHAZAL)
+        self.assertEqual([p.collection for p in pieces], [""])
+
+    def test_the_attribution_is_reported_through_the_out_param(self):
+        attributed: list = []
+        pieces = segment(
+            self._book_with_a_leading_ghazal_before_the_only_header(),
+            None, None, attributed,
+        )
+        self.assertEqual(attributed, [pieces[0]])
+
+    def test_a_piece_straddling_the_first_header_is_not_relabeled(self):
+        # The exact TestRunningHeadersInAssembly fixture: one ghazal-shaped
+        # run continues across the book's very first header. Its own first
+        # line sits before that header, but its own last line sits after
+        # it — it must keep "", not inherit the header seen partway through
+        # its own text.
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        shers = _clean_shers(1, 4)
+        elsewhere = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        paragraphs = (
+            FRONT + GHAZAL + shers[:4] + [para(self.HEADER, 60)] + shers[4:]
+            + elsewhere
+        )
+        attributed: list = []
+        pieces = [p for p in segment(paragraphs, None, None, attributed)
+                  if p.kind == "ghazals"]
+        self.assertEqual(pieces[-1].collection, "")
+        self.assertEqual(attributed, [])
+
+
 class TestRunningHeaderClosesEssayRegion(unittest.TestCase):
     """کلیات vol 2's bug: a running header never closed an essay region.
 

@@ -28,6 +28,7 @@ from .checks import (
     completeness_errors,
     conservation_errors,
     flag_decode_garbage,
+    flag_single_line_pieces,
     lexicon_report,
     roundtrip_errors,
     segmentation_groundtruth_errors,
@@ -125,7 +126,10 @@ def cmd_segment(book_slug: str) -> None:
     paragraphs = decode(data)
     dropped_unknowns: list[str] = []
     unreached: list[tuple[str, object]] = []
-    segments = segment_paragraphs(paragraphs, dropped_unknowns, unreached)
+    position_attributed: list[Segment] = []
+    segments = segment_paragraphs(
+        paragraphs, dropped_unknowns, unreached, position_attributed
+    )
     # A review's `reviewed_book` is the book it prefaces. Set here rather than
     # in segmentation, which only ever sees one book's paragraphs and has no
     # way to know its title.
@@ -167,6 +171,11 @@ def cmd_segment(book_slug: str) -> None:
         # beside the piece. Nothing is removed: a flagged piece is still
         # staged, still counted by the gates below, still promotable.
         + flag_decode_garbage(segments, lexicon)
+        # Also mutates the segments, same contract as flag_decode_garbage
+        # above: a piece whose whole body is one line — dedication, orphaned
+        # title, decode garbage, or a real فرد — is kept and flagged, never
+        # guessed at or dropped.
+        + flag_single_line_pieces(segments)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(paragraphs, segments)
         # The کلیات-only gates. Both are wired by slug for the same reason
@@ -213,6 +222,24 @@ def cmd_segment(book_slug: str) -> None:
             ) or "none"),
         ]
     )
+    if position_attributed:
+        # Attribution by position, not by the source naming it: these pieces
+        # precede every running header the book prints, so they took the
+        # FIRST one's name on the reasoning that no earlier collection exists
+        # to have supplied it (see segment._position_collection). A reviewer
+        # approving the report must be able to see this happened, not just
+        # the resulting count.
+        by_collection = collections.Counter(
+            s.collection for s in position_attributed
+        )
+        gate_output.append(
+            f"{len(position_attributed)} piece(s) had their collection "
+            f"attributed by POSITION (they precede this book's first "
+            f"running header, so there is no earlier collection to read): "
+            + ", ".join(
+                f"{name} {n}" for name, n in sorted(by_collection.items())
+            )
+        )
     if dropped_unknowns:
         # The spec says unknown is flagged and retained, never dropped — but
         # segment() only retains an UNKNOWN paragraph's text when a nazm with

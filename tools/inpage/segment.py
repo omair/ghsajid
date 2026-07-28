@@ -149,10 +149,39 @@ def collections_at(paragraphs: list[Paragraph], kinds: list[str]) -> list[str]:
     return out
 
 
+def _position_collection(
+    natural: str,
+    last_index: int,
+    first_header_index: int | None,
+    first_header_name: str,
+) -> tuple[str, bool]:
+    """Backfill a piece's collection from the book's very first running header.
+
+    A running header only ever names the collection from its own page
+    onward, so a piece with a natural (non-empty) collection already has
+    real evidence and is left alone. A piece with none has none because no
+    earlier header exists in the volume to have supplied one — کلیات جلد
+    ۲'s 82 opening poems, whose first running header does not appear until
+    paragraph 1150 — and the fix is to give it the first header that DOES
+    appear, since there is no earlier one to be wrong about.
+
+    Guarded on the piece's own LAST paragraph, not its first: a piece whose
+    run continues past that first header (split_ghazals failed to separate
+    two collections' poems at the seam, exactly the fixture in
+    TestRunningHeadersInAssembly) must keep "" rather than being stamped
+    with a header its own earlier lines never saw — that is the same
+    "last header wins" bug this fix must not reintroduce by another route.
+    """
+    if natural or first_header_index is None or last_index >= first_header_index:
+        return natural, False
+    return first_header_name, True
+
+
 def segment(
     paragraphs: list[Paragraph],
     dropped_unknowns: list[str] | None = None,
     unreached: list[tuple[str, Paragraph]] | None = None,
+    position_attributed: list[Segment] | None = None,
 ) -> list[Segment]:
     """Assemble classified paragraphs into pieces.
 
@@ -184,6 +213,14 @@ def segment(
     فہرست, the ۰۰۰ separators, a section heading that becomes `section`
     metadata — but a poem's line appearing there is the loss this pipeline
     exists to prevent, and it was invisible until the count was reported.
+
+    `position_attributed`, given a list, is appended with every piece whose
+    `collection` was not read off a running header at all but backfilled
+    from the book's first one, because no earlier header exists in the
+    volume to have supplied it (see `_position_collection`). This is
+    attribution by position, not by the source naming it, and a caller
+    (`cmd_segment`) reports the count rather than letting it look identical
+    to an ordinary header read.
     """
     if dropped_unknowns is None:
         dropped_unknowns = []
@@ -195,6 +232,15 @@ def segment(
     pending_drops: list[tuple[int, str]] = []
     kinds = classify(paragraphs)
     collections = collections_at(paragraphs, kinds)
+    # The book's very first running header, if it has one at all — see
+    # `_position_collection`. تجاوز, باغِ نشاط and کلیات جلد ۱ have none, so
+    # this stays None and nothing below ever fires for them.
+    first_header_index = next(
+        (i for i, k in enumerate(kinds) if k == RUNNING_HEADER), None
+    )
+    first_header_name = (
+        paragraphs[first_header_index].text if first_header_index is not None else ""
+    )
     body_start = body_start_index(paragraphs)
     pieces: list[Segment] = []
     section = ""
@@ -314,11 +360,18 @@ def segment(
             # paragraph — `collections`, precomputed once up front, already
             # accounts for any running header inside the region (the
             # critic's quotations span pages too) without needing to be
-            # walked again here.
+            # walked again here. Backfilled from the book's first header
+            # only when the whole region ends before it (see
+            # `_position_collection`).
+            review_collection, attributed = _position_collection(
+                collections[start], end - 1, first_header_index, first_header_name,
+            )
             piece = _add_review(
                 add, paragraphs[start:end], kinds[start:end], index, paragraphs,
-                collections[start],
+                review_collection,
             )
+            if attributed and position_attributed is not None:
+                position_attributed.append(piece)
             consumed.update(
                 i for i in range(start, end) if kinds[i] != RUNNING_HEADER
             )
@@ -342,10 +395,12 @@ def segment(
             # collection in force once the whole run has been scanned.
             run: list[Paragraph] = []
             run_collections: list[str] = []
+            run_indices: list[int] = []
             for i in range(start, index):
                 if kinds[i] == VERSE:
                     run.append(paragraphs[i])
                     run_collections.append(collections[i])
+                    run_indices.append(i)
             if _is_ghazal_shaped(run):
                 # A ghazal is titled by its matlaa, never by title_candidate —
                 # a pending candidate here is moot and reaches no piece.
@@ -356,20 +411,38 @@ def segment(
                 cursor = 0
                 for group in split_ghazals(pair_shers(run)):
                     flags = ["half-sher"] if any(not s[1] for s in group) else []
-                    piece_collection = run_collections[cursor]
-                    cursor += sum(2 if second else 1 for _, second in group)
-                    add(
+                    group_end = cursor + sum(
+                        2 if second else 1 for _, second in group
+                    )
+                    # Backfilled from the book's first header only when
+                    # THIS group's own last line still precedes it — a
+                    # group whose text runs past the header keeps its
+                    # natural collection (see `_position_collection`).
+                    piece_collection, attributed = _position_collection(
+                        run_collections[cursor], run_indices[group_end - 1],
+                        first_header_index, first_header_name,
+                    )
+                    cursor = group_end
+                    piece = add(
                         "ghazals", group[0][0], _ghazal_body(group), flags,
                         piece_collection,
                     )
+                    if attributed and position_attributed is not None:
+                        position_attributed.append(piece)
             else:
                 title = title_candidate or run[0].text
                 if title_candidate:
                     consumed.add(title_candidate_index)
-                add(
-                    "nazms", title, "\n".join(p.text for p in run), [],
-                    run_collections[0],
+                piece_collection, attributed = _position_collection(
+                    run_collections[0], run_indices[-1],
+                    first_header_index, first_header_name,
                 )
+                piece = add(
+                    "nazms", title, "\n".join(p.text for p in run), [],
+                    piece_collection,
+                )
+                if attributed and position_attributed is not None:
+                    position_attributed.append(piece)
             consumed.update(range(start, index))
             title_candidate = ""
             title_candidate_index = -1

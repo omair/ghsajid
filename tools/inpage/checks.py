@@ -188,6 +188,47 @@ def flag_decode_garbage(segments: list[Segment], lexicon: set[str]) -> list[str]
     ]
 
 
+# The flag a piece carries when its whole body is one surviving line.
+SINGLE_LINE_FLAG = "single-line-piece"
+
+
+def flag_single_line_pieces(segments: list[Segment]) -> list[str]:
+    """Flag a poem whose entire body is one non-empty line, and name it.
+
+    کلیات جلد ۲ emits 33 of these, vol 1 emits 3, and they are not one
+    thing: a dedication ("زُبیر ساجد کے لیے"), a possible nazm title
+    orphaned from its own body ("کیا ہم کہیں کھڑے ہیں؟"), and outright
+    decode garbage ("ب گینیگایںقرا ۔ ا  کج") all land here identically. A
+    فرد — a real, single-sher poem — is also one line, so the shape alone
+    cannot say which of these a given piece is.
+
+    So it is never guessed at. This only flags and names the piece, the same
+    "kept, not dropped, a human decides" contract as `flag_decode_garbage`:
+    the piece stays exactly as segmented, still staged, still promotable,
+    just carrying one more thing for a reviewer to look at before approving.
+    """
+    flagged = [
+        segment for segment in segments
+        if segment.kind in VERSE_KINDS
+        and len([ln for ln in segment.body.split("\n") if ln.strip()]) == 1
+    ]
+    for segment in flagged:
+        if SINGLE_LINE_FLAG not in segment.flags:
+            segment.flags.append(SINGLE_LINE_FLAG)
+    if not flagged:
+        return []
+    listed = "; ".join(
+        f"order {segment.order} ({segment.kind}) {segment.title[:30]!r}"
+        for segment in flagged[:5]
+    )
+    return [
+        f"{len(flagged)} piece(s) flagged {SINGLE_LINE_FLAG}: a single "
+        f"surviving line reads as a poem, but dedications, orphaned titles "
+        f"and decode garbage are indistinguishable from a real فرد without "
+        f"a human. Kept, not dropped — read them before approving: {listed}"
+    ]
+
+
 def toc_count_errors(
     paragraphs: list[Paragraph], segments: list[Segment]
 ) -> list[str]:

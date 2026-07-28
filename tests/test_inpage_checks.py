@@ -190,6 +190,62 @@ class TestDecodeGarbageFlag(unittest.TestCase):
         self.assertEqual(piece.flags.count(checks.GARBAGE_FLAG), 1)
 
 
+class TestSingleLinePieceFlag(unittest.TestCase):
+    """Defect 2: کلیات جلد ۲ emits 33 one-line 'nazms' — دیدication, an
+    orphaned title, decode garbage — indistinguishable without a human.
+    Never dropped, never guessed at: just flagged and named.
+    """
+
+    def test_a_one_line_piece_is_flagged(self):
+        piece = Segment(
+            kind="nazms", title="زُبیر ساجد کے لیے",
+            body="زُبیر ساجد کے لیے", order=1,
+        )
+        checks.flag_single_line_pieces([piece])
+        self.assertIn(checks.SINGLE_LINE_FLAG, piece.flags)
+
+    def test_a_two_line_piece_is_not_flagged(self):
+        piece = Segment(kind="ghazals", title="t", body="ا\nب", order=1)
+        checks.flag_single_line_pieces([piece])
+        self.assertEqual(piece.flags, [])
+
+    def test_the_flag_does_not_change_kind_body_or_order(self):
+        piece = Segment(kind="nazms", title="t", body="ایک سطر", order=5)
+        before = (piece.kind, piece.body, piece.order)
+        checks.flag_single_line_pieces([piece])
+        self.assertEqual((piece.kind, piece.body, piece.order), before)
+
+    def test_ignores_non_verse_kinds(self):
+        piece = Segment(kind="reviews", title="t", body="ایک سطر", order=1)
+        checks.flag_single_line_pieces([piece])
+        self.assertEqual(piece.flags, [])
+
+    def test_an_empty_body_is_not_flagged(self):
+        piece = Segment(kind="ghazals", title="t", body="", order=1)
+        checks.flag_single_line_pieces([piece])
+        self.assertEqual(piece.flags, [])
+
+    def test_the_gate_output_names_the_flagged_piece(self):
+        piece = Segment(
+            kind="nazms", title="زُبیر ساجد کے لیے",
+            body="زُبیر ساجد کے لیے", order=7,
+        )
+        messages = checks.flag_single_line_pieces([piece])
+        self.assertEqual(len(messages), 1)
+        self.assertIn(checks.SINGLE_LINE_FLAG, messages[0])
+        self.assertIn("7", messages[0])
+
+    def test_silent_when_no_piece_is_one_line(self):
+        piece = Segment(kind="ghazals", title="t", body="ا\nب", order=1)
+        self.assertEqual(checks.flag_single_line_pieces([piece]), [])
+
+    def test_flagging_twice_does_not_duplicate_the_flag(self):
+        piece = Segment(kind="nazms", title="t", body="ایک سطر", order=1)
+        checks.flag_single_line_pieces([piece])
+        checks.flag_single_line_pieces([piece])
+        self.assertEqual(piece.flags.count(checks.SINGLE_LINE_FLAG), 1)
+
+
 class TestTocCountGate(unittest.TestCase):
     def test_reports_a_mismatch_with_the_delta(self):
         segments = [Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں")]
