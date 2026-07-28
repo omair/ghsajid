@@ -131,6 +131,24 @@ def _ghazal_body(shers: list[tuple[str, str]]) -> str:
     )
 
 
+def collections_at(paragraphs: list[Paragraph], kinds: list[str]) -> list[str]:
+    """The collection in effect at each paragraph.
+
+    A running page header names the collection from that page onward. A
+    piece must take the name in force where its own first line sits: a verse
+    run can span two collections when one book's poems run straight into the
+    next with nothing between them, and stamping such a run from a single
+    running variable gives every poem in it the last name seen.
+    """
+    current = ""
+    out: list[str] = []
+    for para, kind in zip(paragraphs, kinds):
+        if kind == RUNNING_HEADER:
+            current = para.text
+        out.append(current)
+    return out
+
+
 def segment(
     paragraphs: list[Paragraph],
     dropped_unknowns: list[str] | None = None,
@@ -176,10 +194,10 @@ def segment(
     # alarm. Reconciled against `consumed` at the end.
     pending_drops: list[tuple[int, str]] = []
     kinds = classify(paragraphs)
+    collections = collections_at(paragraphs, kinds)
     body_start = body_start_index(paragraphs)
     pieces: list[Segment] = []
     section = ""
-    collection = ""
     # How many pieces had already been formed when the first BODY heading was
     # reached, or None if the book has no body heading at all. Those pieces
     # precede every section the book declares (باغِ نشاط's epigraph couplet
@@ -206,7 +224,9 @@ def segment(
     boundary = 0
     emitted_end = 0
 
-    def add(kind: str, title: str, body: str, flags: list[str]) -> Segment:
+    def add(
+        kind: str, title: str, body: str, flags: list[str], collection: str,
+    ) -> Segment:
         nonlocal pending_colophon, pending_colophon_index
         if len(title) > MAX_TITLE_LENGTH:
             flags = flags + ["over-long-title"]
@@ -233,10 +253,10 @@ def segment(
         para = paragraphs[index]
 
         if kind == RUNNING_HEADER:
-            # Page furniture: it names the collection and is otherwise
-            # invisible. Emphatically no flush — 972 of these in کلیات vol 2
-            # would cut a ghazal at every page turn.
-            collection = para.text
+            # Page furniture: it names the collection (already captured for
+            # every paragraph by `collections`, computed up front) and is
+            # otherwise invisible. Emphatically no flush — 972 of these in
+            # کلیات vol 2 would cut a ghazal at every page turn.
             index += 1
             continue
 
@@ -290,17 +310,14 @@ def segment(
             start, end = _essay_region(
                 kinds, index, boundary, emitted_end, body_start
             )
-            # A running header can fall inside a long essay region — the
-            # critic's quotations span pages too — and the region is
-            # consumed in one jump below, never passing through the
-            # RUNNING_HEADER branch. Without this, the header's own
-            # collection change is silently skipped, and its text would
-            # otherwise leak into the review body as though it were prose.
-            for header_index in range(start, end):
-                if kinds[header_index] == RUNNING_HEADER:
-                    collection = paragraphs[header_index].text
+            # The review takes the collection in force at its own first
+            # paragraph — `collections`, precomputed once up front, already
+            # accounts for any running header inside the region (the
+            # critic's quotations span pages too) without needing to be
+            # walked again here.
             piece = _add_review(
-                add, paragraphs[start:end], kinds[start:end], index, paragraphs
+                add, paragraphs[start:end], kinds[start:end], index, paragraphs,
+                collections[start],
             )
             consumed.update(
                 i for i in range(start, end) if kinds[i] != RUNNING_HEADER
@@ -316,11 +333,19 @@ def segment(
         if kind == VERSE:
             start = index
             while index < len(paragraphs) and kinds[index] in (VERSE, RUNNING_HEADER):
-                if kinds[index] == RUNNING_HEADER:
-                    collection = paragraphs[index].text
                 index += 1
-            run = [p for p, k in zip(paragraphs[start:index], kinds[start:index])
-                   if k == VERSE]
+            # `run` and `run_collections` are built in the same pass, kept
+            # parallel: `split_ghazals` returns groups of shers, each 1 or 2
+            # lines long, and a cursor stepping over `run_collections` in
+            # lockstep with those groups is what lets each piece take the
+            # collection where its OWN first line sits, rather than the
+            # collection in force once the whole run has been scanned.
+            run: list[Paragraph] = []
+            run_collections: list[str] = []
+            for i in range(start, index):
+                if kinds[i] == VERSE:
+                    run.append(paragraphs[i])
+                    run_collections.append(collections[i])
             if _is_ghazal_shaped(run):
                 # A ghazal is titled by its matlaa, never by title_candidate —
                 # a pending candidate here is moot and reaches no piece.
@@ -328,14 +353,23 @@ def segment(
                     pending_drops.append(
                         (title_candidate_index, title_candidate)
                     )
+                cursor = 0
                 for group in split_ghazals(pair_shers(run)):
                     flags = ["half-sher"] if any(not s[1] for s in group) else []
-                    add("ghazals", group[0][0], _ghazal_body(group), flags)
+                    piece_collection = run_collections[cursor]
+                    cursor += sum(2 if second else 1 for _, second in group)
+                    add(
+                        "ghazals", group[0][0], _ghazal_body(group), flags,
+                        piece_collection,
+                    )
             else:
                 title = title_candidate or run[0].text
                 if title_candidate:
                     consumed.add(title_candidate_index)
-                add("nazms", title, "\n".join(p.text for p in run), [])
+                add(
+                    "nazms", title, "\n".join(p.text for p in run), [],
+                    run_collections[0],
+                )
             consumed.update(range(start, index))
             title_candidate = ""
             title_candidate_index = -1
@@ -402,11 +436,13 @@ def _add_review(
     region_kinds: list[str],
     prose_index: int,
     paragraphs: list[Paragraph],
+    collection: str,
 ) -> Segment:
     """Emit one `reviews` piece for a whole essay region, in source order."""
     # A running header inside the region is page furniture, exactly as it
-    # is everywhere else — it names the collection (handled by the caller
-    # before this runs) and must not become literal essay text.
+    # is everywhere else — it names the collection (already resolved by the
+    # caller, from where the region itself starts) and must not become
+    # literal essay text.
     body_lines = [
         p.text for p, k in zip(region, region_kinds)
         if k not in (COLOPHON, RUNNING_HEADER)
@@ -423,7 +459,10 @@ def _add_review(
     if not title:
         title = paragraphs[prose_index].text
     flags = [] if resolved or not heading_lines else [BYLINE_FLAG]
-    piece = add("reviews", title[:MAX_TITLE_LENGTH], "\n\n".join(body_lines), flags)
+    piece = add(
+        "reviews", title[:MAX_TITLE_LENGTH], "\n\n".join(body_lines), flags,
+        collection,
+    )
     piece.reviewed_author = author
     for p, k in zip(region, region_kinds):
         if k != COLOPHON:
