@@ -52,11 +52,9 @@ from .groundtruth import (
 )
 from .models import Book, Segment
 from .ole import read_text_stream
-from .printed_index import SECTION_NAMES_BY_BOOK
 from .promote import promote
 from .report import render, restamp_report
-from .segment import GATHERED_COLLECTIONS
-from .segment import segment as segment_paragraphs
+from .segment import GATHERED_COLLECTIONS, SECTION_NAMES_BY_BOOK, segment_book
 
 SOURCES = {
     "tajawuz": Path("inp/TAJAWUZ.INP"),
@@ -145,15 +143,11 @@ def cmd_segment(book_slug: str) -> None:
     # keyed by `table`, so this call and any other caller of segment() for
     # this book see the same collections this pipeline stages. A book not
     # keyed into GATHERED_COLLECTIONS is untouched.
-    table = GATHERED_COLLECTIONS.get(book_slug, {})
-    # Section names this book's PRINTED index declares — موسم's six seasons,
-    # عناصر's five elements. Without them a section title page sits between
-    # two verse paragraphs, gets bridged into the ghazal above it, and takes
-    # the following poem's boundary with it. See classify.heading_map.
-    sections = SECTION_NAMES_BY_BOOK.get(book_slug, ())
-    segments = segment_paragraphs(
-        paragraphs, dropped_unknowns, unreached, position_attributed,
-        table, boundaries, boundary_problems, sections,
+    segments = segment_book(
+        book_slug, paragraphs, dropped_unknowns=dropped_unknowns,
+        unreached=unreached, position_attributed=position_attributed,
+        collection_boundaries=boundaries,
+        collection_boundary_problems=boundary_problems,
     )
     # A review's `reviewed_book` is the book it prefaces. Set here rather than
     # in segmentation, which only ever sees one book's paragraphs and has no
@@ -202,7 +196,9 @@ def cmd_segment(book_slug: str) -> None:
         # guessed at or dropped.
         + flag_single_line_pieces(segments)
         + toc_count_errors(paragraphs, segments)
-        + conservation_errors(paragraphs, segments)
+        + conservation_errors(
+            paragraphs, segments, SECTION_NAMES_BY_BOOK.get(book_slug, ())
+        )
         # A title page the volume prints that this table cannot name, and the
         # two counts کلیات جلد ۱'s own فہرست declares. Both are no-ops for a
         # book that is not a gathering.

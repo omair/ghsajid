@@ -12,6 +12,7 @@ against the committed baseline, not verbatim reproduction of every ghazal
 
 import collections
 import re
+from collections.abc import Iterable
 
 from .classify import (
     VERSE, _is_verse_length, body_start_index, classify, toc_count,
@@ -28,6 +29,7 @@ from .groundtruth import (
     skeleton,
 )
 from .models import VERSE_KINDS, Paragraph, Segment
+from .printed_index import DECLARED_POEMS
 
 WORD = re.compile(r"[^\s]+")
 
@@ -322,8 +324,19 @@ def toc_count_errors(
 # totals are reported by cmd_segment's "poems per collection" line and left at
 # that; inventing a number to assert against would be worse than asserting
 # nothing.
+# CORRECTION, 2026-07-28: this table read {"موسم": 130, "عناصر": 100} and
+# the paragraph above explains why — 130 is what موسم's sections declare in
+# غزلیں. It is not موسم's poem count. Each of its six sections ALSO opens
+# with a حمد, indexed as its own entry, so موسم holds 136 poems; the gate
+# passed at 130 while six were missing, which is the worst way for a gate to
+# fail. عناصر, whose sections open with no حمد, was right at 100.
+#
+# The counts now come from the printed فہرست rather than being copied by
+# hand, and every collection in the volume has one — the four the decoded
+# source declares nothing for (کتابِ صبح، آیندہ، معاملہ، روداد) index every
+# poem by its opening misra in print. See tools/inpage/printed_index.py.
 DECLARED_COLLECTION_COUNTS: dict[str, dict[str, int]] = {
-    "kulliyat-jild-1": {"موسم": 130, "عناصر": 100},
+    "kulliyat-jild-1": dict(DECLARED_POEMS),
 }
 
 
@@ -409,7 +422,9 @@ def clear_unverifiable_sections(segments: list[Segment]) -> list[str]:
 
 
 def conservation_errors(
-    paragraphs: list[Paragraph], segments: list[Segment]
+    paragraphs: list[Paragraph],
+    segments: list[Segment],
+    sections: Iterable[str] = (),
 ) -> list[str]:
     """No verse text is missing or duplicated corpus-wide.
 
@@ -436,7 +451,11 @@ def conservation_errors(
     that line twice, so emitting it twice is conservation, not duplication.
     Emitting it more often than the source prints it still fails.
     """
-    kinds = classify(paragraphs)
+    # Classified with the SAME section names the segmentation used. Without
+    # them موسم's سعیر / حمدِ سعیر classify as verse here and as headings
+    # there, so sixteen paragraphs that correctly reach no body would be
+    # reported as verse this pipeline had lost.
+    kinds = classify(paragraphs, sections)
     expected = collections.Counter(
         para.text.strip()
         for para, kind in zip(paragraphs, kinds)

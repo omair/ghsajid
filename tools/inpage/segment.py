@@ -19,6 +19,7 @@ from .classify import (
 )
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
+from .printed_index import SECTION_NAMES_BY_BOOK
 
 # A real ghazal's matlaa is a line of verse, not a paragraph. When the
 # boundary heuristic fails to find a break inside a large prose block (front
@@ -759,6 +760,28 @@ def segment(
     return pieces
 
 
+def segment_book(book_slug: str, paragraphs: list[Paragraph], **kwargs):
+    """Segment `paragraphs` with everything known about `book_slug`.
+
+    The one place a book's per-book arguments are assembled. They used to be
+    assembled in `cmd_segment` alone, so a direct `segment()` call — a test,
+    a gate, a diagnostic — silently ran a DIFFERENT segmentation: first over
+    `gathered_collections` (a direct call reported عناصر with 231 poems
+    where the pipeline staged 100), and again over `sections`, where the
+    pipeline read موسم's six section title pages as headings and a direct
+    call read them as verse.
+
+    Both tables are keyed by slug and default to empty, so a book neither
+    names is segmented exactly as it was before either existed.
+    """
+    return segment(
+        paragraphs,
+        gathered_collections=GATHERED_COLLECTIONS.get(book_slug, {}),
+        sections=SECTION_NAMES_BY_BOOK.get(book_slug, ()),
+        **kwargs,
+    )
+
+
 def _essay_region(
     kinds: list[str],
     prose_index: int,
@@ -989,6 +1012,121 @@ def _is_maqta(sher: tuple[str, str]) -> bool:
     return any(TAKHALLUS in _rhyme_key(misra) for misra in sher if misra)
 
 
+# How many shers must agree before a group's rhyme is settled enough to
+# convict a later sher of abandoning it. Below three, the shared suffix is
+# still carrying accidental letters — the same effect `_same_zameen`
+# describes — and a legitimate qafia change reads as the ghazal ending.
+SETTLED_SHERS = 3
+
+# A trailing group this short, carrying the maqtaa, after a group carrying
+# none, is that group's ending rather than a poem — see `_rejoin_maqta_tails`.
+MAQTA_TAIL = 2
+
+
+def _rhyme_exhausted(
+    current: list[tuple[str, str]], second: str
+) -> bool:
+    """True when this sher leaves the ghazal so far with no rhyme at all.
+
+    Every sher of a ghazal rhymes; when one stops, the ghazal has ended.
+    `split_ghazals` only ever STARTED a group, at a matlaa, and never ended
+    one, so a ghazal whose successor opens on a single-letter qafia ran
+    straight on into it: موسم's برشگال ran two ghazals together across a ر
+    rhyme, زمہریر and قدیم across ے. Those openings cannot be caught by
+    `is_matla`, whose MIN_RHYME floor of 2 exists to stop ordinary shers
+    ending on ہے or سے from reading as matlaas — and lowering it fires 31
+    false openings in جلد ۱ alone. The evidence at those joins is not the
+    weak new rhyme but the strong old one running out.
+
+    The test is on what SURVIVES, not on what matches. Comparing the sher
+    against the group's established suffix convicts a legitimate qafia
+    change — سنگ سے، رنگ سے، دل سے share only سے, and a sher failing to end
+    in نگ سے is still in the ghazal. Asking instead whether the group has
+    any rhyme LEFT once the sher joins separates the two cleanly: a qafia
+    change leaves the radif standing, a new ghazal leaves nothing. Measured
+    both ways — the matching form moves تجاوز (+3) and باغِ نشاط (+4), both
+    promoted; this one moves neither.
+    """
+    if len(current) < SETTLED_SHERS or not second:
+        return False
+    keys = [_rhyme_key(s) for _, s in current if s]
+    if len(_shared_rhyme(keys)) < MIN_RHYME:
+        return False
+    return len(_shared_rhyme(keys + [_rhyme_key(second)])) < MIN_RHYME
+
+
+def _rhyme_is_forward(shers: list[tuple[str, str]], index: int) -> bool:
+    """True when `run_rhyme` read this rhyme from the shers that FOLLOW.
+
+    At the end of a run there is nothing to look ahead to and `run_rhyme`
+    falls back to the candidate sher's own two misras, which over-reads: four
+    shers rhyming شمس give ر شمس for the last one, because its two misras
+    happen to share the ر before it. That reading is too weak to REFUSE a
+    husn-e-matlaa on, so `_carries` is asked only where the rhyme was
+    established forward.
+    """
+    return len([s for _, s in shers[index:index + RHYME_WINDOW] if s]) >= 2
+
+
+def _carries(current: list[tuple[str, str]], rhyme: str) -> bool:
+    """True when the ghazal so far already rhymes the way `rhyme` does.
+
+    The husn-e-matlaa test asks whether an opening sher opens on the rhyme
+    the current ghazal is ALREADY in. `_same_zameen` answers that from the
+    group's shared suffix, and that suffix degenerates: کتابِ صبح's
+    ¬375 ghazal rhymes شک ہے، اجرک ہے، حق ہے، تک ہے، ٹھنڈک ہے, whose common
+    suffix is not ک ہے but a bare ہے — the qafia varies too much to survive
+    the intersection. Any new ghazal ending ہے then looks like the same
+    zameen, and ¶376's وری ہے ghazal was swallowed whole by ¶375's.
+
+    Asking instead whether any sher ALREADY WRITTEN ends on that rhyme
+    restores what the test meant. A husn-e-matlaa is a second opening on the
+    ghazal's own rhyme, so the shers around it carry it by definition; a new
+    poem's rhyme appears for the first time at its matlaa. تجاوز's
+    وحشت ہے / محبّت ہے inside the قیامت ہے ghazal still reads as husn — the
+    ghazal's own shers end ت ہے — and both promoted books come out
+    byte-identical.
+    """
+    if not rhyme:
+        return False
+    return any(
+        _rhyme_key(second).endswith(rhyme) for _, second in current if second
+    )
+
+
+def _rejoin_maqta_tails(
+    groups: list[list[tuple[str, str]]],
+) -> list[list[tuple[str, str]]]:
+    """Give back a tail that is only a maqtaa cut off its own ghazal.
+
+    A ghazal does not end two shers before its takhallus. عناصر's مٹّی
+    ghazal rhymes میری مٹی سے and closes میری مٹی ہے — the same zameen with
+    a different final particle, which `_rhyme_exhausted` cannot see because
+    a common-SUFFIX test collapses to ے when the difference sits at the very
+    end. What gives it away is not the rhyme but the takhallus: a short
+    trailing group carrying the maqtaa, after a group carrying none, is that
+    group's ending.
+
+    Kept as a pass over the finished groups rather than a guard inside the
+    loop, because the loop cannot see how long the tail will turn out to be:
+    at the break, what remains is the rest of the whole verse run, which
+    holds every later ghazal of the section too.
+    """
+    if not groups:
+        return groups
+    merged = [groups[0]]
+    for group in groups[1:]:
+        if (
+            len(group) <= MAQTA_TAIL
+            and any(_is_maqta(sher) for sher in group)
+            and not any(_is_maqta(sher) for sher in merged[-1])
+        ):
+            merged[-1] = merged[-1] + group
+        else:
+            merged.append(group)
+    return merged
+
+
 def split_ghazals(
     shers: list[tuple[str, str]],
 ) -> list[list[tuple[str, str]]]:
@@ -1032,12 +1170,19 @@ def split_ghazals(
     for index, (first, second) in enumerate(shers):
         rhyme = run_rhyme(shers, index)
         opens = is_matla(first, second, rhyme)
-        if opens and current:
+        exhausted = _rhyme_exhausted(current, second)
+        if (opens or exhausted) and current:
             established = _shared_rhyme(
                 [_rhyme_key(s) for _, s in current if s]
             )
             husn = (
-                _same_zameen(established, rhyme)
+                opens
+                and not exhausted
+                and (
+                    _carries(current, rhyme)
+                    or not _rhyme_is_forward(shers, index)
+                )
+                and _same_zameen(established, rhyme)
                 and (len(current) > 1 or matla_before)
                 and not _is_maqta(current[-1])
             )
@@ -1048,4 +1193,4 @@ def split_ghazals(
         matla_before = opens
     if current:
         groups.append(current)
-    return groups
+    return _rejoin_maqta_tails(groups)

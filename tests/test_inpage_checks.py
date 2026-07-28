@@ -787,10 +787,23 @@ class TestDeclaredCollectionCounts(unittest.TestCase):
             checks.declared_collection_count_errors(self._poems(1, 1), {}), []
         )
 
-    def test_the_real_declarations_are_the_two_the_fihrist_states(self):
+    def test_the_real_declarations_come_from_the_printed_fihrist(self):
+        # Was {"موسم": 130, "عناصر": 100} — the only two counts the DECODED
+        # source states. The printed فہرست counts all six, and corrects موسم:
+        # 130 is its غزلیں, and each of its six sections also opens with a
+        # حمد indexed separately, so موسم holds 136.
         self.assertEqual(
             checks.DECLARED_COLLECTION_COUNTS,
-            {"kulliyat-jild-1": {"موسم": 130, "عناصر": 100}},
+            {
+                "kulliyat-jild-1": {
+                    "موسم": 136,
+                    "عناصر": 100,
+                    "کتابِ صبح": 97,
+                    "آیندہ": 104,
+                    "معاملہ": 15,
+                    "روداد": 124,
+                }
+            },
         )
 
 

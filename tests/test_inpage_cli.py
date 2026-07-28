@@ -147,9 +147,13 @@ class TestCmdSegmentKulliyatJild1Records(unittest.TestCase):
                     path.read_text(encoding="utf-8"),
                 )
 
-    def test_the_report_states_both_declared_counts(self):
-        self.assertIn("موسم 130", self.report)
+    def test_the_report_states_every_declared_count(self):
+        self.assertIn("موسم 136", self.report)
         self.assertIn("عناصر 100", self.report)
+        self.assertIn("کتابِ صبح 97", self.report)
+        self.assertIn("آیندہ 104", self.report)
+        self.assertIn("معاملہ 15", self.report)
+        self.assertIn("روداد 124", self.report)
 
     def test_the_report_names_the_title_page_blocks(self):
         self.assertIn("title page", self.report)
