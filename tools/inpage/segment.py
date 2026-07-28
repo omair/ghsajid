@@ -61,8 +61,19 @@ GHAZAL_SHAPE_THRESHOLD = 0.9
 # critic's opening essay between ۰۰۰ separators; a section heading (غزلیں,
 # نعت) closes one just as firmly, and so does the body start, since anything
 # past it is the poems themselves.
+#
+# A RUNNING_HEADER also closes one, but is deliberately absent from
+# REGION_OPEN_KINDS: کلیات vol 2 prints the current collection's name atop
+# every page, and a page header is page furniture, not evidence that a new
+# foreword begins. Without it in REGION_CLOSE_KINDS, the essay region opened
+# earlier in the book had nothing to stop it once body_start had already
+# moved past the essay's own closing separator (exactly چہار دریا's
+# situation, being a later collection, not the book's front matter) — it ran
+# to the end of the book, and all 89 pages of چہار دریا, a whole published
+# collection, vanished into one `reviews` piece. A new page of a poetry
+# collection is definitively not still the foreword.
 REGION_OPEN_KINDS = (SEPARATOR, TOC, HEADING)
-REGION_CLOSE_KINDS = (SEPARATOR, HEADING)
+REGION_CLOSE_KINDS = (SEPARATOR, HEADING, RUNNING_HEADER)
 
 # تجاوز prints the essay's title first and its author second; باغِ نشاط
 # prints them the other way round, so position alone cannot tell them apart —

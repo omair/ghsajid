@@ -542,3 +542,56 @@ class TestRunningHeadersInAssembly(unittest.TestCase):
     def test_collection_is_empty_before_any_page_header(self):
         pieces = segment(FRONT + GHAZAL)
         self.assertEqual(pieces[0].collection, "")
+
+
+class TestRunningHeaderClosesEssayRegion(unittest.TestCase):
+    """کلیات vol 2's bug: a running header never closed an essay region.
+
+    چہار دریا prints the collection name atop every one of its 89 pages —
+    RUNNING_HEADER, not HEADING — and the essay region opened earlier in the
+    book kept absorbing everything after it, since nothing closed the region
+    until end of book. The whole collection disappeared into one `reviews`
+    piece. A new page of a poetry collection is definitively not still the
+    foreword.
+    """
+
+    HEADER = "چہار دریا"
+    SECOND_GHAZAL = [
+        para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1),
+    ]
+
+    def test_a_running_header_closes_an_essay_region(self):
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        # GHAZAL establishes the body immediately; everything below is
+        # already in_body, exactly as چہار دریا's pages are (they follow
+        # earlier collections, not the book's own front matter).
+        region = (
+            [para("۰۰۰", 80), para("ا" * 150, 67), para(self.HEADER, 60)]
+            + self.SECOND_GHAZAL
+        )
+        # Enough further occurrences for running_headers() to count this
+        # text as a running header rather than a one-off section heading.
+        extra_headers = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        pieces = segment(FRONT + GHAZAL + region + extra_headers)
+        ghazals = [p for p in pieces if p.kind == "ghazals"]
+        reviews = [p for p in pieces if p.kind == "reviews"]
+        review_text = "".join(p.body for p in reviews)
+        self.assertEqual(
+            len(ghazals), 2,
+            "the verse after the running header must become its own poem",
+        )
+        self.assertNotIn("یہ نئی دنیا الگ ہے", review_text)
+
+    def test_a_running_header_does_not_open_an_essay_region(self):
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        # Verse, a running header, more verse -- no prose anywhere, so this
+        # must never produce a `reviews` piece. Confirms RUNNING_HEADER stays
+        # out of REGION_OPEN_KINDS even though it now closes a region.
+        extra_headers = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        pieces = segment(
+            FRONT + GHAZAL + [para(self.HEADER, 60)] + self.SECOND_GHAZAL
+            + extra_headers
+        )
+        self.assertEqual(
+            [p.kind for p in pieces if p.kind == "reviews"], []
+        )
