@@ -172,6 +172,23 @@ class TestConservationGate(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("more than one piece", errors[0])
 
+    def test_a_line_the_source_prints_twice_may_be_emitted_twice(self):
+        # The critic's essay quotes a sher that the book also prints as part
+        # of a ghazal — تجاوز's بدن کے اپنے تقاضے ہیں، روح کے اپنے is in both.
+        # Now that the essay region keeps its quotations, the line legitimately
+        # reaches two pieces because the source holds it twice.
+        quoted = "جسم کی خوشبو الگ"
+        paragraphs = [vpara(quoted, 70), vpara("ا" * 300, 67)] + TOC_AND_GHAZAL
+        segments = [
+            Segment(kind="reviews", title="t", order=1,
+                    body=f"{quoted}\n\n" + "ا" * 300),
+            Segment(
+                kind="ghazals", title="t", order=2,
+                body="جسم کی خوشبو الگ\nمیرے دل کا جادو الگ\n\nچاٹ لیتی ہے یہ فکر\nہو نہ جائے تو الگ",
+            ),
+        ]
+        self.assertEqual(conservation_errors(paragraphs, segments), [])
+
 
 if __name__ == "__main__":
     unittest.main()

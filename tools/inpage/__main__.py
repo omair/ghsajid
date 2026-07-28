@@ -9,6 +9,7 @@ until that report is approved, and refuses again if the segmentation changed
 after approval.
 """
 
+import collections
 import json
 import shutil
 import sys
@@ -101,7 +102,8 @@ def cmd_segment(book_slug: str) -> None:
     data = _load(book_slug)
     paragraphs = decode(data)
     dropped_unknowns: list[str] = []
-    segments = segment_paragraphs(paragraphs, dropped_unknowns)
+    unreached: list[tuple[str, object]] = []
+    segments = segment_paragraphs(paragraphs, dropped_unknowns, unreached)
 
     # Gate C (ground truth) is a property of the codepage, not of any one
     # book: the 11 ground-truth ghazals exist only in the کلیات volumes, so
@@ -139,6 +141,27 @@ def cmd_segment(book_slug: str) -> None:
             f"{len(dropped_unknowns)} unknown paragraph(s) reached no piece "
             f"(first few: {sample})"
         )
+    if unreached:
+        # The general form of the line above, and the one that would have
+        # caught the dropped-foreword bug: an essay's quoted verse sat before
+        # the first ghazal, classified front_matter, and reached no piece at
+        # all — ~55 lines of the poet's own work, lost with no report of any
+        # kind. A nonzero count here is expected (the title page, the فہرست,
+        # the ۰۰۰ separators and the section headings all legitimately reach
+        # no piece); the point is that the number is stated, so the next
+        # regression of this shape shows up as the number moving.
+        counts = collections.Counter(kind for kind, _ in unreached)
+        breakdown = ", ".join(
+            f"{kind} {count}" for kind, count in sorted(counts.items())
+        )
+        gate_output.append(
+            f"{len(unreached)} paragraph(s) reached no piece, by kind: "
+            f"{breakdown}"
+        )
+        sample = ", ".join(
+            repr(para.text[:40]) for _, para in unreached[:5]
+        )
+        gate_output.append(f"  first few unreached: {sample}")
     outliers = lexicon_report(paragraphs, corpus_lexicon())
     if outliers:
         gate_output.append("lexicon outliers (review for clustered mis-decodes): "

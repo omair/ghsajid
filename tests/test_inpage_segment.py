@@ -293,6 +293,102 @@ class TestSegmentBook(unittest.TestCase):
         self.assertEqual([p.order for p in pieces], list(range(1, len(pieces) + 1)))
 
 
+class TestEssayRegion(unittest.TestCase):
+    """The critic's essay that opens each book, and the verse it quotes.
+
+    Both pilot books open with an essay about the poet, sitting before the
+    first ghazal and therefore before `body_start_index`. Every verse line it
+    quotes classifies as FRONT_MATTER there, and FRONT_MATTER produced no
+    piece — so ~55 lines of the poet's own verse were dropped, and the essay
+    itself was shredded into one `reviews` fragment per uninterrupted prose
+    run (5 in تجاوز, 10 in باغِ نشاط). The region is now absorbed whole.
+    """
+
+    TITLE_LINE = "شاعرانہ مگس کاری کے متنوع سانچے"
+    AUTHOR_LINE = "ڈاکٹر سعادت سعید"
+    QUOTE_ONE = "شمع خیالِ سبز کی رنگ جما نہیں رہی"
+    QUOTE_TWO = "سَر پر کِسی غریب کے ناچار گِر پڑے"
+    NOTE = "(۵-مئی ۲۰۲۳ئ)"
+
+    def essay(self):
+        """A separator-bounded essay region: headings, prose, quoted verse."""
+        return [
+            para("۰۰۰", 80),
+            para(self.TITLE_LINE, 70),
+            para(self.AUTHOR_LINE, 70),
+            para("الف" * 60, 67),
+            para(self.QUOTE_ONE, 73),
+            para("بے" * 60, 67),
+            para(self.QUOTE_TWO, 73),
+            para(self.NOTE, 1),
+            para("۰۰۰", 80),
+        ]
+
+    def review(self):
+        pieces = segment(FRONT + self.essay() + GHAZAL)
+        reviews = [p for p in pieces if p.kind == "reviews"]
+        self.assertEqual(len(reviews), 1, "the essay must be one piece")
+        return reviews[0]
+
+    def test_an_essay_interrupted_by_verse_is_one_piece_not_several(self):
+        pieces = segment(FRONT + self.essay() + GHAZAL)
+        self.assertEqual(
+            [p.kind for p in pieces], ["reviews", "ghazals"]
+        )
+
+    def test_the_quoted_verse_survives_in_source_order(self):
+        body = self.review().body
+        for quote in (self.QUOTE_ONE, self.QUOTE_TWO):
+            self.assertIn(quote, body)
+        lines = [line for line in body.split("\n\n") if line.strip()]
+        self.assertEqual(
+            lines,
+            [
+                self.TITLE_LINE,
+                self.AUTHOR_LINE,
+                "الف" * 60,
+                self.QUOTE_ONE,
+                "بے" * 60,
+                self.QUOTE_TWO,
+            ],
+        )
+
+    def test_a_colophon_inside_the_region_becomes_the_written_note(self):
+        self.assertEqual(self.review().written_note, self.NOTE)
+
+    def test_the_byline_is_flagged_and_both_heading_lines_are_kept(self):
+        # تجاوز orders the region title-then-author, باغِ نشاط
+        # author-then-title, so there is no rule that picks the byline. Both
+        # lines stay in the body and a human resolves the flag.
+        piece = self.review()
+        self.assertIn("confirm-review-byline", piece.flags)
+        self.assertEqual(piece.title, self.TITLE_LINE)
+        self.assertIn(self.TITLE_LINE, piece.body)
+        self.assertIn(self.AUTHOR_LINE, piece.body)
+
+    def test_no_ghazal_line_is_swallowed_by_the_region(self):
+        # The region stops at the body start even when no separator closes it.
+        essay = [p for p in self.essay() if p.text != "۰۰۰"]
+        pieces = segment(FRONT + [para("۰۰۰", 80)] + essay + GHAZAL)
+        ghazals = [p for p in pieces if p.kind == "ghazals"]
+        self.assertEqual(len(ghazals), 1)
+        self.assertIn("جسم کی خوشبو الگ", ghazals[0].body)
+        self.assertNotIn("جسم کی خوشبو الگ",
+                         [p for p in pieces if p.kind == "reviews"][0].body)
+
+    def test_paragraphs_reaching_no_piece_are_reported_by_kind(self):
+        unreached: list[tuple[str, Paragraph]] = []
+        segment(FRONT + self.essay() + GHAZAL, None, unreached)
+        kinds = {kind for kind, _ in unreached}
+        # The title-page front matter and the فہرست line legitimately reach
+        # no piece; nothing from inside the essay region may appear here.
+        texts = {para_.text for _, para_ in unreached}
+        self.assertNotIn(self.QUOTE_ONE, texts)
+        self.assertNotIn(self.QUOTE_TWO, texts)
+        self.assertNotIn(self.NOTE, texts)
+        self.assertIn("front_matter", kinds)
+
+
 class TestIsGhazalShaped(unittest.TestCase):
     """Direct coverage of the greedy-pairing measurement itself."""
 

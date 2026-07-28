@@ -163,12 +163,23 @@ def conservation_errors(
     ghazal to another conserves perfectly and this gate stays silent — it
     does not prove each verse paragraph lands in the *same* piece it started
     in, only that it lands in some piece, exactly once, somewhere.
+
+    The duplication half is counted against the SOURCE's own multiset, not
+    against one occurrence each. The critic's opening essay quotes the poet,
+    and some of what it quotes is printed again as a ghazal later in the same
+    book — تجاوز's بدن کے اپنے تقاضے ہیں، روح کے اپنے appears both in Dr
+    Saadat Saeed's essay and in the غزل it is quoted from. The source holds
+    that line twice, so emitting it twice is conservation, not duplication.
+    Emitting it more often than the source prints it still fails.
     """
     kinds = classify(paragraphs)
     expected = collections.Counter(
         para.text.strip()
         for para, kind in zip(paragraphs, kinds)
         if kind == VERSE and para.text.strip()
+    )
+    in_source = collections.Counter(
+        para.text.strip() for para in paragraphs if para.text.strip()
     )
     emitted = collections.Counter(
         line.strip()
@@ -186,9 +197,9 @@ def conservation_errors(
             f"verse paragraphs did not reach a piece: {sample}"
         )
     doubled = collections.Counter({
-        text: emitted[text] - count
-        for text, count in expected.items()
-        if emitted[text] > count
+        text: emitted[text] - in_source[text]
+        for text in expected
+        if emitted[text] > in_source[text]
     })
     if doubled:
         total = sum(doubled.values())

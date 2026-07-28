@@ -13,7 +13,7 @@ import re
 
 from .classify import (
     COLOPHON, HEADING, NORMALISED_HEADINGS, PROSE, SECOND_MISRA_GEOMETRY,
-    UNKNOWN, VERSE, classify,
+    SEPARATOR, TOC, UNKNOWN, VERSE, body_start_index, classify,
 )
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
@@ -56,6 +56,20 @@ TAKHALLUS = "ساجد"
 
 GHAZAL_SHAPE_THRESHOLD = 0.9
 
+# What opens an essay region, and what closes it. Both pilot books fence the
+# critic's opening essay between ۰۰۰ separators; a section heading (غزلیں,
+# نعت) closes one just as firmly, and so does the body start, since anything
+# past it is the poems themselves.
+REGION_OPEN_KINDS = (SEPARATOR, TOC, HEADING)
+REGION_CLOSE_KINDS = (SEPARATOR, HEADING)
+
+# The byline cannot be inferred. تجاوز prints the essay's title first and its
+# author second; باغِ نشاط prints them the other way round. Rather than guess
+# (and silently attribute the poet's own book to the wrong person), every
+# heading line is kept in the body, the first becomes the title, and this
+# flag asks a human to say which was which.
+BYLINE_FLAG = "confirm-review-byline"
+
 
 def _is_ghazal_shaped(run: list[Paragraph]) -> bool:
     """True when most of the run pairs cleanly into shers.
@@ -86,7 +100,9 @@ def _ghazal_body(shers: list[tuple[str, str]]) -> str:
 
 
 def segment(
-    paragraphs: list[Paragraph], dropped_unknowns: list[str] | None = None
+    paragraphs: list[Paragraph],
+    dropped_unknowns: list[str] | None = None,
+    unreached: list[tuple[str, Paragraph]] | None = None,
 ) -> list[Segment]:
     """Assemble classified paragraphs into pieces.
 
@@ -102,21 +118,48 @@ def segment(
     is unchanged behaviour, not a new bug: `dropped_unknowns`, if given a
     list, is appended with the text of every such paragraph so a caller (see
     `cmd_segment`) can surface the count instead of it vanishing silently.
+
+    `unreached` is the general form of that same accounting and is what a
+    caller should prefer: given a list, it is appended with `(kind,
+    paragraph)` for every paragraph whose text reached no piece at all,
+    whatever its kind. Some of that is legitimate — the title page, the
+    فہرست, the ۰۰۰ separators, a section heading that becomes `section`
+    metadata — but a poem's line appearing there is the loss this pipeline
+    exists to prevent, and it was invisible until the count was reported.
     """
     if dropped_unknowns is None:
         dropped_unknowns = []
+    # Held as (index, text) rather than appended straight to
+    # `dropped_unknowns`: an UNKNOWN that looked moot when it was overwritten
+    # can still be swept up by an essay region that starts before it, and
+    # reporting it as dropped after it reached a piece would be a false
+    # alarm. Reconciled against `consumed` at the end.
+    pending_drops: list[tuple[int, str]] = []
     kinds = classify(paragraphs)
+    body_start = body_start_index(paragraphs)
     pieces: list[Segment] = []
     section = ""
     title_candidate = ""
+    title_candidate_index = -1
+    # Every paragraph index whose text reached a piece — body, title or
+    # written_note. What is left over is reported through `unreached`.
+    consumed: set[int] = set()
     # A COLOPHON reaching the front of the book, before any piece has been
     # formed, has nothing to attach to yet (see the COLOPHON branch below).
     # Held here rather than dropped, and attached to the first piece add()
     # creates, whatever kind it turns out to be.
     pending_colophon = ""
+    pending_colophon_index = -1
+    # The paragraph just after the last structural boundary (۰۰۰, a فہرست
+    # line, a section heading), and the end of the last piece formed. An
+    # essay region starts at whichever is later: the boundary tells us where
+    # the essay's own heading lines begin, and the piece end stops a region
+    # from reaching back over verse already emitted.
+    boundary = 0
+    emitted_end = 0
 
     def add(kind: str, title: str, body: str, flags: list[str]) -> Segment:
-        nonlocal pending_colophon
+        nonlocal pending_colophon, pending_colophon_index
         if len(title) > MAX_TITLE_LENGTH:
             flags = flags + ["over-long-title"]
         piece = Segment(
@@ -129,7 +172,9 @@ def segment(
         )
         if pending_colophon:
             piece.written_note = pending_colophon
+            consumed.add(pending_colophon_index)
             pending_colophon = ""
+            pending_colophon_index = -1
         pieces.append(piece)
         return piece
 
@@ -140,6 +185,7 @@ def segment(
 
         if kind == HEADING:
             section = NORMALISED_HEADINGS[skeleton(para.text)]
+            boundary = index + 1
             index += 1
             continue
 
@@ -154,10 +200,12 @@ def segment(
                 pieces[-1].written_note = (
                     f"{current} {para.text}" if current else para.text
                 )
+                consumed.add(index)
             else:
                 # Nothing exists yet to attach this to. Never drop it: hold
                 # it until add() creates the next piece.
                 pending_colophon = para.text
+                pending_colophon_index = index
             index += 1
             continue
 
@@ -165,20 +213,26 @@ def segment(
             # A candidate still pending when a new one arrives never reached
             # a piece — see the docstring's note on dropped_unknowns.
             if title_candidate:
-                dropped_unknowns.append(title_candidate)
+                pending_drops.append((title_candidate_index, title_candidate))
             title_candidate = para.text
+            title_candidate_index = index
             index += 1
             continue
 
         if kind == PROSE:
-            start = index
-            while index < len(paragraphs) and kinds[index] in (PROSE, VERSE):
-                index += 1
-            body = "\n\n".join(p.text for p in paragraphs[start:index])
-            add("reviews", paragraphs[start].text[:MAX_TITLE_LENGTH], body, [])
+            start, end = _essay_region(
+                kinds, index, boundary, emitted_end, body_start
+            )
+            piece = _add_review(
+                add, paragraphs[start:end], kinds[start:end], index, paragraphs
+            )
+            consumed.update(range(start, end))
             if title_candidate:
-                dropped_unknowns.append(title_candidate)
+                pending_drops.append((title_candidate_index, title_candidate))
             title_candidate = ""
+            title_candidate_index = -1
+            emitted_end = end
+            index = end
             continue
 
         if kind == VERSE:
@@ -190,24 +244,102 @@ def segment(
                 # A ghazal is titled by its matlaa, never by title_candidate —
                 # a pending candidate here is moot and reaches no piece.
                 if title_candidate:
-                    dropped_unknowns.append(title_candidate)
+                    pending_drops.append(
+                        (title_candidate_index, title_candidate)
+                    )
                 for group in split_ghazals(pair_shers(run)):
                     flags = ["half-sher"] if any(not s[1] for s in group) else []
                     add("ghazals", group[0][0], _ghazal_body(group), flags)
             else:
                 title = title_candidate or run[0].text
+                if title_candidate:
+                    consumed.add(title_candidate_index)
                 add("nazms", title, "\n".join(p.text for p in run), [])
+            consumed.update(range(start, index))
             title_candidate = ""
+            title_candidate_index = -1
+            emitted_end = index
             continue
 
+        if kind in (SEPARATOR, TOC):
+            boundary = index + 1
         index += 1
 
     # A candidate still pending at end of book (paragraphs ran out right
     # after the last UNKNOWN) never reached a piece either.
     if title_candidate:
-        dropped_unknowns.append(title_candidate)
+        pending_drops.append((title_candidate_index, title_candidate))
 
+    dropped_unknowns.extend(
+        text for i, text in pending_drops if i not in consumed
+    )
+    if unreached is not None:
+        unreached.extend(
+            (kinds[i], para)
+            for i, para in enumerate(paragraphs)
+            if i not in consumed
+        )
     return pieces
+
+
+def _essay_region(
+    kinds: list[str],
+    prose_index: int,
+    boundary: int,
+    emitted_end: int,
+    body_start: int,
+) -> tuple[int, int]:
+    """The half-open span of paragraphs the essay at `prose_index` occupies.
+
+    Bounded structurally, not by the prose run: the critic quotes the poet
+    throughout, and each quotation is verse sitting before the first ghazal,
+    where classify() can only call it FRONT_MATTER. Taking the prose run
+    alone therefore stopped at the first quotation, dropped it, and started a
+    fresh fragment after it — تجاوز's essay became 5 pieces and lost 5 lines,
+    باغِ نشاط's became 10 and lost ~50.
+
+    The span runs from the last structural boundary (so the essay's title and
+    author lines come with it) to the next one, never past the body start and
+    never back over paragraphs already emitted.
+    """
+    start = max(boundary, emitted_end)
+    end = prose_index
+    while end < len(kinds) and kinds[end] not in REGION_CLOSE_KINDS:
+        end += 1
+    if body_start > prose_index:
+        end = min(end, body_start)
+    return start, end
+
+
+def _add_review(
+    add,
+    region: list[Paragraph],
+    region_kinds: list[str],
+    prose_index: int,
+    paragraphs: list[Paragraph],
+) -> Segment:
+    """Emit one `reviews` piece for a whole essay region, in source order."""
+    body_lines = [
+        p.text for p, k in zip(region, region_kinds) if k != COLOPHON
+    ]
+    first_prose = next(
+        (i for i, k in enumerate(region_kinds) if k == PROSE), 0
+    )
+    heading_lines = [
+        p.text
+        for p, k in zip(region[:first_prose], region_kinds[:first_prose])
+        if k != COLOPHON
+    ]
+    title = heading_lines[0] if heading_lines else paragraphs[prose_index].text
+    flags = [BYLINE_FLAG] if heading_lines else []
+    piece = add("reviews", title[:MAX_TITLE_LENGTH], "\n\n".join(body_lines), flags)
+    for p, k in zip(region, region_kinds):
+        if k != COLOPHON:
+            continue
+        piece.written_note = (
+            f"{piece.written_note} {p.text}" if piece.written_note else p.text
+        )
+    return piece
 
 
 def pair_shers(run: list[Paragraph]) -> list[tuple[str, str]]:
