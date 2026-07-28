@@ -51,7 +51,7 @@ from .models import Book, Segment
 from .ole import read_text_stream
 from .promote import promote
 from .report import render, restamp_report
-from .segment import GATHERED_COLLECTIONS, attribute_gathered_collections
+from .segment import GATHERED_COLLECTIONS
 from .segment import segment as segment_paragraphs
 
 SOURCES = {
@@ -130,8 +130,21 @@ def cmd_segment(book_slug: str) -> None:
     dropped_unknowns: list[str] = []
     unreached: list[tuple[str, object]] = []
     position_attributed: list[Segment] = []
+    boundaries: list[tuple[int, str]] = []
+    boundary_problems: list[str] = []
+    # کلیات جلد ۱ gathers six separately-published books, and the first of
+    # them — موسم — is never named by a page header before its poems, so
+    # `collections_at` reads the other five and backfills موسم's 130 with the
+    # wrong name. Its collections are corrected from the title page each
+    # gathered book opens with, inside the body (see
+    # segment.attribute_gathered_collections) — done INSIDE segment() now,
+    # keyed by `table`, so this call and any other caller of segment() for
+    # this book see the same collections this pipeline stages. A book not
+    # keyed into GATHERED_COLLECTIONS is untouched.
+    table = GATHERED_COLLECTIONS.get(book_slug, {})
     segments = segment_paragraphs(
-        paragraphs, dropped_unknowns, unreached, position_attributed
+        paragraphs, dropped_unknowns, unreached, position_attributed,
+        table, boundaries, boundary_problems,
     )
     # A review's `reviewed_book` is the book it prefaces. Set here rather than
     # in segmentation, which only ever sees one book's paragraphs and has no
@@ -139,27 +152,6 @@ def cmd_segment(book_slug: str) -> None:
     for piece in segments:
         if piece.kind == "reviews":
             piece.reviewed_book = TITLES[book_slug]
-
-    # کلیات جلد ۱ gathers six separately-published books, and the first of
-    # them — موسم — is never named by a page header before its poems, so
-    # `collections_at` reads the other five and backfills موسم's 130 with the
-    # wrong name. Its collections are corrected from the title page each
-    # gathered book opens with, inside the body (see
-    # segment.attribute_gathered_collections). Runs before every
-    # gate below, because `collection` is what the count gate counts, what the
-    # "poems per collection" line reports, and what `resolve_book_records`
-    # groups by. A book not keyed into GATHERED_COLLECTIONS is untouched.
-    table = GATHERED_COLLECTIONS.get(book_slug, {})
-    boundaries, boundary_problems = attribute_gathered_collections(
-        segments, table
-    )
-    if table:
-        # Every piece has just been re-stamped from the title pages, so
-        # nothing in this book carries a collection attributed by position
-        # any more. Leaving the list filled would report 130 of موسم's poems
-        # as "attributed by POSITION" when the volume's own title page names
-        # them — the opposite of what that line exists to warn about.
-        position_attributed.clear()
 
     # Gate C (ground truth) is a property of the codepage, not of any one
     # book: the 11 ground-truth ghazals exist only in the کلیات volumes, so

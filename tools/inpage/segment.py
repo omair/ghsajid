@@ -381,6 +381,9 @@ def segment(
     dropped_unknowns: list[str] | None = None,
     unreached: list[tuple[str, Paragraph]] | None = None,
     position_attributed: list[Segment] | None = None,
+    gathered_collections: dict[str, tuple[str, str]] | None = None,
+    collection_boundaries: list[tuple[int, str]] | None = None,
+    collection_boundary_problems: list[str] | None = None,
 ) -> list[Segment]:
     """Assemble classified paragraphs into pieces.
 
@@ -420,6 +423,35 @@ def segment(
     attribution by position, not by the source naming it, and a caller
     (`cmd_segment`) reports the count rather than letting it look identical
     to an ordinary header read.
+
+    `gathered_collections`, given a table (see `GATHERED_COLLECTIONS`),
+    re-stamps every piece's `collection` from the volume's own title pages
+    (see `attribute_gathered_collections`) before returning — the same step
+    `cmd_segment` used to run itself, after calling this function, as a
+    second pass over its result. Doing it here instead of there is the
+    point: a caller that reaches `segment()` directly — a test, a gate, a
+    diagnostic — used to see collections attributed by running header alone
+    (کلیات جلد ۱'s موسم backfilled into عناصر, 231 poems where the volume's
+    own فہرست declares 100) while `cmd_segment`'s own staged output, one
+    step later, told a different story for the same book. Passing the table
+    here means there is only one place collections are decided, and every
+    caller sees what the pipeline stages. Left `None` (the default), no
+    re-stamping happens at all — correct for the three books in the corpus
+    that are not gatherings this way, and for any caller measuring the raw
+    header-only reading on purpose (see
+    `TestKulliyatJild1Collections.test_the_headers_alone_still_cannot_name_موسم`).
+
+    When a table is given, `position_attributed` (if also given) is cleared
+    before returning: every piece has just been re-stamped from the title
+    pages, so nothing in the book carries a collection attributed by
+    position any more, and leaving stale entries there would report موسم's
+    130 poems as "attributed by POSITION" when the volume's own title page
+    names them.
+
+    `collection_boundaries` and `collection_boundary_problems`, each given a
+    list, receive `attribute_gathered_collections`'s two return values — the
+    title pages found, in order, and any dedication the table could not
+    name. Both are no-ops when `gathered_collections` is `None` or empty.
     """
     if dropped_unknowns is None:
         dropped_unknowns = []
@@ -685,6 +717,16 @@ def segment(
             for i, para in enumerate(paragraphs)
             if i not in consumed
         )
+    if gathered_collections:
+        boundaries, problems = attribute_gathered_collections(
+            pieces, gathered_collections
+        )
+        if collection_boundaries is not None:
+            collection_boundaries.extend(boundaries)
+        if collection_boundary_problems is not None:
+            collection_boundary_problems.extend(problems)
+        if position_attributed is not None:
+            position_attributed.clear()
     return pieces
 
 

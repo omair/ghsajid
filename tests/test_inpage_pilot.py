@@ -1,7 +1,12 @@
 import collections
+import re
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from tools.inpage import __main__ as cli
 from tools.inpage.checks import (
     DECLARED_COLLECTION_COUNTS, KULLIYAT_VOLUMES, TOC_FIRST_LINE_BASELINE,
     completeness_errors, conservation_errors, declared_collection_count_errors,
@@ -440,6 +445,75 @@ class TestSingleBooksAttributeNothing(unittest.TestCase):
                      if collection_boundary_dedication(s)],
                     [],
                 )
+
+
+class TestSegmentDirectCallMatchesThePipeline(unittest.TestCase):
+    """The split-brain regression test.
+
+    `segment()` used to set collections two different ways depending on the
+    caller: `cmd_segment` ran `attribute_gathered_collections` as a SECOND
+    pass over its own result, while a direct `segment()` call — a test, a
+    gate, a diagnostic — saw only the running-header reading. For کلیات جلد
+    ۱ those disagreed outright: a direct call reported عناصر with 231 poems,
+    backfilled from موسم's missing header, where the pipeline actually
+    stages 100, the count its own فہرست declares. Now that
+    `attribute_gathered_collections` runs INSIDE `segment()` (keyed by the
+    `gathered_collections` table `cmd_segment` also uses), the two paths
+    must produce identical book records for both volumes — this locks it so
+    a future change to one path without the other fails here first, not in
+    a report a reviewer has to notice by hand.
+    """
+
+    def _pipeline_book_record_counts(self, book_slug: str) -> dict[str, int]:
+        """Poems per book record, read back from what `cmd_segment` staged."""
+        staging_root = Path(tempfile.mkdtemp())
+        try:
+            with mock.patch.object(cli, "STAGING", staging_root):
+                cli.cmd_segment(book_slug)
+            books_dir = staging_root / book_slug / "books"
+            return {
+                yaml_path.stem: len(
+                    re.findall(
+                        r"^\s*-\s*\{", yaml_path.read_text(encoding="utf-8"),
+                        re.MULTILINE,
+                    )
+                )
+                for yaml_path in books_dir.iterdir()
+            }
+        finally:
+            shutil.rmtree(staging_root)
+
+    def _direct_book_record_counts(self, book_slug: str) -> dict[str, int]:
+        """Poems per book record, from calling `segment()` directly."""
+        paragraphs = decode(read_text_stream(KULLIYAT[book_slug]))
+        segments = segment(
+            paragraphs, gathered_collections=GATHERED_COLLECTIONS.get(book_slug, {}),
+        )
+        records, problems = resolve_book_records(segments, book_slug)
+        self.assertEqual(problems, [])
+        return {
+            slug: sum(
+                1 for s in segments
+                if s.kind in ("ghazals", "nazms") and s.collection == collection
+            )
+            for collection, slug in records
+        }
+
+    def test_kulliyat_jild_1(self):
+        if not KULLIYAT["kulliyat-jild-1"].exists():
+            self.skipTest("inp/ sources not present")
+        self.assertEqual(
+            self._direct_book_record_counts("kulliyat-jild-1"),
+            self._pipeline_book_record_counts("kulliyat-jild-1"),
+        )
+
+    def test_kulliyat_jild_2(self):
+        if not KULLIYAT["kulliyat-jild-2"].exists():
+            self.skipTest("inp/ sources not present")
+        self.assertEqual(
+            self._direct_book_record_counts("kulliyat-jild-2"),
+            self._pipeline_book_record_counts("kulliyat-jild-2"),
+        )
 
 
 if __name__ == "__main__":
