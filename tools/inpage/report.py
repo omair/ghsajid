@@ -58,8 +58,8 @@ def _staged_digests(
 
 def segmentation_hash(
     segments: list[Segment],
-    staging: Path | None = None,
-    book_slug: str = "",
+    staging: Path | None,
+    book_slug: str,
 ) -> str:
     """A stable digest of the boundaries this report describes.
 
@@ -73,9 +73,11 @@ def segmentation_hash(
     writer of a piece's bytes, and catches an edit to any part of the file —
     frontmatter included — not just to the body a re-render would reproduce.
 
-    `staging` stays optional so the pure boundary digest is still available on
-    its own (the hash-stability tests use it), but every caller in the
-    pipeline passes it.
+    `staging` may be None to get the boundary digest alone, but it has NO
+    DEFAULT: a caller must say so deliberately. A default would let a future
+    caller weaken the binding by omission and never notice — the same shape as
+    the bug where `is_approved` took the FIRST regex match in the document and
+    a crafted title could forge an approval above the real one.
     """
     lines = [f"{s.order}\x1f{s.kind}\x1f{s.title}\x1f{s.body}" for s in segments]
     if staging is not None:
@@ -87,7 +89,7 @@ def render(
     book_slug: str,
     segments: list[Segment],
     gate_output: list[str],
-    staging: Path | None = None,
+    staging: Path | None,
 ) -> str:
     """Render the review report for one book.
 
@@ -137,8 +139,8 @@ def render(
 def is_approved(
     report_text: str,
     segments: list[Segment],
-    staging: Path | None = None,
-    book_slug: str = "",
+    staging: Path | None,
+    book_slug: str,
 ) -> bool:
     """True only if the report says approved AND still describes `segments`.
 
