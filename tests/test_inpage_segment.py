@@ -269,7 +269,7 @@ class TestSegmentBook(unittest.TestCase):
         # ‘‘۱۹، مئی ۲۰۱۰ئ۔ لاہور’’, 784 is the title نیلو فر, and 785 opens
         # the نظم. A colophon is not VERSE, so the title touches verse on one
         # side only — the position classify.py deliberately leaves UNKNOWN
-        # (see _bridge_short_verse_lines) precisely so it can still be read as
+        # (see _bridge_lines_enclosed_by_verse) precisely so it can still be read as
         # a title here.
         pieces = segment(
             FRONT + GHAZAL

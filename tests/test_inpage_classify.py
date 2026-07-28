@@ -222,13 +222,21 @@ class TestKinds(unittest.TestCase):
         self.assertEqual(len(self.kinds(paras)), len(paras))
 
 
-class TestShortLinesBetweenVerse(unittest.TestCase):
-    """VERSE_MIN was measured on ghazals; free verse runs shorter than that.
+class TestParagraphsEnclosedByVerse(unittest.TestCase):
+    """The ghazal-calibrated length bounds are broken at BOTH ends by free verse.
 
-    A nazm's line can be 7 characters where a misra is 28-42, so length alone
-    files it UNKNOWN, the verse run breaks, and segment() emits the fragments
-    as separate pieces. Position is the evidence length cannot supply: a short
-    paragraph with VERSE on BOTH sides is inside a poem.
+    VERSE_MIN and PROSE_MIN were measured on ghazals, whose misras run 28-42
+    characters. A نظم is free verse: its lines can be 7 characters where a
+    misra is 28, and a parenthetical aside inside one can be 356. Length alone
+    files the first UNKNOWN and the second PROSE, the verse run breaks either
+    way, and segment() emits fragments — or, for PROSE, opens a critic's essay
+    region in the middle of a poem.
+
+    Position is the evidence length cannot supply, and it is the SAME evidence
+    at both ends: a paragraph with VERSE on both sides is inside a poem,
+    whatever its length. One rule, one enclosure test — differing only in how
+    many paragraphs in a row it will take, which MAX_ENCLOSED_RUN states per
+    kind with the measurement behind it.
     """
 
     def kinds(self, extra):
@@ -275,11 +283,102 @@ class TestShortLinesBetweenVerse(unittest.TestCase):
         self.assertEqual(kinds[-2], classify.RUNNING_HEADER)
 
     def test_a_short_line_before_the_body_is_still_front_matter(self):
-        # The bridge only ever rewrites UNKNOWN, which exists only in the body.
+        # UNKNOWN exists only in the body, so before the body there is nothing
+        # for the bridge to rewrite.
         kinds = classify.classify(
             [para("ا" * 30, 1), para("یاد", 1), para("ب" * 30, 1)] + list(BODY)
         )
         self.assertEqual(kinds[1], classify.FRONT_MATTER)
+
+    def test_a_prose_length_line_between_two_verse_lines_is_verse(self):
+        # کلیات جلد ۲ ¶1272 — a 356-character parenthetical aside between two
+        # verse lines of one نظم. PROSE_MIN called it prose, segment() opened
+        # an essay region on it, and that region ran to the next running
+        # header, swallowing 1,749 verse paragraphs into a single 3,617-line
+        # `reviews` piece.
+        kinds = self.kinds([para("ا" * 356, 1), para("ب" * 30, 1)])
+        self.assertEqual(kinds[-2], classify.VERSE)
+
+    def test_a_run_of_two_prose_length_lines_between_verse_stays_prose(self):
+        # MEASURED, and the reason MAX_ENCLOSED_RUN[PROSE] is 1: every
+        # enclosed prose run of two or more in either کلیات volume is a
+        # critic's essay, quoting the poet either side of it — جلد ۱'s pairs
+        # are 1323+1066, 1181+593, 1249+431 chars; جلد ۲'s 1698+433,
+        # 4021+380, 1618+3008. Bridging them dissolves the essay into the
+        # poems: at a limit of 2 جلد ۱'s اورینٹ پبلشرز title-page block became
+        # a نظم, at 4 جلد ۲'s ڈاکٹر مسعود اقبال essay became a 331-line one.
+        # A poet sets ONE aside between two lines of verse.
+        kinds = self.kinds([
+            para("ا" * 356, 1), para("ب" * 512, 1), para("ج" * 30, 1),
+        ])
+        self.assertEqual(kinds[-3:-1], [classify.PROSE] * 2)
+
+    def test_a_very_long_enclosed_paragraph_is_still_verse(self):
+        # جلد ۱ has single enclosed paragraphs of 945 and 1217 characters.
+        # Whether such a passage is one very long verse line or a prose
+        # interlude, it belongs to the poem it sits inside — not to a separate
+        # essay.
+        kinds = self.kinds([para("ا" * 1217, 1), para("ب" * 30, 1)])
+        self.assertEqual(kinds[-2], classify.VERSE)
+
+    def test_short_and_prose_lines_do_not_merge_into_one_enclosed_run(self):
+        # DECIDED, and forced by a promoted book. باغِ نشاط ¶1419-1421 is
+        # UNKNOWN(8), UNKNOWN(9), PROSE(106) between two verse lines —
+        # end-of-stream decode garbage — and جلد ۲ ¶1854-1855 is UNKNOWN(10),
+        # PROSE(149) between two verse lines, a real نظم line and the poet's
+        # aside. Structurally identical, so no adjacency rule can take the
+        # second without the first, and باغِ نشاط must stay byte-identical.
+        # A run is therefore homogeneous: each paragraph here keeps its kind.
+        kinds = self.kinds([
+            para("سُکڑ کر", 1), para("ا" * 356, 1), para("ب" * 30, 1),
+        ])
+        self.assertEqual(kinds[-3:-1], [classify.UNKNOWN, classify.PROSE])
+
+    def test_a_bracketed_aside_groups_with_the_short_line_beside_it(self):
+        # جلد ۲ ¶1854-1855: the نظم line اور یہ دِل (10 chars, UNKNOWN) and
+        # then its aside, '(جو نِت دن بند مُٹھی میں…' (149 chars, PROSE),
+        # between two verse lines. Neither is enclosed on its own, and merging
+        # UNKNOWN with ordinary PROSE moves باغِ نشاط — but an aside OPENS
+        # with a bracket where a critic's paragraph does not, so it groups
+        # with the short lines and both become verse. Left alone, ¶1855
+        # opened an essay region that swallowed 1,269 paragraphs.
+        kinds = self.kinds([
+            para("اور یہ دِل", 1), para("(" + "ا" * 355, 1), para("ب" * 30, 1),
+        ])
+        self.assertEqual(kinds[-3:-1], [classify.VERSE] * 2)
+
+    def test_an_unenclosed_bracketed_aside_still_opens_a_region(self):
+        # The bracket only ever changes which run a paragraph GROUPS with. A
+        # prose-length bracketed paragraph that is not enclosed by verse keeps
+        # the kind `_kind` gave it, so nothing can be lost this way.
+        kinds = self.kinds([para("۰۰۰", 1), para("(" + "ا" * 355, 1)])
+        self.assertEqual(kinds[-1], classify.PROSE)
+
+    def test_a_prose_line_at_the_end_of_a_verse_run_stays_prose(self):
+        # An essay that follows a quoted line of the poet must still open a
+        # region. Verse on one side is not evidence, at either end of the
+        # length scale.
+        kinds = self.kinds([para("ا" * 356, 1), para("۰۰۰", 1)])
+        self.assertEqual(kinds[-2], classify.PROSE)
+
+    def test_a_prose_line_at_the_start_of_a_verse_run_stays_prose(self):
+        kinds = self.kinds([
+            para("۰۰۰", 1), para("ا" * 356, 1), para("ب" * 30, 1),
+        ])
+        self.assertEqual(kinds[-2], classify.PROSE)
+
+    def test_a_prose_line_with_no_verse_neighbour_stays_prose(self):
+        kinds = self.kinds([
+            para("۰۰۰", 1), para("ا" * 356, 1), para("۰۰۰", 1),
+        ])
+        self.assertEqual(kinds[-2], classify.PROSE)
+
+    def test_a_prose_line_before_the_body_is_still_prose(self):
+        kinds = classify.classify(
+            [para("ا" * 30, 1), para("ب" * 356, 1), para("ج" * 30, 1)]
+            + list(BODY)
+        )
+        self.assertEqual(kinds[1], classify.PROSE)
 
 
 class TestTocCount(unittest.TestCase):

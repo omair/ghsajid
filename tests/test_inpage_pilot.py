@@ -182,6 +182,27 @@ class TestKulliyatGroundTruth(unittest.TestCase):
             with self.subTest(slug=slug):
                 self.assertEqual(conservation_errors(paragraphs, segments), [])
 
+    def test_no_review_swallows_a_collection(self):
+        # کلیات جلد ۲ ¶1272 is a 356-character parenthetical aside inside a
+        # نظم, with verse either side of it. PROSE_MIN called it prose, PROSE
+        # is what opens a critic's essay region, and the region ran to the
+        # next running header — 1,749 verse paragraphs, 42 colophons and 30
+        # unknowns swallowed into ONE 3,617-line `reviews` piece at order 34,
+        # holding poetry from several collections. ¶1855 did the same for a
+        # further 1,269 paragraphs.
+        #
+        # The ceiling is measured, not chosen for comfort: the longest piece
+        # that is genuinely a critic's essay is جلد ۲'s ڈاکٹر مسعود اقبال
+        # (653 lines, dedication and all), and جلد ۱'s longest is 191. 800
+        # sits clear of the real maximum and far under any swallow — the two
+        # that were there were 3,617 and 2,489.
+        for slug, (_, segments) in self.per_book.items():
+            for piece in segments:
+                if piece.kind != "reviews":
+                    continue
+                with self.subTest(slug=slug, order=piece.order):
+                    self.assertLess(len(piece.body.splitlines()), 800)
+
 
 # The collection معاملہ, in کلیات جلد ۱ — ہمارے بیچ is its radif, not its
 # name; the volume's title page and معاملہ's own title page both name it — is
@@ -296,7 +317,7 @@ JILD_1_COLLECTIONS = (
 )
 # روداد reads 123, not the 124 it read while a short line enclosed by two
 # verse lines still classified UNKNOWN and broke the run (see
-# classify._bridge_short_verse_lines). The one piece the change removes from
+# classify._bridge_lines_enclosed_by_verse). The one piece the change removes from
 # this volume is the last: order 581, whose entire body was
 # ‘‘ب گینیگایںقرا ۔ ا  کج’’ — the scratch material at the end of the stream,
 # flagged both likely-decode-garbage and single-line-piece. It is now a line
@@ -311,7 +332,7 @@ JILD_1_COLLECTIONS = (
 # and the header text is taken verbatim.
 #
 # Every count here fell when a short line enclosed by two verse lines stopped
-# breaking the verse run (see classify._bridge_short_verse_lines). جلد ۲ is
+# breaking the verse run (see classify._bridge_lines_enclosed_by_verse). جلد ۲ is
 # where the volume's free verse lives — 214 of its 576 pieces were نظمیں —
 # and a نظم's lines are much shorter than a ghazal's misra, so 255 of its
 # paragraphs were falling out of their own poem's run and being emitted as
@@ -358,8 +379,27 @@ JILD_1_COLLECTIONS = (
 # any collection's ghazal count (348 across the volume, before and after).
 # That is the control again: a colophon ends a نظم, and only a نظم — so a
 # change that moved a ghazal count would be a change doing something else.
+#
+# نیند میں چلتے ہوئے then moved 31 → 72 when a prose-LENGTH paragraph enclosed
+# by verse stopped opening a critic's essay region (see
+# classify._bridge_lines_enclosed_by_verse). This is the same defect as the
+# short-line one above, at the other end of the ghazal-calibrated length
+# scale: ¶1272 is a 356-character parenthetical aside inside a نظم, PROSE_MIN
+# called it prose, and prose is what OPENS an essay region — so that one line
+# swallowed 1,749 verse paragraphs, 42 colophons and 30 unknowns into a single
+# 3,617-line `reviews` piece at order 34, holding poetry from several
+# collections. ¶1855, the aside of the نظم اور یہ دِل, did the same to a
+# further 1,269 paragraphs. The volume's `reviews` count falls 14 → 13 (the
+# two swallows go, the essay one of them had eaten comes back), its نظمیں rise
+# 130 → 171, and the largest `reviews` piece is now 653 lines — the ڈاکٹر
+# مسعود اقبال essay, which is genuinely that long.
+#
+# Only this one collection moves, and again only in نظمیں: its 71 نظمیں were
+# 30, and every other collection's نظمیں and غزلیں are unchanged to the poem
+# (348 ghazals across the volume, as before). The swallowed span lay inside
+# نیند میں چلتے ہوئے, which is where this volume's free verse lives.
 JILD_2_COLLECTIONS = {
-    "نیند میں چلتے ہوئے": 31,
+    "نیند میں چلتے ہوئے": 72,
     "چہار دریا": 51,
     "ہست و  ُبود": 98,
     "اِعادہ": 101,

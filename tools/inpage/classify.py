@@ -307,46 +307,154 @@ def _kind(text: str, in_body: bool, running: set[str]) -> str:
     return UNKNOWN
 
 
-def _bridge_short_verse_lines(kinds: list[str]) -> None:
-    """Reclassify UNKNOWN paragraphs enclosed by VERSE on BOTH sides.
+# What the enclosure rule may rewrite, and how long a run of each it will
+# take. UNKNOWN and PROSE are the two kinds a line of a poem falls into when
+# only its LENGTH is consulted — under VERSE_MIN and over PROSE_MIN
+# respectively — so they are the two the rule may reconsider. Every other kind
+# is recognised by something other than length (a separator by its text, a
+# colophon by its date, a running header by its repetition); that evidence is
+# positive where length is merely a default, so enclosure does not override
+# it, and a RUNNING_HEADER between two verse lines stays page furniture.
+#
+# The run limits differ, and that difference is measured, not stylistic:
+#
+# * Consecutive SHORT lines are consecutive lines of one poem. جلد ۲ ¶877-879
+#   (اِس کہانی میں / کشف کی رات / بہت دن بعد) is three of them in a row, so
+#   any limit at all would cut that نظم. Hence None.
+#
+# * Consecutive PROSE-LENGTH paragraphs, with no verse between them, are prose
+#   discourse — a critic writing paragraph after paragraph and quoting the
+#   poet only now and then. Of the enclosed prose runs measured, the singles
+#   are the poet's own asides (356, 231, 135, 103 …) but EVERY run of two or
+#   more is essay text: جلد ۱'s pairs are 1323+1066, 1181+593, 1249+431 and
+#   its longest enclosed run is 17 paragraphs; جلد ۲'s are 1698+433,
+#   4021+380, 1618+3008. Bridging them dissolves the essays into the poems —
+#   at a limit of 2 جلد ۱'s اورینٹ پبلشرز title-page block becomes a نظم, and
+#   at 4 جلد ۲'s ڈاکٹر مسعود اقبال essay becomes a 331-line one. A poet sets
+#   ONE aside between two lines of verse; two 1,300-character paragraphs
+#   back to back is someone else talking. Hence 1.
+MAX_ENCLOSED_RUN = {UNKNOWN: None, PROSE: 1}
 
-    VERSE_MIN was measured on ghazals, whose misras run 28-42 characters. A
-    نظم is free verse and its lines are not that: کلیات جلد ۲ prints سُکڑ کر
-    (7 chars), کشف کی رات (10), مِرے کاندھے (11) as whole lines of one poem.
-    Every one of them falls under the floor, classifies UNKNOWN, and breaks
-    the verse run it sits in — so `segment` emits the fragments either side as
-    separate pieces. That is where جلد ۲'s 33 one-line "nazms" came from, and
-    much of its 103 unknown paragraphs reaching no piece at all.
+# An ASIDE — a body paragraph over PROSE_MIN that OPENS with a bracket — is
+# grouped with the short lines rather than with prose discourse, because that
+# is what it is: something set inside a poem, not a paragraph of a critic's
+# argument. A critic's paragraph does not begin mid-parenthesis.
+#
+# Measured across all four books, body paragraphs of prose length opening with
+# a bracket: تجاوز 0, باغِ نشاط 0, کلیات جلد ۱ 0, کلیات جلد ۲ 1 — ¶1855,
+# '(جو نِت دن بند مُٹھی میں قید تتلی کی طرح…', the aside of the نظم that
+# begins اور یہ دِل. (¶1272, the 356-character aside this change was written
+# for, opens with a bracket too; it needs no help, having verse on both
+# sides already.) One paragraph is thin evidence for a rule and it is stated
+# here as such — but the alternative is worse than thin, it is impossible:
+# ¶1855's left neighbour is the نظم line اور یہ دِل, 10 characters and so
+# UNKNOWN, and merging UNKNOWN with PROSE into one enclosed run is what moves
+# باغِ نشاط (see the docstring below). The bracket is the only thing that
+# separates ¶1855 from باغِ نشاط's decode garbage, and without it ¶1855 opens
+# an essay region that swallows 1,269 paragraphs.
+#
+# Grouping, not classifying: an aside that is NOT enclosed by verse keeps the
+# kind `_kind` gave it and still opens a region, so nothing can be lost this
+# way.
+OPENING_BRACKET = "("
+ASIDE_GROUP = UNKNOWN
 
-    Lowering VERSE_MIN is not the fix. `body_start_index`, the
-    front-matter/verse boundary and nazm titling all read that constant, and a
+
+def _enclosable_group(kind: str, text: str) -> str | None:
+    """Which enclosed-run group a paragraph joins, or None if it joins none."""
+    if kind == PROSE and text.startswith(OPENING_BRACKET):
+        return ASIDE_GROUP
+    return kind if kind in MAX_ENCLOSED_RUN else None
+
+
+def _bridge_lines_enclosed_by_verse(
+    kinds: list[str], paragraphs: list[Paragraph]
+) -> None:
+    """Reclassify length-derived kinds enclosed by VERSE on BOTH sides.
+
+    One rule now, where there were two. VERSE_MIN and PROSE_MIN were both
+    measured on ghazals, whose misras run 28-42 characters, and free verse
+    breaks that calibration at BOTH ends. Under the floor: کلیات جلد ۲ prints
+    سُکڑ کر (7 chars), کشف کی رات (10), مِرے کاندھے (11) as whole lines of one
+    poem — they classify UNKNOWN, break the verse run, and `segment` emits the
+    fragments either side as separate pieces (whence جلد ۲'s 33 one-line
+    "nazms"). Over the ceiling: ¶1272 is a 356-character parenthetical aside
+    sitting between two verse lines of a نظم — it classifies PROSE, and PROSE
+    is what OPENS a critic's essay region, so that one line swallowed 1,749
+    verse paragraphs, 42 colophons and 30 unknowns into a single 3,617-line
+    `reviews` piece holding poetry from several collections.
+
+    Those are the same failure — length read as evidence where it has none —
+    so they get one enclosure test, one BRIDGEABLE set, and one pass. What
+    they do NOT share is how many paragraphs in a row the evidence survives,
+    and MAX_ENCLOSED_RUN above states that per kind with the measurement
+    behind it. Unifying to "any run of either, any length" was tried and is
+    wrong twice over: it merges a mixed UNKNOWN+PROSE run, which moves
+    باغِ نشاط (a promoted book), and it dissolves real critics' essays into
+    nazms.
+
+    An enclosed paragraph may still be very long — جلد ۱ has single enclosed
+    paragraphs of 945 and 1217 characters, جلد ۲ one of 972. Whether such a
+    passage is one very long verse line or a prose interlude the poet set
+    inside a nazm is not something this pipeline can tell, and it does not
+    need to: either way it belongs to the poem it sits in, not to a separate
+    `reviews` piece attributed to a critic.
+
+    Neither bound may be relaxed instead. `body_start_index`, the
+    front-matter/verse boundary and nazm titling all read VERSE_MIN, and a
     nazm's TITLE is short in exactly the same way its lines are — dropping the
-    floor would make every title verse. What separates the two is not length,
-    which is identical, but position: a title sits at the EDGE of a run, a
-    line of the poem sits INSIDE it. So the run's interior is what this
-    reclassifies, and only that.
+    floor would make every title verse. Raising PROSE_MIN is worse: the
+    critics' essays contain real paragraphs of 250-3,000 characters that must
+    stay prose. What separates the two cases is not length, which is
+    identical, but position: an essay or a title sits at the EDGE of a verse
+    run, a line of the poem sits INSIDE it.
 
-    A gap of any length is bridged, not only a single line — ¶877-879
-    (اِس کہانی میں / کشف کی رات / بہت دن بعد) are three consecutive lines of
-    one نظم, and a one-line rule would still have cut the poem there.
+    A paragraph TOUCHING a run on one side only is deliberately left alone, at
+    both ends of the length scale. That position is genuinely ambiguous and it
+    is where both a nazm title (یاد, 3 chars, immediately before its poem) and
+    a critic's essay opening on a quotation live; `segment` reads UNKNOWN as
+    its one title candidate and PROSE as its one region opener, so sweeping
+    those in would retitle nazms by their own first line and weld essays onto
+    poems.
 
-    A paragraph TOUCHING a run on one side only is deliberately left UNKNOWN.
-    That position is genuinely ambiguous and it is where a nazm title lives
-    (یاد, 3 chars, immediately before its poem); `segment` reads UNKNOWN as
-    its one title candidate, so sweeping those in would retitle nazms by
-    their own first line and gain nothing that context can vouch for.
-    Measured, both promoted books have ZERO enclosed cases — تجاوز 0 of 8
-    UNKNOWN, باغِ نشاط 0 of 4 — so neither can move; جلد ۲ has 148.
+    A run is homogeneous by GROUP, and the groups are not the kinds: UNKNOWN
+    and ordinary PROSE never merge into one enclosed run, because merging them
+    moves a promoted book. باغِ نشاط ¶1419-1421 is UNKNOWN(8), UNKNOWN(9),
+    PROSE(106) between two verse lines — end-of-stream decode garbage — and
+    جلد ۲ ¶1854-1855 is UNKNOWN(10), PROSE(149) between two verse lines, a
+    real نظم line and the poet's aside. By kind and position the two are
+    identical, so no adjacency rule can take the second without also taking
+    the first, and باغِ نشاط must come out byte-identical. What separates them
+    is the bracket ¶1855 opens with (see ASIDE_GROUP): an aside is set inside
+    a poem, garbage is not, and grouping the aside with the short lines lets
+    the نظم line beside it come along.
+
+    Measured, both promoted books have ZERO enclosed cases of either kind —
+    تجاوز 0 of 8 UNKNOWN and 0 prose in body, باغِ نشاط 0 of 4 UNKNOWN and 0
+    of its 1 body prose — so neither moves, and a direct `segment()` dump
+    before and after confirms both are byte-identical. جلد ۲ has 148 enclosed
+    short runs and 45 single enclosed prose paragraphs, جلد ۱ has 12.
     """
+    groups = [
+        _enclosable_group(kind, para.text.strip())
+        for kind, para in zip(kinds, paragraphs, strict=True)
+    ]
     index = 0
     while index < len(kinds):
-        if kinds[index] != UNKNOWN:
+        group = groups[index]
+        if group is None:
             index += 1
             continue
         end = index
-        while end < len(kinds) and kinds[end] == UNKNOWN:
+        while end < len(kinds) and groups[end] == group:
             end += 1
-        if index and kinds[index - 1] == VERSE and kinds[end:end + 1] == [VERSE]:
+        limit = MAX_ENCLOSED_RUN[group]
+        if (
+            index
+            and kinds[index - 1] == VERSE
+            and kinds[end:end + 1] == [VERSE]
+            and (limit is None or end - index <= limit)
+        ):
             kinds[index:end] = [VERSE] * (end - index)
         index = end
 
@@ -359,7 +467,7 @@ def classify(paragraphs: list[Paragraph]) -> list[str]:
         _kind(para.text.strip(), index >= start, running)
         for index, para in enumerate(paragraphs)
     ]
-    _bridge_short_verse_lines(kinds)
+    _bridge_lines_enclosed_by_verse(kinds, paragraphs)
     return kinds
 
 
