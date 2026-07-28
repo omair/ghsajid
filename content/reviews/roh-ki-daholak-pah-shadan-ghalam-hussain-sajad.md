@@ -1,8 +1,10 @@
 ---
-title: "ڈاکٹر شاہد اشرف"
-slug: "dakatar-shahad-asharaf"
+title: "روح کی ڈھولک پہ شاداں، غلام حسین ساجد"
+slug: "roh-ki-daholak-pah-shadan-ghalam-hussain-sajad"
 language: "urdu"
 script: "nastaliq"
+reviewed_book: "باغِ نشاط کی طرف"
+reviewed_author: "ڈاکٹر شاہد اشرف"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 1
 ---

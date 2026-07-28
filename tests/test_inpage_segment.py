@@ -338,12 +338,12 @@ class TestEssayRegion(unittest.TestCase):
     QUOTE_TWO = "سَر پر کِسی غریب کے ناچار گِر پڑے"
     NOTE = "(۵-مئی ۲۰۲۳ئ)"
 
-    def essay(self):
+    def essay(self, author_line=None):
         """A separator-bounded essay region: headings, prose, quoted verse."""
         return [
             para("۰۰۰", 80),
             para(self.TITLE_LINE, 70),
-            para(self.AUTHOR_LINE, 70),
+            para(author_line or self.AUTHOR_LINE, 70),
             para("الف" * 60, 67),
             para(self.QUOTE_ONE, 73),
             para("بے" * 60, 67),
@@ -352,8 +352,8 @@ class TestEssayRegion(unittest.TestCase):
             para("۰۰۰", 80),
         ]
 
-    def review(self):
-        pieces = segment(FRONT + self.essay() + GHAZAL)
+    def review(self, author_line=None):
+        pieces = segment(FRONT + self.essay(author_line) + GHAZAL)
         reviews = [p for p in pieces if p.kind == "reviews"]
         self.assertEqual(len(reviews), 1, "the essay must be one piece")
         return reviews[0]
@@ -384,15 +384,22 @@ class TestEssayRegion(unittest.TestCase):
     def test_a_colophon_inside_the_region_becomes_the_written_note(self):
         self.assertEqual(self.review().written_note, self.NOTE)
 
-    def test_the_byline_is_flagged_and_both_heading_lines_are_kept(self):
-        # تجاوز orders the region title-then-author, باغِ نشاط
-        # author-then-title, so there is no rule that picks the byline. Both
-        # lines stay in the body and a human resolves the flag.
+    def test_the_byline_is_resolved_and_both_heading_lines_are_kept(self):
+        # تجاوز orders the region title-then-author and باغِ نشاط
+        # author-then-title, so position cannot pick the byline — but the
+        # honorific can. Both lines still stay in the body either way.
         piece = self.review()
-        self.assertIn("confirm-review-byline", piece.flags)
         self.assertEqual(piece.title, self.TITLE_LINE)
+        self.assertEqual(piece.reviewed_author, self.AUTHOR_LINE)
+        self.assertNotIn("confirm-review-byline", piece.flags)
         self.assertIn(self.TITLE_LINE, piece.body)
         self.assertIn(self.AUTHOR_LINE, piece.body)
+
+    def test_an_unresolvable_byline_is_still_flagged(self):
+        # No honorific: the pipeline must not guess which line is the critic.
+        piece = self.review(author_line="سعادت سعید")
+        self.assertIn("confirm-review-byline", piece.flags)
+        self.assertEqual(piece.reviewed_author, "")
 
     def test_no_ghazal_line_is_swallowed_by_the_region(self):
         # The region stops at the body start even when no separator closes it.
@@ -443,3 +450,48 @@ class TestIsGhazalShaped(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+from tools.inpage.segment import _split_byline
+
+
+class TestSplitByline(unittest.TestCase):
+    """تجاوز prints title then author; باغِ نشاط prints author then title.
+
+    Taking the first line blind titled باغِ نشاط's essay 'ڈاکٹر شاہد اشرف' —
+    its critic's name. An academic honorific tells them apart; anything it
+    cannot resolve is flagged rather than guessed.
+    """
+
+    def test_author_second_as_in_tajawuz(self):
+        title, author, resolved = _split_byline(
+            ["شاعرانہ مگس کاری کے متنوع سانچے", "ڈاکٹر سعادت سعید"]
+        )
+        self.assertEqual(title, "شاعرانہ مگس کاری کے متنوع سانچے")
+        self.assertEqual(author, "ڈاکٹر سعادت سعید")
+        self.assertTrue(resolved)
+
+    def test_author_first_as_in_bagh_e_nishat(self):
+        title, author, resolved = _split_byline(
+            ["ڈاکٹر شاہد اشرف", "روح کی ڈھولک پہ شاداں، غلام حسین ساجد"]
+        )
+        self.assertEqual(title, "روح کی ڈھولک پہ شاداں، غلام حسین ساجد")
+        self.assertEqual(author, "ڈاکٹر شاہد اشرف")
+        self.assertTrue(resolved)
+
+    def test_unresolved_when_no_honorific(self):
+        title, author, resolved = _split_byline(["پہلا عنوان", "دوسرا عنوان"])
+        self.assertEqual(title, "پہلا عنوان")
+        self.assertEqual(author, "")
+        self.assertFalse(resolved)
+
+    def test_unresolved_when_two_honorifics(self):
+        _, author, resolved = _split_byline(["ڈاکٹر الف", "پروفیسر ب"])
+        self.assertEqual(author, "")
+        self.assertFalse(resolved)
+
+    def test_unresolved_when_the_honorific_is_the_only_line(self):
+        title, author, resolved = _split_byline(["ڈاکٹر سعادت سعید"])
+        self.assertEqual(title, "ڈاکٹر سعادت سعید")
+        self.assertEqual(author, "")
+        self.assertFalse(resolved)

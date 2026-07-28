@@ -42,6 +42,11 @@ class Segment:
     # move when it is.
     precedes_first_heading: bool = False
     written_note: str = ""          # date and place, verbatim from the source
+    # Only for `reviews`: who wrote the criticism, and which book it prefaces.
+    # `reviewed_book` is filled by the CLI, which is what knows a book's title;
+    # segmentation only ever sees one book's paragraphs.
+    reviewed_author: str = ""
+    reviewed_book: str = ""
     flags: list[str] = field(default_factory=list)
 
 

@@ -51,6 +51,10 @@ def _piece(segment: Segment, book_slug: str) -> Piece:
             "source_book": book_slug,
             "book_order": segment.order,
             "written_note": segment.written_note,
+            # Empty on poems; `_render` drops empty values, so they stay absent
+            # rather than appearing as blank frontmatter keys.
+            "reviewed_author": segment.reviewed_author,
+            "reviewed_book": segment.reviewed_book,
         },
     )
 

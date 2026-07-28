@@ -121,6 +121,12 @@ def cmd_segment(book_slug: str) -> None:
     dropped_unknowns: list[str] = []
     unreached: list[tuple[str, object]] = []
     segments = segment_paragraphs(paragraphs, dropped_unknowns, unreached)
+    # A review's `reviewed_book` is the book it prefaces. Set here rather than
+    # in segmentation, which only ever sees one book's paragraphs and has no
+    # way to know its title.
+    for piece in segments:
+        if piece.kind == "reviews":
+            piece.reviewed_book = TITLES[book_slug]
 
     # Gate C (ground truth) is a property of the codepage, not of any one
     # book: the 11 ground-truth ghazals exist only in the کلیات volumes, so

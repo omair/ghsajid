@@ -3,6 +3,8 @@ title: "شاعرانہ مگس کاری کے متنوع سانچے"
 slug: "sharanah-magas-kari-ke-matno-sanche"
 language: "urdu"
 script: "nastaliq"
+reviewed_book: "تجاوز"
+reviewed_author: "ڈاکٹر سعادت سعید"
 written_note: "(۵-مئی ۲۰۲۳ئ)"
 source_book: "tajawuz"
 book_order: 1

@@ -63,12 +63,32 @@ GHAZAL_SHAPE_THRESHOLD = 0.9
 REGION_OPEN_KINDS = (SEPARATOR, TOC, HEADING)
 REGION_CLOSE_KINDS = (SEPARATOR, HEADING)
 
-# The byline cannot be inferred. تجاوز prints the essay's title first and its
-# author second; باغِ نشاط prints them the other way round. Rather than guess
-# (and silently attribute the poet's own book to the wrong person), every
-# heading line is kept in the body, the first becomes the title, and this
-# flag asks a human to say which was which.
+# تجاوز prints the essay's title first and its author second; باغِ نشاط
+# prints them the other way round, so position alone cannot tell them apart —
+# and taking the first line blind titled باغِ نشاط's essay "ڈاکٹر شاہد اشرف",
+# its critic's name.
+#
+# An academic honorific does distinguish them: a critic is introduced as
+# ڈاکٹر or پروفیسر, and a title is not. That is a real convention of Urdu
+# literary criticism, not a guess about these two files. When exactly one
+# heading line opens with an honorific it is the byline and the other is the
+# title; anything else still keeps every line in the body, takes the first as
+# the title, and raises the flag for a human, because attributing the wrong
+# person to criticism of the poet's work is not a mistake worth risking.
+HONORIFICS = ("ڈاکٹر", "پروفیسر", "سیّد", "سید", "پیر", "مولانا")
 BYLINE_FLAG = "confirm-review-byline"
+
+
+def _split_byline(heading_lines: list[str]) -> tuple[str, str, bool]:
+    """Return `(title, author, resolved)` for an essay's heading lines."""
+    bylines = [
+        line for line in heading_lines
+        if line.strip().startswith(HONORIFICS)
+    ]
+    others = [line for line in heading_lines if line not in bylines]
+    if len(bylines) == 1 and others:
+        return others[0], bylines[0], True
+    return (heading_lines[0] if heading_lines else ""), "", False
 
 
 def _is_ghazal_shaped(run: list[Paragraph]) -> bool:
@@ -359,9 +379,12 @@ def _add_review(
         for p, k in zip(region[:first_prose], region_kinds[:first_prose])
         if k != COLOPHON
     ]
-    title = heading_lines[0] if heading_lines else paragraphs[prose_index].text
-    flags = [BYLINE_FLAG] if heading_lines else []
+    title, author, resolved = _split_byline(heading_lines)
+    if not title:
+        title = paragraphs[prose_index].text
+    flags = [] if resolved or not heading_lines else [BYLINE_FLAG]
     piece = add("reviews", title[:MAX_TITLE_LENGTH], "\n\n".join(body_lines), flags)
+    piece.reviewed_author = author
     for p, k in zip(region, region_kinds):
         if k != COLOPHON:
             continue
