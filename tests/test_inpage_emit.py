@@ -409,3 +409,23 @@ class TestPromoteIsBoundToTheStagedBytes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPromoteAcceptsReviews(unittest.TestCase):
+    """A book's critical foreword must reach content/reviews/.
+
+    promote's kind guard listed only ghazals and nazms, so the first real
+    promote silently skipped both books' essays — real criticism of the poet,
+    with its own collection and /tabsira route.
+    """
+
+    def test_reviews_is_a_promotable_kind(self):
+        from tools.inpage.promote import KNOWN_KINDS
+
+        self.assertIn("reviews", KNOWN_KINDS)
+
+    def test_a_stray_kind_is_still_rejected(self):
+        from tools.inpage.promote import KNOWN_KINDS
+
+        self.assertNotIn("front_matter", KNOWN_KINDS)
+        self.assertNotIn("toc", KNOWN_KINDS)

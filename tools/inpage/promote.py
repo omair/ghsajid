@@ -16,7 +16,18 @@ from .models import Segment
 from .report import is_approved
 
 
-KNOWN_KINDS = {"ghazals", "nazms"}
+# The content collections a staged piece may be promoted into. `reviews` is
+# here deliberately: a book's critical foreword is real criticism of the
+# poet's work, it has its own collection and /tabsira route, and the design
+# always intended to capture it. Omitting it silently skipped both books'
+# essays on the first real promote. This set guards against a stray directory
+# under staging, not against `reviews`.
+#
+# It is deliberately NOT the same set as `models.VERSE_KINDS`: that one is
+# "kinds whose bodies are verse", used for counting poems against the فہرست
+# and for what may appear in a book record's contents. A review is
+# promotable but is neither a poem nor a contents row.
+KNOWN_KINDS = {"ghazals", "nazms", "reviews"}
 
 
 class _MalformedFrontmatter(Exception):
