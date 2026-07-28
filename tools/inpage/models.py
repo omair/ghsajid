@@ -33,6 +33,14 @@ class Segment:
     body: str
     order: int
     section: str = ""
+    # True only when the book has a section heading inside its body AND this
+    # piece comes before it. باغِ نشاط's epigraph couplet is the case: it is
+    # a real, correctly segmented poem, but it sits before the first heading
+    # and its فہرست never numbered it. Recorded as a position rather than
+    # read back off `section`, because `section` can legitimately be cleared
+    # (see checks.clear_unverifiable_sections) and the count gate must not
+    # move when it is.
+    precedes_first_heading: bool = False
     written_note: str = ""          # date and place, verbatim from the source
     flags: list[str] = field(default_factory=list)
 

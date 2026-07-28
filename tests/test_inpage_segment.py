@@ -232,9 +232,37 @@ class TestSegmentBook(unittest.TestCase):
         pieces = segment(FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1)])
         self.assertEqual(pieces[0].written_note, "۱۷، مئی ۲۰۱۰ئ۔ لاہور")
 
-    def test_a_heading_sets_the_section(self):
+    def test_a_heading_inside_the_body_sets_the_section(self):
+        # The heading has to sit after body_start_index to be a real section
+        # heading: here the first ghazal establishes the body, so the نعت
+        # after it is the book speaking about its own poems.
+        second = [para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1)]
+        pieces = segment(FRONT + GHAZAL + [para("نعت", 69)] + second)
+        self.assertEqual(pieces[1].section, "نعت")
+
+    def test_a_heading_before_the_body_start_does_not_set_the_section(self):
+        # A heading in the front matter is the فہرست listing its own section
+        # names, not the book reaching a section. تجاوز's only two headings
+        # are of exactly this kind (paragraphs 1 and 16, body start 85), and
+        # every one of its 101 pieces used to inherit غزلیں from them —
+        # correct only by accident.
         pieces = segment(FRONT + [para("نعت", 69)] + GHAZAL)
-        self.assertEqual(pieces[0].section, "نعت")
+        self.assertEqual(pieces[0].section, "")
+
+    def test_pieces_before_the_first_body_heading_are_marked(self):
+        # باغِ نشاط's epigraph couplet precedes its نعت heading and is not a
+        # numbered فہرست entry; the count gate reads this position rather
+        # than the section string (see checks.toc_count_errors).
+        second = [para("یہ نئی دنیا الگ ہے", 77), para("ہر اک راستہ الگ ہے", 1)]
+        pieces = segment(FRONT + GHAZAL + [para("نعت", 69)] + second)
+        self.assertEqual(
+            [p.precedes_first_heading for p in pieces], [True, False]
+        )
+
+    def test_nothing_is_marked_when_the_book_has_no_body_heading(self):
+        # تجاوز's shape: headings exist, but only in the front matter.
+        pieces = segment(FRONT + [para("نعت", 69)] + GHAZAL)
+        self.assertEqual([p.precedes_first_heading for p in pieces], [False])
 
     def test_a_half_sher_is_flagged_not_dropped(self):
         # Ten clean shers with one interior unpairable line: greedy pairing

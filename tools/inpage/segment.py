@@ -110,6 +110,14 @@ def segment(
     never straight to content/. Nothing is ever dropped: an unpaired line is
     flagged, and a run that fits no pattern still becomes a piece.
 
+    `section` is taken only from a HEADING that sits at or after
+    `body_start_index`. A heading before it belongs to the فہرست, which
+    lists the book's section names before any poem has been reached; reading
+    those as sections gave تجاوز a غزلیں label on all 101 pieces that was
+    correct only by coincidence. Pieces formed before the first body heading
+    are marked `precedes_first_heading` so the count gate can exclude them
+    without depending on the section string.
+
     `UNKNOWN` paragraphs are the one exception worth naming: each is held as
     `title_candidate` on the chance a nazm immediately follows it with no
     title of its own, but a candidate that is overwritten by a later UNKNOWN,
@@ -139,6 +147,13 @@ def segment(
     body_start = body_start_index(paragraphs)
     pieces: list[Segment] = []
     section = ""
+    # How many pieces had already been formed when the first BODY heading was
+    # reached, or None if the book has no body heading at all. Those pieces
+    # precede every section the book declares (باغِ نشاط's epigraph couplet
+    # is the one real instance), and `precedes_first_heading` is stamped onto
+    # them once the whole book has been read — at add() time there is no way
+    # to know whether a heading is still coming.
+    pieces_before_first_heading: int | None = None
     title_candidate = ""
     title_candidate_index = -1
     # Every paragraph index whose text reached a piece — body, title or
@@ -184,7 +199,17 @@ def segment(
         para = paragraphs[index]
 
         if kind == HEADING:
-            section = NORMALISED_HEADINGS[skeleton(para.text)]
+            # Only a heading inside the body names a section. Before the body
+            # start the same words are the فہرست listing its own section
+            # names, and taking `section` from there labelled whole books off
+            # a table of contents: تجاوز's only two headings are at
+            # paragraphs 1 and 16 against a body start of 85, and all 101 of
+            # its pieces inherited غزلیں from them. That label happened to be
+            # right, but nothing in the evidence said so.
+            if index >= body_start:
+                section = NORMALISED_HEADINGS[skeleton(para.text)]
+                if pieces_before_first_heading is None:
+                    pieces_before_first_heading = len(pieces)
             boundary = index + 1
             index += 1
             continue
@@ -269,6 +294,10 @@ def segment(
     # after the last UNKNOWN) never reached a piece either.
     if title_candidate:
         pending_drops.append((title_candidate_index, title_candidate))
+
+    if pieces_before_first_heading is not None:
+        for piece in pieces[:pieces_before_first_heading]:
+            piece.precedes_first_heading = True
 
     dropped_unknowns.extend(
         text for i, text in pending_drops if i not in consumed

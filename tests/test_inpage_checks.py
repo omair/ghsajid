@@ -129,22 +129,39 @@ class TestTocCountGate(unittest.TestCase):
         ]
         self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
 
-    def test_a_piece_before_any_heading_is_not_counted_against_the_fihrist(self):
+    def test_a_poem_before_the_first_body_heading_is_not_counted(self):
         # باغِ نشاط's epigraph couplet -- the poem the book is named after --
-        # sits in section="" (before the نعت heading) and is not a numbered
-        # فہرست entry. The gate must count only the two sectioned poems
-        # below, matching the declared count of 2, and stay silent even
-        # though a third VERSE_KINDS piece exists in the source.
+        # sits before the نعت heading and is not a numbered فہرست entry. The
+        # gate must count only the two poems that follow that heading,
+        # matching the declared count of 2, and stay silent even though a
+        # third VERSE_KINDS piece exists in the source. Keyed on position,
+        # not on the section string: the section may legitimately be cleared
+        # (see checks.clear_unverifiable_sections) and the arithmetic must
+        # not move when it is.
         segments = [
-            Segment(kind="ghazals", title="epigraph", body="b", order=1, section=""),
+            Segment(kind="ghazals", title="epigraph", body="b", order=1,
+                    precedes_first_heading=True),
             Segment(kind="ghazals", title="t", body="b", order=2, section="نعت"),
             Segment(kind="ghazals", title="t", body="b", order=3, section="نعت"),
         ]
         self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
+        for segment_ in segments:
+            segment_.section = ""
+        self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
 
-    def test_still_fails_when_sectioned_poems_exceed_the_declared_count(self):
-        # Over-splitting under a heading must still be caught -- an
-        # unsectioned piece must never be able to mask a real surplus.
+    def test_a_book_with_no_body_heading_counts_all_its_poems(self):
+        # تجاوز's shape after the fix: its only headings are in the front
+        # matter, so no piece is marked and every poem is counted. Nothing
+        # is excluded when there is no body heading to be before.
+        segments = [
+            Segment(kind="ghazals", title="t", body="b", order=1),
+            Segment(kind="ghazals", title="t", body="b", order=2),
+        ]
+        self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
+
+    def test_still_fails_when_poems_exceed_the_declared_count(self):
+        # Over-splitting must still be caught -- excluding the poems before
+        # the first body heading must never be able to mask a real surplus.
         segments = [
             Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں"),
             Segment(kind="ghazals", title="t", body="b", order=2, section="غزلیں"),
@@ -154,13 +171,73 @@ class TestTocCountGate(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("+1", errors[0])
 
-    def test_still_fails_when_sectioned_poems_fall_short_of_the_declared_count(self):
+    def test_still_fails_when_poems_fall_short_of_the_declared_count(self):
         segments = [
             Segment(kind="ghazals", title="t", body="b", order=1, section="غزلیں"),
         ]
         errors = toc_count_errors(TOC_AND_GHAZAL, segments)
         self.assertEqual(len(errors), 1)
         self.assertIn("-1", errors[0])
+
+
+class TestUnverifiableSection(unittest.TestCase):
+    """A heading whose section swallows the book cannot be asserted.
+
+    باغِ نشاط's only two headings are both نعت, and the غزلیں heading the
+    book really has never reaches the byte stream — so 85 ghazals were being
+    labelled as naat. An empty section is honest; نعت on a ghazal is not.
+    """
+
+    def test_a_section_covering_the_whole_book_is_reported_and_cleared(self):
+        poems = [
+            Segment(kind="ghazals", title="t", body="b", order=i, section="نعت")
+            for i in range(1, 11)
+        ]
+        messages = checks.clear_unverifiable_sections(poems)
+        self.assertEqual(len(messages), 1)
+        self.assertIn("نعت", messages[0])
+        self.assertIn("10", messages[0])
+        self.assertEqual({s.section for s in poems}, {""})
+
+    def test_a_section_covering_part_of_a_book_is_left_alone(self):
+        poems = [
+            Segment(kind="ghazals", title="t", body="b", order=i, section="نعت")
+            for i in range(1, 4)
+        ] + [
+            Segment(kind="ghazals", title="t", body="b", order=i, section="غزلیں")
+            for i in range(4, 11)
+        ]
+        self.assertEqual(checks.clear_unverifiable_sections(poems), [])
+        self.assertEqual(
+            {s.section for s in poems}, {"نعت", "غزلیں"}
+        )
+
+    def test_the_count_gate_is_unmoved_by_the_clearing(self):
+        # The reason the gate had to stop keying on the section string: the
+        # clearing below empties every section, which a section-based count
+        # would read as zero poems against a declared 2.
+        segments = [
+            Segment(kind="ghazals", title="epigraph", body="b", order=1,
+                    precedes_first_heading=True),
+            Segment(kind="ghazals", title="t", body="b", order=2, section="نعت"),
+            Segment(kind="ghazals", title="t", body="b", order=3, section="نعت"),
+        ]
+        checks.clear_unverifiable_sections(segments)
+        self.assertEqual(toc_count_errors(TOC_AND_GHAZAL, segments), [])
+
+    def test_a_review_carrying_the_same_section_is_cleared_too(self):
+        # The share is measured over poems, but the false label is cleared
+        # wherever it was written.
+        segments = [
+            Segment(kind="ghazals", title="t", body="b", order=i, section="نعت")
+            for i in range(1, 11)
+        ] + [Segment(kind="reviews", title="r", body="r", order=11, section="نعت")]
+        checks.clear_unverifiable_sections(segments)
+        self.assertEqual({s.section for s in segments}, {""})
+
+    def test_silent_when_no_piece_carries_a_section(self):
+        segments = [Segment(kind="ghazals", title="t", body="b", order=1)]
+        self.assertEqual(checks.clear_unverifiable_sections(segments), [])
 
 
 class TestConservationGate(unittest.TestCase):

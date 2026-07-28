@@ -18,6 +18,7 @@ from pathlib import Path
 
 from .checks import (
     VERSE_KINDS,
+    clear_unverifiable_sections,
     completeness_errors,
     conservation_errors,
     lexicon_report,
@@ -126,6 +127,11 @@ def cmd_segment(book_slug: str) -> None:
             f"{isolated_mapped} of which decoded to a character"
         ]
         + verse_errors(segments)
+        # Runs before anything is written: it erases a section label the
+        # source cannot support, and write_book/report both read `section`.
+        # The count gate is unaffected by the erasure by construction — it
+        # reads position, not the section string.
+        + clear_unverifiable_sections(segments)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(paragraphs, segments)
     )

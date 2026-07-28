@@ -131,25 +131,32 @@ def toc_count_errors(
     exactly. So the basis is the poems; the reviews are carried by the
     conservation gate and the report, not counted here.
 
-    Counted only under a section heading, for the same reason. باغِ نشاط's
-    epigraph couplet — باغِ نشاط کی طرف اپنے قدم نہیں بڑھے / جب سے ہمارے کھوج
-    میں بادِ صبا نہیں رہی, the couplet the book takes its title from — was
-    recovered as a real, correctly segmented poem, but it sits before any
-    heading, in `section: ""`, so it is not a numbered فہرست entry either.
-    Counting every VERSE_KINDS piece made the gate read 86 against a declared
-    85. Checked directly: exactly 85 poems sit under باغِ نشاط's نعت heading
-    and exactly 100 under تجاوز's غزلیں, both matching their فہرست precisely
-    — the نعت heading was already entry 1, so recovering its truncated lines
-    added no piece, and the epigraph is the only surplus. So the count is
-    further narrowed to poems with a non-empty `section`; the epigraph is
-    still emitted as a piece, still written to the book record, still
-    promotable, just not counted against a فہرست that never numbered it.
+    Poems before the first BODY heading are excluded, for the same reason.
+    باغِ نشاط's epigraph couplet — باغِ نشاط کی طرف اپنے قدم نہیں بڑھے / جب
+    سے ہمارے کھوج میں بادِ صبا نہیں رہی, the couplet the book takes its title
+    from — was recovered as a real, correctly segmented poem, but it sits at
+    paragraphs 129-130, before the book's first heading at 131, so it is not
+    a numbered فہرست entry either. Counting every VERSE_KINDS piece made the
+    gate read 86 against a declared 85.
+
+    Excluded by POSITION (`Segment.precedes_first_heading`), not by an empty
+    `section` string. The section is the wrong property to key on twice over:
+    باغِ نشاط's only headings are both نعت, so its ghazals' section is a
+    false label that `clear_unverifiable_sections` erases, and تجاوز now has
+    no body heading at all, so every one of its poems carries `section: ""`
+    — a section-based count read 0 against a declared 100. Position survives
+    both: تجاوز has no body heading, so nothing is excluded and all 100
+    poems count; باغِ نشاط excludes the one piece before paragraph 131 and
+    counts 85. The epigraph is still emitted as a piece, still written to
+    the book record, still promotable, just not counted against a فہرست that
+    never numbered it.
     """
     expected = toc_count(paragraphs)
     if expected is None:
         return ["no فہرست found: the piece-count gate could not run"]
     actual = sum(
-        1 for segment in segments if segment.kind in VERSE_KINDS and segment.section
+        1 for segment in segments
+        if segment.kind in VERSE_KINDS and not segment.precedes_first_heading
     )
     if actual != expected:
         return [
@@ -157,6 +164,59 @@ def toc_count_errors(
             f"(delta {actual - expected:+d})"
         ]
     return []
+
+
+# The share of a book's poems one section may cover before the label stops
+# being evidence of anything. باغِ نشاط is the measured case: its only two
+# headings are both نعت (paragraphs 131 and 144), the غزلیں heading the book
+# really prints never reaches the byte stream at all — InPage keeps some
+# headings in separate text frames the linear stream does not carry — and so
+# 85 ghazals inherited نعت, 85 of 86 poems, 98.8%.
+#
+# 0.9 is chosen as the point past which the label has stopped describing a
+# section and started describing the whole book. What it really means is that
+# the source gave us where a section BEGINS and never where it ENDS: there is
+# no second heading to close it, so every poem after the first one keeps
+# inheriting. That reading holds whether or not the book truly has one
+# section, which is why the message says the boundary could not be determined
+# rather than claiming the heading is wrong. Below 0.9 a book is genuinely
+# divided and each heading is closed by the next, so the sections stand.
+IMPLAUSIBLE_SECTION_SHARE = 0.9
+
+
+def clear_unverifiable_sections(segments: list[Segment]) -> list[str]:
+    """Report and erase a section that swallows most of the book.
+
+    Mutates `segments`, which no other check here does, and deliberately:
+    the finding and the remedy are the same act. `section` is written
+    verbatim into content/books/*.yaml, so leaving it in place would publish
+    نعت — the devotional form addressed to the Prophet — as the label on 85
+    of this poet's ghazals. An empty section is honest about what the source
+    supports; نعت on a ghazal is a fabrication, and the archive is the wrong
+    place to keep one.
+
+    The share is measured over poems (VERSE_KINDS) since that is what a
+    section divides, but the label is cleared from every piece carrying it,
+    reviews included. See IMPLAUSIBLE_SECTION_SHARE for the threshold.
+    """
+    poems = [s for s in segments if s.kind in VERSE_KINDS]
+    if not poems:
+        return []
+    counts = collections.Counter(s.section for s in poems if s.section)
+    messages = []
+    for name, count in counts.most_common():
+        if count / len(poems) < IMPLAUSIBLE_SECTION_SHARE:
+            continue
+        messages.append(
+            f'section "{name}" covers {count} of {len(poems)} poems: no '
+            f"further heading closes it, so its boundary could not be "
+            f"determined — headings may be missing from the source. Cleared "
+            f"the section on those pieces rather than asserting it."
+        )
+        for piece in segments:
+            if piece.section == name:
+                piece.section = ""
+    return messages
 
 
 def conservation_errors(
