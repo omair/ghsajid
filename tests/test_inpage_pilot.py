@@ -132,5 +132,95 @@ class TestKulliyatGroundTruth(unittest.TestCase):
                 self.assertEqual(conservation_errors(paragraphs, segments), [])
 
 
+# The collection ہمارے بیچ, in کلیات جلد ۱, is written entirely in one radif:
+# every one of its ghazals ends every second misra on ہمارے بیچ. Its ghazals
+# are also extraordinarily long — 15 to 71 shers, where the poet's norm is
+# 5 to 15 — and that combination makes them look exactly like a segmentation
+# failure. They are not. The collection's own فہرست, printed at paragraphs
+# 175-179 of the volume, lists fifteen entries and no more, and the fifteen
+# pieces the segmenter produces open on those fifteen lines in that order.
+#
+# This is a lock against a plausible-sounding "fix". Reading the length alone
+# as fusion, and splitting inside these ghazals on any rhyme heuristic, would
+# manufacture boundaries the book does not have and cannot be caught by the
+# ground-truth gate, because none of the 11 known ghazals lives here.
+HUMARE_BEECH_MATLAAS = (
+    "نہیں ہے کوئی اگر سلسلہ ہمارے بیچ",
+    "خیالِ وصل نہ آتا کبھی ہمارے بیچ",
+    "ظہور کرنے لگی پھر زمیں ہمارے بیچ",
+    "اُگی تھی دھوپ کسی موڑ پر ہمارے بیچ",
+    "فروغ پانے لگیں تلخیاں ہمارے بیچ",
+    "بنے گا کوئی تعلّق نہ جب ہمارے بیچ",
+    "ہو گا شگفت جب گلِ حیرت ہمارے بیچ",
+    "کچھ روز سے ذرا سی ہے اَن بن ہمارے بیچ",
+    # The فہرست misprints this one as کونیل; the body reads کونپل, and the
+    # body is the poem. Every other entry matches the matlaa verbatim.
+    "پھوٹی ہے کوئی نور کی کونپل ہمارے بیچ",
+    "رہتی ہے اب تھوڑی سی تکرار ہمارے بیچ",
+    "دیے جلانے لگا ہے لہو ہمارے بیچ",
+    "کیسے جگہ بنائے وہ دریا ہمارے بیچ",
+    "کِھلا گیا ہے کوئی گل بدن ہمارے بیچ",
+    "ختم ہوا پھر ملنے کا امکان ہمارے بیچ",
+    "وہی زمیں، وہی باغِ ارم ہمارے بیچ",
+)
+
+# The longest piece in کلیات جلد ۱ — the first ہمارے بیچ ghazal. Held as an
+# exact ceiling rather than a round number so that a change producing a
+# LONGER piece, which would be real fusion, fails here.
+LONGEST_PIECE_SHERS = 71
+
+
+def _sher_count(piece) -> int:
+    return len([b for b in piece.body.split("\n\n") if b.strip()])
+
+
+@unittest.skipUnless(
+    KULLIYAT["kulliyat-jild-1"].exists(), "inp/ sources not present"
+)
+class TestHumareBeechCollection(unittest.TestCase):
+    """The long-ghazal collection that must NOT be split further."""
+
+    @classmethod
+    def setUpClass(cls):
+        paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
+        cls.segments = segment(paragraphs)
+        cls.poems = [s for s in cls.segments if s.kind in ("ghazals", "nazms")]
+
+    def test_the_collection_is_exactly_its_fihrist(self):
+        opened = [
+            s.body.split("\n")[0] for s in self.poems
+            if s.body.split("\n")[0].rstrip().endswith("ہمارے بیچ")
+        ]
+        self.assertEqual(tuple(opened), HUMARE_BEECH_MATLAAS)
+
+    def test_the_collection_is_contiguous(self):
+        orders = [
+            s.order for s in self.poems
+            if s.body.split("\n")[0].rstrip().endswith("ہمارے بیچ")
+        ]
+        self.assertEqual(orders, list(range(orders[0], orders[0] + 15)))
+
+    def test_no_piece_is_longer_than_the_longest_real_ghazal(self):
+        longest = max(self.poems, key=_sher_count)
+        self.assertEqual(_sher_count(longest), LONGEST_PIECE_SHERS)
+        self.assertEqual(longest.body.split("\n")[0], HUMARE_BEECH_MATLAAS[0])
+
+    def test_every_long_piece_is_an_accounted_for_ghazal(self):
+        # Fifteen pieces run past 20 shers. Fourteen are ہمارے بیچ ghazals
+        # the فہرست names; the fifteenth is a 23-sher ghazal that closes on
+        # the takhallus, which is the book itself saying the ghazal ended
+        # there. Nothing else in the volume is long.
+        long = [s for s in self.poems if _sher_count(s) > 20]
+        self.assertEqual(len(long), 15)
+        radif = [
+            s for s in long
+            if s.body.split("\n")[0].rstrip().endswith("ہمارے بیچ")
+        ]
+        self.assertEqual(len(radif), 14)
+        (other,) = [s for s in long if s not in radif]
+        self.assertEqual(other.body.split("\n")[0], "جب سے اُس شوخ سے ملا ہوں مَیں")
+        self.assertIn("ساجد", other.body.split("\n\n")[-1])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -667,6 +667,26 @@ def split_ghazals(
       (وحشت ہے / محبّت ہے inside the قیامت ہے ghazal).
     * Unless the sher before it is the maqtaa, in which case the previous
       ghazal has closed and a like-rhymed opening really is a new poem.
+
+    A length outlier is NOT evidence of fusion here, and the one place it
+    looks most like it is the place it is least true. کلیات جلد ۱ carries a
+    whole collection, ہمارے بیچ, written in a single radif: fifteen ghazals
+    of 15 to 71 shers, against a book-wide norm of 5 to 15. The obvious
+    reading — that a shared radif defeated the rhyme test and welded them —
+    is wrong twice over. The fifteen ghazals carry fifteen DIFFERENT qafia
+    (ا, ی, یں, ر, اں, ب, ت, ن, ل, ار, و, ن, ان, م), so `run_rhyme` separates
+    them cleanly, and the collection's own فہرست lists exactly fifteen
+    entries which the fifteen pieces open on in order. Inside them there is
+    no further boundary to find: across all 142 lines of the longest, not one
+    first misra ends on ہمارے بیچ, and no separator falls between them. They
+    are simply long. See TestHumareBeechCollection, which locks this.
+
+    The correction that suggests itself — require a matlaa's own two misras
+    to share more than the run's radif, deriving the radif from the following
+    shers — was measured and is far worse. At a genuine matlaa the pair's
+    shared suffix IS the following shers' shared suffix, so "strictly longer"
+    is never satisfied: تجاوز collapsed from 100 pieces to 29, باغِ نشاط from
+    86 to 23, and 8 of the 11 known ghazals broke.
     """
     groups: list[list[tuple[str, str]]] = []
     current: list[tuple[str, str]] = []
