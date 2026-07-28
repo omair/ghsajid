@@ -125,15 +125,94 @@ def render(
         "",
         "## Approval",
         "",
-        "Change `approved` to true once the boundaries above are correct.",
+        "Once the boundaries above are correct, change the `approved:` line",
+        "below to read exactly `approved: true` — that literal string, nothing",
+        "else, is the only value this gate accepts.",
         "Re-running segmentation voids this approval, and so does editing any",
-        "staged file — the hash covers the bytes promote will copy.",
+        "staged file — the hash covers the bytes promote will copy. If you",
+        "hand-correct a staged file after approval, run",
+        "`python -m tools.inpage restamp <book-slug>` to re-baseline the hash",
+        "against your correction, then re-approve.",
         "",
         f"segmentation: {segmentation_hash(segments, staging, book_slug)}",
         "approved: false",
         "",
     ])
     return "\n".join(lines)
+
+
+def restamp_report(
+    report_text: str,
+    segments: list[Segment],
+    staging: Path,
+    book_slug: str,
+) -> tuple[str, str, str]:
+    """Rewrite `report_text`'s `segmentation:` and `approved:` lines in place.
+
+    Used by `restamp` to recover from a legitimate hand-correction to a staged
+    piece: that correction rightly voids the old hash, but `segment` would
+    destroy the correction by regenerating staging from scratch, and
+    `promote` correctly refuses a stale hash. This recomputes the hash over
+    the CURRENT staged bytes (never re-segmenting, never touching a staged
+    piece) and rewrites only the two lines the approval gate reads.
+
+    Everything else in the report — including any comments a reviewer typed
+    in — is preserved byte-for-byte: only the matched `segmentation:` and
+    `approved:` spans are replaced, nothing around them.
+
+    `approved:` is forced to `false` regardless of what it said before. A
+    correction is a change, and a change must be re-approved — inheriting a
+    prior `true` would let a hand-edit slip through unreviewed, defeating the
+    whole point of the binding.
+
+    Only the authoritative `## Approval` section is touched (the last such
+    heading, and everything after it — the same scope `is_approved` reads),
+    so a segment title crafted to contain a fake `segmentation:` or
+    `approved:` line earlier in the report cannot be mistaken for the real
+    one.
+
+    Returns `(new_report_text, old_hash, new_hash)`. Raises `ValueError` if
+    the report has no `## Approval` section, or is missing either line within
+    it — same shape of malformed-report guard as `is_approved`.
+    """
+    heading_at = report_text.rfind(APPROVAL_HEADING)
+    if heading_at == -1:
+        raise ValueError("report has no ## Approval section to restamp")
+    section = report_text[heading_at:]
+
+    stamped_matches = list(HASH_LINE.finditer(section))
+    if not stamped_matches:
+        raise ValueError("report has no segmentation: line to restamp")
+    approved_matches = list(APPROVED_LINE.finditer(section))
+    if not approved_matches:
+        raise ValueError("report has no approved: line to restamp")
+
+    old_hash = stamped_matches[-1].group(1)
+    new_hash = segmentation_hash(segments, staging, book_slug)
+
+    hash_match = stamped_matches[-1]
+    new_section = (
+        section[: hash_match.start()]
+        + f"segmentation: {new_hash}"
+        + section[hash_match.end():]
+    )
+
+    # Re-find within `new_section`: replacing the hash line above cannot shift
+    # the approved line's offset (same-length replacement of a same-shaped
+    # line in the common case), but re-matching against the actual current
+    # text is correct regardless of length, rather than trusting stale spans.
+    approved_matches = list(APPROVED_LINE.finditer(new_section))
+    if not approved_matches:
+        raise ValueError("report has no approved: line to restamp")
+    approved_match = approved_matches[-1]
+    new_section = (
+        new_section[: approved_match.start()]
+        + "approved: false"
+        + new_section[approved_match.end():]
+    )
+
+    new_text = report_text[:heading_at] + new_section
+    return new_text, old_hash, new_hash
 
 
 def is_approved(

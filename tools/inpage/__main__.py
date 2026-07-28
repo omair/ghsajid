@@ -2,11 +2,15 @@
 
     python -m tools.inpage decode  <book-slug>
     python -m tools.inpage segment <book-slug>
+    python -m tools.inpage restamp <book-slug>
     python -m tools.inpage promote <book-slug>
 
 `segment` writes staging output and a review report. `promote` refuses to run
 until that report is approved, and refuses again if the segmentation changed
-after approval.
+after approval. `restamp` re-baselines an approved report against a staged
+piece a human hand-corrected after approval: it never re-segments and never
+rewrites a staged piece, it only recomputes the hash over the bytes already
+on disk and forces the report back to unapproved for re-review.
 """
 
 import collections
@@ -35,10 +39,10 @@ from .groundtruth import (
     MIN_WHOLE_GHAZALS,
     corpus_lexicon,
 )
-from .models import Book
+from .models import Book, Segment
 from .ole import read_text_stream
 from .promote import promote
-from .report import render
+from .report import render, restamp_report
 from .segment import segment as segment_paragraphs
 
 SOURCES = {
@@ -227,6 +231,40 @@ def cmd_segment(book_slug: str) -> None:
     print(f"{len(segments)} pieces staged. Review and approve: {report_path}")
 
 
+def cmd_restamp(book_slug: str) -> None:
+    """Re-baseline an approved report's hash against hand-corrected staging.
+
+    Never re-segments (that would destroy the correction) and never rewrites
+    a staged piece — it only reads what is already on disk, recomputes the
+    hash over those bytes, and rewrites the `segmentation:` and `approved:`
+    lines of the existing report.md, leaving every other line — including any
+    reviewer comments — untouched. `approved:` is always forced back to
+    false: a correction is a change, and a change must be re-approved.
+    """
+    _source(book_slug)   # validate the slug before it is joined onto a path
+    book_staging = STAGING / book_slug
+    segments_path = book_staging / "segments.json"
+    if not segments_path.exists():
+        sys.exit(f"no segments.json at {segments_path} — run segment first")
+    report_path = book_staging / "report.md"
+    if not report_path.exists():
+        sys.exit(f"no report at {report_path} — run segment first")
+
+    raw = json.loads(segments_path.read_text(encoding="utf-8"))
+    segments = [Segment(**item) for item in raw]
+    report_text = report_path.read_text(encoding="utf-8")
+
+    new_text, old_hash, new_hash = restamp_report(
+        report_text, segments, book_staging, book_slug
+    )
+    with open(report_path, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(new_text)
+
+    changed = "yes" if old_hash != new_hash else "no"
+    print(f"segmentation: {old_hash} -> {new_hash} (changed: {changed})")
+    print("approved: false — re-review the staged pieces and re-approve before promote.")
+
+
 def cmd_promote(book_slug: str) -> None:
     _source(book_slug)   # validate the slug before it is joined onto a path
     written, problems = promote(book_slug, STAGING, CONTENT)
@@ -241,7 +279,12 @@ def main() -> None:
     if len(sys.argv) != 3:
         sys.exit(__doc__)
     command, book_slug = sys.argv[1], sys.argv[2]
-    handlers = {"decode": cmd_decode, "segment": cmd_segment, "promote": cmd_promote}
+    handlers = {
+        "decode": cmd_decode,
+        "segment": cmd_segment,
+        "restamp": cmd_restamp,
+        "promote": cmd_promote,
+    }
     handler = handlers.get(command)
     if handler is None:
         sys.exit(__doc__)

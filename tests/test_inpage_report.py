@@ -5,7 +5,7 @@ from pathlib import Path
 
 from tools.inpage.emit import write_book, write_segments
 from tools.inpage.models import Book, Segment
-from tools.inpage.report import is_approved, render, segmentation_hash
+from tools.inpage.report import is_approved, render, restamp_report, segmentation_hash
 
 SEGMENTS = [
     Segment(kind="ghazals", title="جسم کی خوشبو الگ ہے", body="الف\nب", order=1),
@@ -176,6 +176,120 @@ class TestHashCoversTheStagedBytes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRestampReport(unittest.TestCase):
+    """`restamp` recovers from a hand-correction to a staged piece.
+
+    segment would destroy the correction by regenerating staging; promote
+    correctly refuses the now-stale hash. restamp is the third way forward:
+    recompute the hash over the CURRENT staged bytes and re-baseline the
+    report, without ever touching a staged piece or re-segmenting.
+    """
+
+    def setUp(self):
+        self.staging = Path(tempfile.mkdtemp())
+        self.segments = [
+            Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1),
+        ]
+        _, slugs, _ = write_segments(self.segments, "tajawuz", self.staging)
+        write_book(
+            Book(title="تجاوز", slug="tajawuz", contents=self.segments),
+            slugs,
+            self.staging,
+        )
+        self.piece = self.staging / "ghazals" / "pahli-nazm.md"
+
+    def tearDown(self):
+        shutil.rmtree(self.staging)
+
+    def test_untouched_staging_hashes_the_same_and_forces_unapproved(self):
+        original = render("tajawuz", self.segments, [], self.staging)
+        approved = original.replace("approved: false", "approved: true")
+
+        new_text, old_hash, new_hash = restamp_report(
+            approved, self.segments, self.staging, "tajawuz"
+        )
+
+        self.assertEqual(old_hash, new_hash)
+        self.assertFalse(
+            is_approved(new_text, self.segments, self.staging, "tajawuz")
+        )
+        # The literal line the gate reads must read exactly "approved: false"
+        # — not merely "not approved: true" somewhere in the instructions,
+        # which legitimately mention that phrase as an example.
+        approval_at = new_text.rfind("## Approval")
+        section = new_text[approval_at:]
+        self.assertRegex(section, r"(?m)^approved: false\s*$")
+        self.assertNotRegex(section, r"(?m)^approved: true\s*$")
+
+    def test_edited_staged_piece_produces_a_different_hash_and_can_be_reapproved(self):
+        original = render("tajawuz", self.segments, [], self.staging)
+        approved = original.replace("approved: false", "approved: true")
+
+        # A human hand-corrects the staged piece after approval.
+        self.piece.write_text(
+            self.piece.read_text(encoding="utf-8").replace("دوم", "سوم"),
+            encoding="utf-8",
+        )
+
+        new_text, old_hash, new_hash = restamp_report(
+            approved, self.segments, self.staging, "tajawuz"
+        )
+        self.assertNotEqual(old_hash, new_hash)
+
+        # Re-approving against the restamped report accepts the correction.
+        reapproved = new_text.replace("approved: false", "approved: true")
+        self.assertTrue(
+            is_approved(reapproved, self.segments, self.staging, "tajawuz")
+        )
+
+    def test_forces_approved_false_even_when_report_said_true(self):
+        original = render("tajawuz", self.segments, [], self.staging)
+        approved = original.replace("approved: false", "approved: true")
+
+        new_text, _, _ = restamp_report(
+            approved, self.segments, self.staging, "tajawuz"
+        )
+
+        self.assertFalse(
+            is_approved(new_text, self.segments, self.staging, "tajawuz")
+        )
+
+    def test_preserves_reviewer_comments_verbatim(self):
+        original = render("tajawuz", self.segments, [], self.staging)
+        # One comment ahead of the ## Approval section, one inside it —
+        # both must survive, including the one sharing the section restamp
+        # actually rewrites.
+        commented = original.replace(
+            "## Gate output",
+            "## Gate output\n\n<!-- reviewer note: checked line breaks by hand -->",
+        ).replace(
+            "approved: false",
+            "<!-- re-checked after the correction -->\napproved: false",
+        )
+
+        new_text, _, _ = restamp_report(
+            commented, self.segments, self.staging, "tajawuz"
+        )
+
+        self.assertIn(
+            "<!-- reviewer note: checked line breaks by hand -->", new_text
+        )
+        self.assertIn("<!-- re-checked after the correction -->", new_text)
+
+    def test_preserves_everything_outside_the_two_stamped_lines(self):
+        original = render("tajawuz", self.segments, [], self.staging)
+        approved = original.replace("approved: false", "approved: true")
+
+        new_text, _, _ = restamp_report(
+            approved, self.segments, self.staging, "tajawuz"
+        )
+
+        approval_at = approved.rfind("## Approval")
+        new_approval_at = new_text.rfind("## Approval")
+        # Everything before the ## Approval section is untouched.
+        self.assertEqual(approved[:approval_at], new_text[:new_approval_at])
 
 
 class TestPieceLineShowsKind(unittest.TestCase):
