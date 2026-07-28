@@ -21,11 +21,14 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .checks import (
+    COLLECTION_INDEX_BASELINE,
     DECLARED_COLLECTION_COUNTS,
     KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE,
     VERSE_KINDS,
     clear_unverifiable_sections,
+    collection_index_errors,
+    collection_index_matches,
     completeness_errors,
     conservation_errors,
     declared_collection_count_errors,
@@ -218,6 +221,13 @@ def cmd_segment(book_slug: str) -> None:
             if book_slug in TOC_FIRST_LINE_BASELINE
             else []
         )
+        # جلد ۱'s four uncounted collections, each gated against its own
+        # measured floor on how many poems the volume's index (front matter
+        # + reviews) can find (see COLLECTION_INDEX_BASELINE). A no-op for
+        # every other book slug.
+        + collection_index_errors(
+            paragraphs, segments, COLLECTION_INDEX_BASELINE.get(book_slug, {})
+        )
         + [
             # A threshold that misfires must be visible: too low and a real
             # section heading (نعت, 5 times) or a contents heading (فہرست,
@@ -274,6 +284,22 @@ def cmd_segment(book_slug: str) -> None:
                 "the source; their totals are reported above and asserted "
                 "against nothing."
             )
+    index_floors = COLLECTION_INDEX_BASELINE.get(book_slug, {})
+    if index_floors:
+        # Every floored collection's count, not just the ones that fail —
+        # collection_index_errors above only speaks up on a regression, so
+        # this line is what lets a reviewer see the real numbers on a clean
+        # run too.
+        matches = collection_index_matches(paragraphs, segments, set(index_floors))
+        gate_output.append(
+            "collection index floor (matlaa found in front matter + "
+            "reviews; a floor, not a census — see COLLECTION_INDEX_BASELINE): "
+            + ", ".join(
+                f"{name} {matches[name][0]}/{matches[name][1]} "
+                f"(floor {floor})"
+                for name, floor in sorted(index_floors.items())
+            )
+        )
     if position_attributed:
         # Attribution by position, not by the source naming it: these pieces
         # precede every running header the book prints, so they took the

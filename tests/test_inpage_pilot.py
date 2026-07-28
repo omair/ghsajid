@@ -8,9 +8,10 @@ from unittest import mock
 
 from tools.inpage import __main__ as cli
 from tools.inpage.checks import (
-    DECLARED_COLLECTION_COUNTS, KULLIYAT_VOLUMES, TOC_FIRST_LINE_BASELINE,
-    completeness_errors, conservation_errors, declared_collection_count_errors,
-    roundtrip_errors, segmentation_groundtruth_errors, toc_count_errors,
+    COLLECTION_INDEX_BASELINE, DECLARED_COLLECTION_COUNTS, KULLIYAT_VOLUMES,
+    TOC_FIRST_LINE_BASELINE, collection_index_errors, completeness_errors,
+    conservation_errors, declared_collection_count_errors, roundtrip_errors,
+    segmentation_groundtruth_errors, toc_count_errors,
     toc_first_line_baseline_errors,
 )
 from tools.inpage.classify import running_headers, toc_count
@@ -78,6 +79,21 @@ class PilotSegmentation:
     def test_no_verse_line_is_lost(self):
         self.assertEqual(conservation_errors(self.paragraphs, self.segments), [])
 
+    def test_the_collection_index_floor_does_not_run(self):
+        # تجاوز and باغِ نشاط are single published books, not gatherings, so
+        # neither slug is keyed into COLLECTION_INDEX_BASELINE at all — the
+        # same `.get(book_slug, {})` cmd_segment uses for every other
+        # کلیات-only gate.
+        book_slug = "tajawuz" if self.source == TAJAWUZ else "bagh-e-nishat-ki-taraf"
+        self.assertNotIn(book_slug, COLLECTION_INDEX_BASELINE)
+        self.assertEqual(
+            collection_index_errors(
+                self.paragraphs, self.segments,
+                COLLECTION_INDEX_BASELINE.get(book_slug, {}),
+            ),
+            [],
+        )
+
 
 @unittest.skipUnless(TAJAWUZ.exists(), "inp/ sources not present")
 class TestPilotSegmentationTajawuz(PilotSegmentation, unittest.TestCase):
@@ -128,7 +144,13 @@ class TestKulliyatGroundTruth(unittest.TestCase):
                 )
 
     def test_the_partial_index_still_meets_its_floor(self):
-        for slug, (paragraphs, segments) in self.per_book.items():
+        # Only iterates the slugs actually keyed into TOC_FIRST_LINE_BASELINE
+        # (جلد ۲ alone — see that dict's own comment): جلد ۱'s whole-volume
+        # entry was retired in favour of the per-collection floor below, so
+        # asserting it here too would be the overlapping gate the brief warns
+        # against, checking the same regression two different ways.
+        for slug in TOC_FIRST_LINE_BASELINE:
+            paragraphs, segments = self.per_book[slug]
             with self.subTest(slug=slug):
                 self.assertEqual(
                     toc_first_line_baseline_errors(
@@ -136,6 +158,24 @@ class TestKulliyatGroundTruth(unittest.TestCase):
                     ),
                     [],
                 )
+
+    def test_the_collection_index_floors_hold_on_jild_1(self):
+        # جلد ۱'s four uncounted collections (کتابِ صبح، روداد، معاملہ،
+        # آیندہ) each floored against the volume's own front matter +
+        # reviews — the per-collection gate that superseded the old
+        # whole-volume TOC_FIRST_LINE_BASELINE entry for this book.
+        paragraphs, segments = self.per_book["kulliyat-jild-1"]
+        self.assertEqual(
+            collection_index_errors(
+                paragraphs, segments,
+                COLLECTION_INDEX_BASELINE["kulliyat-jild-1"],
+            ),
+            [],
+        )
+
+    def test_the_collection_index_floor_does_not_run_on_jild_2(self):
+        # measured 3-22% per collection — too low to floor, hence no entry.
+        self.assertNotIn("kulliyat-jild-2", COLLECTION_INDEX_BASELINE)
 
     def test_no_verse_line_is_lost(self):
         for slug, (paragraphs, segments) in self.per_book.items():

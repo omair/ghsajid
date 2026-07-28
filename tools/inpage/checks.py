@@ -673,20 +673,26 @@ def segmentation_groundtruth_errors(
     return errors
 
 
-# How many of کلیات جلد ۱'s front-matter verse-length lines matched a poem's
-# matlaa when this was measured, and the same figure for جلد ۲. A FLOOR in the
-# manner of the codepage's 139/169 baseline, and emphatically NOT a census:
-# جلد ۱ prints 136 verse-length lines in its front matter against 570 poems,
-# because its فہرست indexes collections by range and quotes only a partial
-# selection of opening lines. 78 of 570 is an artefact of that partial index,
-# not coverage of the book, and nothing should ever be inferred from the gap.
+# How many of کلیات جلد ۲'s front-matter verse-length lines matched a poem's
+# matlaa when this was measured. A FLOOR in the manner of the codepage's
+# 139/169 baseline, and emphatically NOT a census: the فہرست indexes
+# collections by range and quotes only a partial selection of opening lines,
+# so 14 of 56 is an artefact of that partial index, not coverage of the book,
+# and nothing should ever be inferred from the gap.
 #
-# Kept per book rather than as one number for the same reason gate C is not
-# wired per book: جلد ۲ measures 14 of 56, so a single shared floor would
-# make جلد ۲ fail every run — the guaranteed false alarm this gate exists to
-# avoid being.
+# جلد ۱ used to carry an entry here too (78, measured against the whole
+# volume's 570 poems), but it has been superseded by
+# `collection_index_errors` / `COLLECTION_INDEX_BASELINE`, which measures the
+# same idea PER COLLECTION and against a wider index — front matter plus the
+# reviews pieces, where the فہرست's own text ends up (see toc_count_errors's
+# note on what becomes a `reviews` piece). Keeping both would leave two gates
+# measuring the same regression differently for the same book; the
+# per-collection gate is strictly the better of the two — it names which
+# collection moved, not just that the volume's front matter did — so جلد ۱'s
+# entry here was removed rather than kept alongside it. جلد ۲ has no
+# per-collection gate (see COLLECTION_INDEX_BASELINE), so this whole-volume
+# floor is still what covers it.
 TOC_FIRST_LINE_BASELINE = {
-    "kulliyat-jild-1": 78,
     "kulliyat-jild-2": 14,
 }
 
@@ -732,3 +738,128 @@ def toc_first_line_baseline_errors(
             f"part of the book."
         ]
     return []
+
+
+# کلیات جلد ۱'s فہرست counts two of its six gathered books outright (see
+# DECLARED_COLLECTION_COUNTS: موسم 130, عناصر 100). The other four —
+# کتابِ صبح، روداد، معاملہ، آیندہ — are never counted; instead the volume's
+# front matter (and, since the فہرست's own text is what a `reviews` piece
+# carries forward — see toc_count_errors's note on where the essay's quoted
+# verse ends up — its reviews pieces too) quotes SOME of their poems' opening
+# lines. Measured, matching each poem's matlaa on the letter skeleton against
+# that combined index:
+#
+#     collection     poems   matched   share
+#     کتابِ صبح        92        76      82.6%
+#     روداد           124        98      79.0%
+#     معاملہ           15        12      80.0%
+#     آیندہ           104        75      72.1%
+#
+# These are FLOORS, in the same class as MIN_LINES_MATCHED and
+# TOC_FIRST_LINE_BASELINE, and emphatically NOT a census — 72-82% is the
+# index's own coverage, not this pipeline's, and no future change should ever
+# be judged against reaching 100%. What a floor here catches is different
+# from what it measures: a segmentation change that fuses, splits or
+# mis-attributes poems in one of these four collections moves its matched
+# count even though the SET of poems the index quotes never changes, because
+# the poem whose matlaa used to open its own piece no longer does.
+#
+# موسم and عناصر have no entry here — they are counted outright instead (see
+# DECLARED_COLLECTION_COUNTS) and never indexed by opening line at all (0 of
+# 130 and 0 of 100 measured), so a floor on the index would be a guaranteed
+# false alarm for both. کلیات جلد ۲ has no entry either — measured the same
+# way its six collections index at 3-22%, low and uneven enough that a floor
+# would be a coin flip on every run rather than a regression guard; its own
+# whole-volume gate (TOC_FIRST_LINE_BASELINE) is what still covers it.
+COLLECTION_INDEX_BASELINE: dict[str, dict[str, int]] = {
+    "kulliyat-jild-1": {
+        "کتابِ صبح": 76,
+        "روداد": 98,
+        "معاملہ": 12,
+        "آیندہ": 75,
+    },
+}
+
+
+def collection_index_matches(
+    paragraphs: list[Paragraph], segments: list[Segment], names: set[str],
+) -> dict[str, tuple[int, int]]:
+    """`(matched, total)` poems per named collection against the index.
+
+    The index searched is the volume's front matter (everything before
+    `body_start_index`) plus its `reviews` pieces, since the فہرست's own
+    quoted text is exactly what a `reviews` piece carries forward (see
+    toc_count_errors). A poem matches when its matlaa — the skeleton of its
+    body's first non-blank line — appears anywhere in that combined text.
+
+    Split out of `collection_index_errors` so `cmd_segment` can report every
+    floored collection's count, not only the ones that fall below their
+    floor — the same reason `declared_collection_count_errors` is paired with
+    a "poems per collection" summary line rather than only its gate.
+    """
+    start = body_start_index(paragraphs)
+    front = (skeleton(p.text.strip()) for p in paragraphs[:start])
+    reviews = (
+        skeleton(line)
+        for piece in segments if piece.kind == "reviews"
+        for line in piece.body.split("\n")
+    )
+    haystack = " ".join(line for line in (*front, *reviews) if line)
+
+    by_collection: dict[str, list[Segment]] = collections.defaultdict(list)
+    for piece in segments:
+        if piece.kind in VERSE_KINDS:
+            by_collection[piece.collection].append(piece)
+
+    results = {}
+    for name in names:
+        pieces = by_collection.get(name, [])
+        matched = 0
+        for piece in pieces:
+            lines = [ln for ln in piece.body.split("\n") if ln.strip()]
+            if not lines:
+                continue
+            matlaa = skeleton(lines[0])
+            if matlaa and matlaa in haystack:
+                matched += 1
+        results[name] = (matched, len(pieces))
+    return results
+
+
+def collection_index_errors(
+    paragraphs: list[Paragraph], segments: list[Segment], floors: dict[str, int],
+) -> list[str]:
+    """At least `floors[name]` of a collection's poems must match the index.
+
+    See `collection_index_matches` for what "matches the index" means.
+
+    A regression guard, not a count of anything meaningful — see
+    COLLECTION_INDEX_BASELINE for the measured shares and why 100% is never
+    the right expectation. If a segmentation change fuses, splits or
+    mis-attributes poems inside a floored collection, its matched count moves
+    even though the index itself quotes exactly the same lines it always did.
+
+    `floors` is empty for every book that has none (see
+    COLLECTION_INDEX_BASELINE), in which case this is a no-op — the same
+    shape as `declared_collection_count_errors` being handed `{}`.
+
+    A collection absent from the segmentation entirely reports its full
+    floor as the shortfall rather than passing silently, for the same reason
+    `declared_collection_count_errors` does: a gate that goes quiet when its
+    subject disappears is not a gate.
+    """
+    if not floors:
+        return []
+    matches = collection_index_matches(paragraphs, segments, set(floors))
+    errors = []
+    for name, minimum in floors.items():
+        matched, total = matches[name]
+        if matched < minimum:
+            errors.append(
+                f"collection {name}: only {matched} of {total} poems' "
+                f"opening line matches the volume's index (floor: {minimum}) "
+                f"— matlaa detection or collection attribution may have "
+                f"regressed. This is a floor, not a census: the فہرست indexes "
+                f"only part of the book."
+            )
+    return errors

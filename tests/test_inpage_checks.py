@@ -611,6 +611,109 @@ class TestKulliyatIndexBaseline(unittest.TestCase):
         self.assertIn("census", errors[0])
 
 
+class TestCollectionIndexFloor(unittest.TestCase):
+    """The per-collection floor on جلد ۱'s four uncounted collections.
+
+    کتابِ صبح، روداد، معاملہ، آیندہ declare no count anywhere in the source
+    (unlike موسم and عناصر, see TestDeclaredCollectionCounts), so instead of
+    a count this gate floors how many of a collection's poems have their
+    matlaa findable in the volume's index — front matter plus reviews.
+    """
+
+    FRONT = [
+        vpara("جسم کی خوشبو الگ سے", 80),
+        vpara("چاٹ لیتی ہے یہ فکر و خیال", 80),
+    ]
+    BODY = [
+        vpara("جسم کی خوشبو الگ سے", 73), vpara("میرے دل کا جادو الگ", 1),
+        vpara("چاٹ لیتی ہے یہ فکر", 89), vpara("ہو نہ جائے تو الگ", 1),
+    ]
+
+    def _fixture(self, collection="آیندہ"):
+        paragraphs = self.FRONT + self.BODY
+        segments = [
+            Segment(
+                kind="ghazals", title="t", order=1, collection=collection,
+                body="جسم کی خوشبو الگ سے\nمیرے دل کا جادو الگ",
+            )
+        ]
+        return paragraphs, segments
+
+    def test_silent_when_the_floor_is_met(self):
+        paragraphs, segments = self._fixture()
+        self.assertEqual(
+            checks.collection_index_errors(paragraphs, segments, {"آیندہ": 1}),
+            [],
+        )
+
+    def test_reports_when_a_collection_falls_below_its_floor(self):
+        paragraphs, segments = self._fixture()
+        errors = checks.collection_index_errors(
+            paragraphs, segments, {"آیندہ": 2}
+        )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("آیندہ", errors[0])
+        self.assertIn("1", errors[0])
+        self.assertIn("2", errors[0])
+
+    def test_the_message_denies_being_a_census(self):
+        paragraphs, segments = self._fixture()
+        errors = checks.collection_index_errors(
+            paragraphs, segments, {"آیندہ": 2}
+        )
+        self.assertIn("census", errors[0])
+
+    def test_a_collection_missing_entirely_reports_its_floor_as_the_shortfall(self):
+        # Same shape as declared_collection_count_errors: a subject that
+        # vanishes reports the full shortfall rather than passing silently.
+        paragraphs, segments = self._fixture()
+        errors = checks.collection_index_errors(
+            paragraphs, segments, {"روداد": 3}
+        )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("روداد", errors[0])
+        self.assertIn("0 of 0", errors[0])
+
+    def test_no_floors_asserts_nothing(self):
+        # موسم and عناصر are counted outright instead (declared_collection_
+        # count_errors) and have no entry in COLLECTION_INDEX_BASELINE, so
+        # an empty `floors` — what cmd_segment hands this gate for them —
+        # must be a no-op.
+        paragraphs, segments = self._fixture()
+        self.assertEqual(
+            checks.collection_index_errors(paragraphs, segments, {}), []
+        )
+
+    def test_a_matlaa_found_only_in_a_reviews_piece_still_counts(self):
+        # The فہرست's own text is exactly what a reviews piece carries
+        # forward (see toc_count_errors), so the index searched must include
+        # reviews bodies, not only front matter.
+        paragraphs = [vpara("نہیں کچھ اور بات یہاں", 80)]
+        segments = [
+            Segment(kind="reviews", title="essay", order=1,
+                    body="جسم کی خوشبو الگ سے"),
+            Segment(kind="ghazals", title="t", order=2, collection="آیندہ",
+                    body="جسم کی خوشبو الگ سے\nمیرے دل کا جادو الگ"),
+        ]
+        self.assertEqual(
+            checks.collection_index_errors(paragraphs, segments, {"آیندہ": 1}),
+            [],
+        )
+
+    def test_the_real_floors_are_the_four_measured_collections(self):
+        self.assertEqual(
+            checks.COLLECTION_INDEX_BASELINE,
+            {
+                "kulliyat-jild-1": {
+                    "کتابِ صبح": 76,
+                    "روداد": 98,
+                    "معاملہ": 12,
+                    "آیندہ": 75,
+                },
+            },
+        )
+
+
 class TestDeclaredCollectionCounts(unittest.TestCase):
     """A collection whose poem count the volume's own فہرست declares.
 
