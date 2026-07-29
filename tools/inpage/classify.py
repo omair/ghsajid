@@ -76,6 +76,10 @@ MONTH_YEAR = re.compile(
 # a genuine colophon that happens to end in a parenthetical.
 WHOLLY_BRACKETED = re.compile(r"\(.*\)")
 
+# A tribute the poet set under a ghazal: نذر, then whose. Shared with
+# `segment`, which lifts it out of the poem's body and onto the piece.
+DEDICATION = re.compile(r"^\(\s*نذرِ?\s+.+\)$")
+
 SECTION_HEADINGS = frozenset({
     # سلام belongs with نعت and حمد: the same devotional forms, printed the
     # same way. Without it the word fell inside the نعت run as a line of
@@ -403,7 +407,17 @@ ASIDE_GROUP = UNKNOWN
 
 
 def _enclosable_group(kind: str, text: str) -> str | None:
-    """Which enclosed-run group a paragraph joins, or None if it joins none."""
+    """Which enclosed-run group a paragraph joins, or None if it joins none.
+
+    A dedication never joins one. `(نذرِ سوداؔ)` sits at the foot of a
+    ghazal with verse on both sides, so bridging swept it into the run — and
+    then `pair_shers` paired it with the maqtaa's closing misra, which cut
+    اِعادہ's باغِ سبز مرا ghazal in half and made the tail a poem of its own.
+    Left unbridged it ends the run cleanly and `segment` gives it back to the
+    poem it belongs to.
+    """
+    if DEDICATION.match(text):
+        return None
     if kind == PROSE and text.startswith(OPENING_BRACKET):
         return ASIDE_GROUP
     return kind if kind in MAX_ENCLOSED_RUN else None

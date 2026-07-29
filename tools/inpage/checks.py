@@ -462,6 +462,15 @@ def toc_count_errors(
 # poem by its opening misra in print. See tools/inpage/printed_index.py.
 DECLARED_COLLECTION_COUNTS: dict[str, dict[str, int]] = {
     "kulliyat-jild-1": dict(DECLARED_POEMS),
+    # اِعادہ was also published on its own, in 2017, and that edition is an
+    # InPage 3 document — which keeps its digits, so its فہرست survives the
+    # decode and numbers its poems 1 to 100 with no gaps. No photograph
+    # needed: the count came out of the file.
+    #
+    # The volume's other five collections declare nothing anywhere, in the
+    # کلیات or in the standalone books that exist for two of them (both
+    # InPage 1, digits stripped). Nothing is asserted for those.
+    "kulliyat-jild-2": {"اِعادہ": 100},
 }
 
 

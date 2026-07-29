@@ -436,7 +436,11 @@ JILD_2_COLLECTIONS = {
     "نیند میں چلتے ہوئے": 72,
     "چہار دریا": 51,
     "ہست و  ُبود": 98,
-    "اِعادہ": 103,
+    # 102 against the 100 its own 2017 edition declares — see
+    # DECLARED_COLLECTION_COUNTS. Two known causes remain, both recorded in
+    # the report: the book's dedication page counts as a poem, and one ghazal
+    # on the radif اد is split in two.
+    "اِعادہ": 102,
     "حقیقت": 73,
     "ُگلِ سیمیا": 128,
 }

@@ -620,6 +620,16 @@ def segment(
             continue
 
         if kind == UNKNOWN:
+            # A dedication belongs to the poem above it. `classify` refuses to
+            # bridge one into a verse run — bridging paired `(نذرِ سوداؔ)`
+            # with the maqtaa's closing misra and tore اِعادہ's
+            # باغِ سبز مرا ghazal in two — so it arrives here instead, right
+            # after the piece it was set under.
+            if pieces and DEDICATION.match(para.text.strip()):
+                pieces[-1].dedication = para.text.strip()
+                consumed.add(index)
+                index += 1
+                continue
             # A candidate still pending when a new one arrives never reached
             # a piece — see the docstring's note on dropped_unknowns.
             if title_candidate:
@@ -886,9 +896,7 @@ def _attribution(line: str) -> tuple[str, str] | None:
     return match.group("who").strip(), match.group("book").strip()
 
 
-# A tribute the poet set under a ghazal: نذر, then whose. Bracketed as a
-# whole line, which is how the book sets it apart from the verse above.
-DEDICATION = re.compile(r"^\(\s*نذرِ?\s+.+\)$")
+from .classify import DEDICATION  # noqa: E402  (kept beside its use)
 
 
 def _lift_dedication(

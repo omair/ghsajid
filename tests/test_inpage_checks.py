@@ -914,7 +914,12 @@ class TestDeclaredCollectionCounts(unittest.TestCase):
                     "آیندہ": 104,
                     "معاملہ": 15,
                     "روداد": 124,
-                }
+                },
+                # اِعادہ's own 2017 edition is an InPage 3 document, which
+                # keeps its digits — so its فہرست survives decoding and
+                # numbers its poems 1 to 100. The count came out of the file,
+                # with no photograph needed.
+                "kulliyat-jild-2": {"اِعادہ": 100},
             },
         )
 
