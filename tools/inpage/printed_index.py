@@ -268,6 +268,19 @@ def apply_printed_titles(
     return problems
 
 
+# The titles the printed index gives this book's prose, for `segment` to
+# recognise where an essay begins. موسم's پیش لفظ opens straight after the
+# collection's title page with no separator between them, so the essay region
+# reaches back over the imprint, the dedication and the epigraph couplet and
+# swallows them — and the whole block then reads as a title page, which
+# refused محمد خالد's criticism along with it. Knowing what the essay is
+# CALLED is what tells the two apart.
+PROSE_TITLES_BY_BOOK: dict[str, frozenset[str]] = {
+    "kulliyat-jild-1": frozenset(
+        title for c in VOLUME_1 for title, _, _ in c.prose
+    ),
+}
+
 # Section names to hand `classify` for a given book slug — see
 # `classify.heading_map` for why these are passed per book instead of joining
 # the global SECTION_HEADINGS set. A slug that is absent gets `()`, which

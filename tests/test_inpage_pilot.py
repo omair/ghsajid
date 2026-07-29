@@ -332,12 +332,12 @@ class TestHumareBeechCollection(unittest.TestCase):
 # orphaned byline, end-of-stream scratch) are staged and reported but are not
 # poems, so they are not counted here either.
 JILD_1_COLLECTIONS = (
-    ("موسم", 4, 136, 5, 140),
-    ("عناصر", 141, 100, 145, 244),
-    ("کتابِ صبح", 245, 97, 247, 343),
-    ("آیندہ", 344, 104, 346, 449),
-    ("معاملہ", 450, 15, 452, 466),
-    ("روداد", 467, 124, 469, 592),
+    ("موسم", 4, 136, 6, 141),
+    ("عناصر", 142, 100, 147, 246),
+    ("کتابِ صبح", 247, 97, 249, 345),
+    ("آیندہ", 346, 104, 348, 451),
+    ("معاملہ", 452, 15, 454, 468),
+    ("روداد", 469, 124, 471, 594),
 )
 # روداد reads 123, not the 124 it read while a short line enclosed by two
 # verse lines still classified UNKNOWN and broke the run (see
@@ -611,7 +611,7 @@ class TestKulliyatJild1Collections(unittest.TestCase):
             if not s.collection and s.kind in ("ghazals", "nazms")
         ]
         self.assertEqual(
-            [s.order for s in unattributed], [141, 245, 344, 450, 467]
+            [s.order for s in unattributed], [4, 142, 247, 346, 452, 469]
         )
 
     def test_six_book_records_are_written_under_this_volume(self):

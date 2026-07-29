@@ -20,7 +20,7 @@ from .classify import (
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
 from .flags import BYLINE_FLAG, TITLE_PAGE_FLAG
-from .printed_index import SECTION_NAMES_BY_BOOK
+from .printed_index import PROSE_TITLES_BY_BOOK, SECTION_NAMES_BY_BOOK
 
 # A real ghazal's matlaa is a line of verse, not a paragraph. When the
 # boundary heuristic fails to find a break inside a large prose block (front
@@ -408,6 +408,7 @@ def segment(
     collection_boundaries: list[tuple[int, str]] | None = None,
     collection_boundary_problems: list[str] | None = None,
     sections: Iterable[str] = (),
+    prose_titles: Iterable[str] = (),
 ) -> list[Segment]:
     """Assemble classified paragraphs into pieces.
 
@@ -643,7 +644,7 @@ def segment(
             )
             piece = _add_review(
                 add, paragraphs[start:end], kinds[start:end], index, paragraphs,
-                review_collection,
+                review_collection, frozenset(prose_titles),
             )
             if attributed and position_attributed is not None:
                 position_attributed.append(piece)
@@ -805,6 +806,7 @@ def segment_book(book_slug: str, paragraphs: list[Paragraph], **kwargs):
         paragraphs,
         gathered_collections=GATHERED_COLLECTIONS.get(book_slug, {}),
         sections=SECTION_NAMES_BY_BOOK.get(book_slug, ()),
+        prose_titles=PROSE_TITLES_BY_BOOK.get(book_slug, ()),
         **kwargs,
     )
 
@@ -970,6 +972,7 @@ def _add_review(
     prose_index: int,
     paragraphs: list[Paragraph],
     collection: str,
+    prose_titles: frozenset[str] = frozenset(),
 ) -> Segment:
     """Emit one `reviews` piece for a whole essay region, in source order."""
     # A running header inside the region is page furniture, exactly as it
@@ -992,6 +995,33 @@ def _add_review(
         for p, k in zip(region[:first_prose], region_kinds[:first_prose])
         if k not in (COLOPHON, RUNNING_HEADER)
     ]
+    # موسم's پیش لفظ opens straight after the collection's title page, with
+    # only a separator before the title page and nothing between the two. The
+    # region therefore begins at the title page and the essay's heading lines
+    # arrive with the imprint, the dedication and the epigraph couplet in
+    # front of them — so the block read as a title page, and refusing title
+    # pages refused محمد خالد's criticism with it.
+    #
+    # Where the printed index's name for the essay appears among those
+    # heading lines, everything before it is the title page and is emitted as
+    # its own piece. Only the FIRST such line counts, and only when something
+    # precedes it: every other essay in the book already starts at its own
+    # title, and must take the untouched path.
+    opens_at = next(
+        (
+            i for i, line in enumerate(heading_lines)
+            if i and line.strip() in prose_titles
+        ),
+        0,
+    )
+    if opens_at:
+        title_page = add(
+            "nazms", heading_lines[0][:MAX_TITLE_LENGTH],
+            "\n".join(heading_lines[:opens_at]), [TITLE_PAGE_FLAG], "",
+        )
+        del title_page
+        body_lines = body_lines[opens_at:]
+        heading_lines = heading_lines[opens_at:]
     title, author, resolved = _split_byline(heading_lines)
     if not title:
         title = paragraphs[prose_index].text

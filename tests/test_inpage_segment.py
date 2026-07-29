@@ -3,6 +3,7 @@ from unittest import mock
 
 from tools.inpage import segment as segment_module
 from tools.inpage.classify import COLOPHON, PROSE, VERSE
+from tools.inpage.flags import TITLE_PAGE_FLAG
 from tools.inpage.models import Paragraph, Segment
 from tools.inpage.segment import (
     KULLIYAT_JILD_1_COLLECTIONS, MAX_TITLE_LENGTH, _is_ghazal_shaped,
@@ -1058,3 +1059,84 @@ class TestAnthologySplit(unittest.TestCase):
             segment_module._split_anthology(add, region, [PROSE, VERSE], "")
         )
         self.assertEqual(made, [])
+
+
+class TestTitlePageSplitFromItsForeword(unittest.TestCase):
+    """موسم's پیش لفظ must not be refused along with its title page.
+
+    Five of the six collections open with a title page that forms its own
+    piece, because a verse run precedes the essay region and bounds it.
+    موسم's does not: its title page sits in the front matter with only a
+    separator before it and its foreword immediately after, so the essay
+    region reached back over the imprint, the dedication and the epigraph
+    couplet. The whole block then read as a title page — and refusing title
+    pages refused محمد خالد's criticism with it.
+    """
+
+    HEADINGS = [
+        para("موسم", 40),
+        para("(یکم دسمبر ئ،خالدین،لاہور)", 41),
+        para("مرحوم ماں باپ کے نام", 42),
+        para("گزر گیا ہے وہ کاروانِ بہار، لیکن", 43),
+        para("پیش لفظ", 44),
+        para("محمد خالد", 45),
+    ]
+    ESSAY = para("عہد کوئی بھی ہو، تاجرانہ معاشرت یہ کمال دِکھاتی ہے۔ " * 12, 46)
+
+    def _run(self, prose_titles):
+        made = []
+
+        def add(kind, title, body, flags, collection):
+            piece = Segment(
+                kind=kind, title=title, body=body, order=len(made) + 1,
+                collection=collection, flags=list(flags),
+            )
+            made.append(piece)
+            return piece
+
+        region = [*self.HEADINGS, self.ESSAY]
+        kinds = [VERSE] * len(self.HEADINGS) + [PROSE]
+        segment_module._add_review(
+            add, region, kinds, len(self.HEADINGS), region, "موسم",
+            frozenset(prose_titles),
+        )
+        return made
+
+    def test_the_title_page_becomes_its_own_flagged_piece(self):
+        pieces = self._run({"پیش لفظ"})
+        self.assertEqual(len(pieces), 2)
+        title_page, essay = pieces
+        self.assertIn(TITLE_PAGE_FLAG, title_page.flags)
+        self.assertIn("مرحوم ماں باپ کے نام", title_page.body)
+        self.assertEqual(title_page.collection, "")
+
+    def test_the_foreword_keeps_its_collection_and_loses_the_title_page(self):
+        _, essay = self._run({"پیش لفظ"})
+        self.assertEqual(essay.kind, "reviews")
+        self.assertEqual(essay.collection, "موسم")
+        self.assertNotIn(TITLE_PAGE_FLAG, essay.flags)
+        self.assertNotIn("مرحوم ماں باپ کے نام", essay.body)
+        self.assertIn("تاجرانہ معاشرت", essay.body)
+
+    def test_without_the_printed_title_the_block_stays_whole(self):
+        # Every other essay in the book already starts at its own title and
+        # must take the untouched path — the split only fires where the
+        # printed index's name for the essay appears with something before it.
+        pieces = self._run(set())
+        self.assertEqual(len(pieces), 1)
+        self.assertIn("مرحوم ماں باپ کے نام", pieces[0].body)
+
+    def test_a_title_at_the_very_start_is_not_a_split_point(self):
+        made = []
+
+        def add(kind, title, body, flags, collection):
+            piece = Segment(kind=kind, title=title, body=body, order=1)
+            made.append(piece)
+            return piece
+
+        region = [para("دیباچہ", 40), para("ڈاکٹر نجیب جمال", 41), self.ESSAY]
+        segment_module._add_review(
+            add, region, [VERSE, VERSE, PROSE], 2, region, "معاملہ",
+            frozenset({"دیباچہ"}),
+        )
+        self.assertEqual(len(made), 1)
