@@ -23,6 +23,7 @@ from pathlib import Path
 from .checks import (
     COLLECTION_INDEX_BASELINE,
     GARBAGE_FLAG,
+    UNPUBLISHABLE,
     DECLARED_COLLECTION_COUNTS,
     KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE,
@@ -34,6 +35,7 @@ from .checks import (
     conservation_errors,
     declared_collection_count_errors,
     flag_decode_garbage,
+    flag_first_line_index,
     flag_single_line_pieces,
     lexicon_report,
     roundtrip_errors,
@@ -117,7 +119,9 @@ def book_contents_and_slugs(
     contents: list = []
     resolved: list[str] = []
     for segment, slug in zip(segments, slugs, strict=True):
-        if segment.kind in VERSE_KINDS and GARBAGE_FLAG not in segment.flags:
+        if segment.kind in VERSE_KINDS and not (
+            UNPUBLISHABLE & set(segment.flags)
+        ):
             contents.append(segment)
             resolved.append(slug)
     return contents, resolved
@@ -202,6 +206,7 @@ def cmd_segment(book_slug: str) -> None:
         # title, decode garbage, or a real فرد — is kept and flagged, never
         # guessed at or dropped.
         + flag_single_line_pieces(segments)
+        + flag_first_line_index(segments)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(
             paragraphs, segments, SECTION_NAMES_BY_BOOK.get(book_slug, ())

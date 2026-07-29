@@ -35,7 +35,21 @@ MAX_TITLE_LENGTH = 200
 # run rhyming گویائی/پسپائی/شہنائی (آ vs ا), and باغِ نشاط's ...ہالہ کہاں سے
 # آتا ہے against اُجالا/والا/سنبھالا (word-final ہ vs ا). Each miss silently
 # welded two ghazals into one piece.
-RHYME_FOLD = str.maketrans({"آ": "ا", "ۂ": "ہ", "ۃ": "ہ", "ؤ": "و", "ۓ": "ے"})
+# ق folds to ک for the same reason, and it is the one entry here that is
+# about Urdu rather than about orthography: ق is an Arabic letter Urdu
+# borrowed and pronounces /k/, so حق and دستک rhyme as surely as دستک and
+# ٹھنڈک do. عناصر's ہَوا section is where it mattered — every one of its
+# twenty ghazals ends ہَوا نے, so the radif can never separate them, and the
+# only boundary is the qafia. The poem opening
+# `چراغِ صبح سے چھینا ہے اُس کا حق ہَوا نے` was read as a continuation of the
+# ghazal above it because its ق did not match the ک of the دستک/ٹھنڈک/کالک
+# run, and ہَوا stood at 19 against the بیس غزلیں its فہرست declares.
+# Confirmed against the printed book, which starts the two on different
+# pages. Measured across all four books, this fold moves exactly that one
+# boundary: تجاوز, باغِ نشاط and جلد ۲ are byte-identical without it.
+RHYME_FOLD = str.maketrans(
+    {"آ": "ا", "ۂ": "ہ", "ۃ": "ہ", "ؤ": "و", "ۓ": "ے", "ق": "ک"}
+)
 FINAL_HE = re.compile(r"ہ(?=\s|$)")
 
 # A rhyme is compared as characters, not words: the qafia is a *partial* word

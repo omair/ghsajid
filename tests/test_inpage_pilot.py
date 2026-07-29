@@ -12,8 +12,9 @@ from tools.inpage.checks import (
     COLLECTION_INDEX_BASELINE, DECLARED_COLLECTION_COUNTS, GARBAGE_FLAG,
     KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE, collection_index_errors, completeness_errors,
-    conservation_errors, declared_collection_count_errors,
-    flag_decode_garbage, roundtrip_errors,
+    UNPUBLISHABLE, conservation_errors, declared_collection_count_errors,
+    flag_decode_garbage, flag_first_line_index, flag_single_line_pieces,
+    roundtrip_errors,
     segmentation_groundtruth_errors, toc_count_errors,
     toc_first_line_baseline_errors,
 )
@@ -326,13 +327,17 @@ class TestHumareBeechCollection(unittest.TestCase):
 # opens with a حمد, listed as its own index entry. A declared غزلیں count is
 # not a collection's poem total, and reading it as one made a six-poem
 # shortfall look like an exact pass. See tools/inpage/printed_index.py.
+# Counts are the printed فہرست's, and the pieces are counted the way the site
+# publishes them — pieces flagged UNPUBLISHABLE (the volume's own index, an
+# orphaned byline, end-of-stream scratch) are staged and reported but are not
+# poems, so they are not counted here either.
 JILD_1_COLLECTIONS = (
     ("موسم", 4, 136, 5, 140),
-    ("عناصر", 141, 100, 143, 243),
-    ("کتابِ صبح", 244, 97, 246, 342),
-    ("آیندہ", 343, 104, 345, 448),
-    ("معاملہ", 449, 15, 451, 465),
-    ("روداد", 466, 125, 468, 593),
+    ("عناصر", 141, 100, 145, 244),
+    ("کتابِ صبح", 245, 97, 247, 343),
+    ("آیندہ", 344, 104, 346, 449),
+    ("معاملہ", 450, 15, 452, 466),
+    ("روداد", 467, 124, 469, 592),
 )
 # روداد reads 123, not the 124 it read while a short line enclosed by two
 # verse lines still classified UNKNOWN and broke the run (see
@@ -437,9 +442,30 @@ JILD_2_COLLECTIONS = {
 }
 
 
+def _flag_all(segments):
+    """Run the flag checks cmd_segment runs, in its order.
+
+    A test that flags only for garbage measures a different archive from the
+    one the pipeline stages — the count gate, the book records and `promote`
+    all read every UNPUBLISHABLE flag, not one of them.
+    """
+    flag_decode_garbage(segments, corpus_lexicon())
+    flag_single_line_pieces(segments)
+    flag_first_line_index(segments)
+
+
 def _distribution(segments):
+    """Poems per collection, the way the site counts them.
+
+    Pieces flagged UNPUBLISHABLE are staged and named in the report but never
+    reach content/, so counting them here would measure something the archive
+    does not publish — and did: عناصر's orphaned byline was counted as its
+    hundredth poem, which hid a ghazal genuinely missing from ہَوا.
+    """
     return collections.Counter(
-        s.collection for s in segments if s.kind in ("ghazals", "nazms")
+        s.collection for s in segments
+        if s.kind in ("ghazals", "nazms")
+        and not (UNPUBLISHABLE & set(s.flags))
     )
 
 
@@ -453,6 +479,7 @@ class TestKulliyatJild1Collections(unittest.TestCase):
     def setUpClass(cls):
         paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
         cls.segments = segment_book("kulliyat-jild-1", paragraphs)
+        _flag_all(cls.segments)
         cls.boundaries, cls.problems = attribute_gathered_collections(
             cls.segments, KULLIYAT_JILD_1_COLLECTIONS
         )
@@ -496,7 +523,7 @@ class TestKulliyatJild1Collections(unittest.TestCase):
         paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
         header_only = _distribution(segment(paragraphs))
         self.assertEqual(header_only["موسم"], 0)
-        self.assertEqual(header_only["عناصر"], 242)
+        self.assertEqual(header_only["عناصر"], 243)
 
     def test_every_title_page_is_found_and_named(self):
         self.assertEqual(
@@ -511,7 +538,9 @@ class TestKulliyatJild1Collections(unittest.TestCase):
             with self.subTest(collection=name):
                 orders = [
                     s.order for s in self.segments
-                    if s.collection == name and s.kind in ("ghazals", "nazms")
+                    if s.collection == name
+                    and s.kind in ("ghazals", "nazms")
+                    and not (UNPUBLISHABLE & set(s.flags))
                 ]
                 self.assertEqual(counts[name], poems)
                 self.assertEqual((orders[0], orders[-1]), (first, last))
@@ -530,7 +559,7 @@ class TestKulliyatJild1Collections(unittest.TestCase):
         # flags — the same order cmd_segment uses. جلد ۱'s stream ends in
         # nine lines of scratch that segment as a `nazm` inside روداد, and
         # counting it made روداد read 125 against a declared 124.
-        flag_decode_garbage(self.segments, corpus_lexicon())
+        _flag_all(self.segments)
         self.assertEqual(
             declared_collection_count_errors(
                 self.segments, DECLARED_COLLECTION_COUNTS["kulliyat-jild-1"]
@@ -548,32 +577,32 @@ class TestKulliyatJild1Collections(unittest.TestCase):
         errors = declared_collection_count_errors(
             unflagged, DECLARED_COLLECTION_COUNTS["kulliyat-jild-1"]
         )
-        self.assertEqual(len(errors), 1, errors)
-        self.assertIn("روداد", errors[0])
-        self.assertIn("+1", errors[0])
+        self.assertEqual(len(errors), 2, errors)
+        joined = " ".join(errors)
+        # روداد gains the scratch nazm, عناصر the orphaned byline — and the
+        # byline is the one that mattered, because counting it made عناصر
+        # read a complete 100 while ہَوا was a ghazal short.
+        self.assertIn("روداد", joined)
+        self.assertIn("عناصر", joined)
 
     def test_every_section_of_موسم_and_عناصر_matches_the_printed_fihrist(self):
         # The finer gate the printed index made possible. A total can pass
         # while a poem is missing from one section and duplicated in another —
         # these eleven cannot.
         #
-        # عناصر's ہَوا is the one exception, and it is a KIND error rather
-        # than a count one: عناصر totals exactly its declared 100, but one of
-        # ہَوا's poems segments as a `nazm` and so carries no section at all.
-        # Named explicitly so that fixing it fails here and the exemption
-        # comes out, instead of quietly widening to cover a real regression.
+        # All eleven, with no exemption. ہَوا held 19 until the rhyme
+        # comparison learned that ق and ک rhyme in Urdu — its twentieth ghazal
+        # opens حق ہَوا نے against a دستک/ٹھنڈک/کالک run, and was read as a
+        # continuation of the poem above it.
         counts = collections.Counter(
             (s.collection, s.section) for s in self.segments
             if s.kind in ("ghazals", "nazms")
         )
         for collection in PRINTED_VOLUME_1:
             for section in collection.sections:
-                expected = section.poems
-                if (collection.name, section.name) == ("عناصر", "ہَوا"):
-                    expected -= 1
                 with self.subTest(section=section.name):
                     self.assertEqual(
-                        counts[(collection.name, section.name)], expected
+                        counts[(collection.name, section.name)], section.poems
                     )
 
     def test_only_the_title_pages_are_left_unattributed(self):
@@ -582,7 +611,7 @@ class TestKulliyatJild1Collections(unittest.TestCase):
             if not s.collection and s.kind in ("ghazals", "nazms")
         ]
         self.assertEqual(
-            [s.order for s in unattributed], [141, 244, 343, 449, 466]
+            [s.order for s in unattributed], [141, 245, 344, 450, 467]
         )
 
     def test_six_book_records_are_written_under_this_volume(self):
@@ -762,12 +791,12 @@ class TestSegmentDirectCallMatchesThePipeline(unittest.TestCase):
         """Poems per book record, from calling `segment()` directly."""
         paragraphs = decode(read_text_stream(KULLIYAT[book_slug]))
         segments = segment_book(book_slug, paragraphs)
-        # The pipeline flags decode garbage before it builds book contents,
-        # and `book_contents_and_slugs` leaves a flagged piece out — so a
-        # direct call that skips the flagging really does describe a
+        # The pipeline runs every flag check before it builds book contents,
+        # and `book_contents_and_slugs` leaves an UNPUBLISHABLE piece out — so
+        # a direct call that skips the flagging really does describe a
         # different book. Exactly the divergence this class exists to catch,
         # in its newest form.
-        flag_decode_garbage(segments, corpus_lexicon())
+        _flag_all(segments)
         records, problems = resolve_book_records(segments, book_slug)
         self.assertEqual(problems, [])
         return {
@@ -775,7 +804,7 @@ class TestSegmentDirectCallMatchesThePipeline(unittest.TestCase):
                 1 for s in segments
                 if s.kind in ("ghazals", "nazms")
                 and s.collection == collection
-                and GARBAGE_FLAG not in s.flags
+                and not (UNPUBLISHABLE & set(s.flags))
             )
             for collection, slug in records
         }

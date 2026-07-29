@@ -239,6 +239,99 @@ def flag_decode_garbage(segments: list[Segment], lexicon: set[str]) -> list[str]
 # The flag a piece carries when its whole body is one surviving line.
 SINGLE_LINE_FLAG = "single-line-piece"
 
+# The flag a `reviews` piece carries when it is the book's own index rather
+# than criticism.
+INDEX_FLAG = "first-line-index"
+
+# Flags that bar a piece from the site. Each marks real text the source
+# contains — so segmentation keeps it and the report names it — that is
+# neither a poem nor criticism. `promote` refuses them, and they are left out
+# of the poem counts and of a book record's contents.
+#
+# SINGLE_LINE_FLAG is here because a poem cannot be one line: a فرد is a whole
+# sher, two misras. A single surviving line is a byline, a stray title, or
+# half a sher whose partner was lost. عناصر's ابتدائیہ byline — the one line
+# `ڈاکٹر مرزا حامد بیگ` — was staged as a نظم AND counted as one of عناصر's
+# hundred poems, which is what hid a real ghazal missing from ہَوا.
+UNPUBLISHABLE = frozenset({GARBAGE_FLAG, INDEX_FLAG, SINGLE_LINE_FLAG})
+
+# How much of a piece must be poem openings before it is an index. کلیات
+# جلد ۱ opens with its partial first-line فہرست, and the classifier reads it
+# as three critical essays because it is prose-shaped and sits before the
+# body: they would have published to /tabsira as three essays made of
+# disconnected opening misras.
+#
+# Measured over every `reviews` piece in the four books, as the share of a
+# piece's lines that open a poem of the same book:
+#
+#     the three index blocks           68%, 73%, 87%
+#     highest real essay               8%   (کتابِ صبح's foreword, which
+#                                            quotes the poet at length)
+#     every other real essay           0-6%
+#     تجاوز, باغِ نشاط                 no piece over the floor at all
+#
+# 0.5 sits in the middle of a 60-point gap. What it really asks is whether a
+# piece LISTS the book's poems or DISCUSSES them — a critic quotes a few
+# openings, an index is nothing but openings.
+INDEX_LINE_SHARE = 0.5
+
+# How much of an opening line must match before it counts as the same poem.
+# Long enough that two poems opening on the same few words are not confused,
+# short enough to survive the index setting a line differently from the body
+# (بیکرانی in the index against بے کرانی in the poem, a space either way).
+INDEX_MATCH_PREFIX = 24
+
+
+def flag_first_line_index(segments: list[Segment]) -> list[str]:
+    """Flag a `reviews` piece that is really the book's own فہرست.
+
+    Kept and flagged, never dropped, on the same rule as
+    `flag_decode_garbage`: the index is real text the source contains, and a
+    decoder that discards what it cannot place is how poems go missing. What
+    changes is that `promote` will not publish it — an index of first lines
+    is not criticism, and /tabsira is for criticism.
+    """
+    matlaas = {
+        skeleton(piece.body.split("\n")[0])
+        for piece in segments
+        if piece.kind in VERSE_KINDS and piece.body.strip()
+    }
+    openings = {
+        line[:INDEX_MATCH_PREFIX]
+        for line in matlaas
+        if len(line) >= INDEX_MATCH_PREFIX
+    }
+    flagged: list[tuple[Segment, float]] = []
+    for segment in segments:
+        if segment.kind != "reviews":
+            continue
+        lines = [line for line in segment.body.splitlines() if line.strip()]
+        if not lines:
+            continue
+        listed = sum(
+            1 for line in lines
+            if skeleton(line)[:INDEX_MATCH_PREFIX] in openings
+        )
+        share = listed / len(lines)
+        if share <= INDEX_LINE_SHARE:
+            continue
+        if INDEX_FLAG not in segment.flags:
+            segment.flags.append(INDEX_FLAG)
+        flagged.append((segment, share))
+    if not flagged:
+        return []
+    listed_out = "; ".join(
+        f"order {segment.order} — {share:.0%} of its lines open a poem of "
+        f"this book"
+        for segment, share in flagged
+    )
+    return [
+        f"{len(flagged)} piece(s) flagged {INDEX_FLAG}: over "
+        f"{INDEX_LINE_SHARE:.0%} of their lines are the opening line of a poem "
+        f"in this same book, so they are the فہرست rather than criticism. Kept "
+        f"in staging, not published: {listed_out}"
+    ]
+
 
 def flag_single_line_pieces(segments: list[Segment]) -> list[str]:
     """Flag a poem whose entire body is one non-empty line, and name it.
@@ -399,19 +492,20 @@ def declared_collection_count_errors(
     broken boundary detector would take, and a gate that goes quiet when its
     subject disappears is not a gate.
 
-    A piece already flagged as decode garbage is not counted. The فہرست
-    declares poems, and end-of-stream scratch is not one: کلیات جلد ۱ ends in
-    nine lines of it, which segmented as a `nazm` inside روداد and made that
-    collection read 125 against a declared 124. Excluding it is only honest
-    because the flag is loud — `flag_decode_garbage` names every piece it
-    marks in the same gate output a reviewer signs, so nothing is quietly
-    written out of the count. Run this AFTER `flag_decode_garbage`, or the
-    flags are not yet on the pieces.
+    A piece flagged UNPUBLISHABLE is not counted. The فہرست declares poems,
+    and none of what those flags mark is one: کلیات جلد ۱ ends in nine lines
+    of scratch that segmented as a `nazm` inside روداد, and عناصر's ابتدائیہ
+    byline became a one-line `nazm` that was counted as its hundredth poem —
+    which hid a ghazal genuinely missing from ہَوا. Excluding them is only
+    honest because the flags are loud: each check names every piece it marks
+    in the same gate output a reviewer signs, so nothing is quietly written
+    out of the count. Run this AFTER the flag checks, or the flags are not
+    yet on the pieces.
     """
     counts = collections.Counter(
         piece.collection
         for piece in segments
-        if piece.kind in VERSE_KINDS and GARBAGE_FLAG not in piece.flags
+        if piece.kind in VERSE_KINDS and not (UNPUBLISHABLE & set(piece.flags))
     )
     errors = []
     for name, expected in declared.items():

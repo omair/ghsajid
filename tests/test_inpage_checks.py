@@ -229,6 +229,67 @@ class TestDecodeGarbageFlag(unittest.TestCase):
         self.assertLessEqual(share, checks.GARBAGE_FRAGMENT_SHARE)
         self.assertEqual(checks.flag_decode_garbage([piece], self.LEXICON), [])
 
+    def test_an_index_is_not_criticism(self):
+        # کلیات جلد ۱ opens with its own partial first-line فہرست, which the
+        # classifier reads as three critical essays. An index LISTS the
+        # book's poems; a critic DISCUSSES them, quoting a few at most.
+        poems = [
+            Segment(
+                kind="ghazals",
+                title="غزل",
+                body=f"دل جان شام چراغ خواب آنکھ {n}\nدوسرا مصرع یہاں ہے {n}",
+                order=n,
+            )
+            for n in range(1, 6)
+        ]
+        index = Segment(
+            kind="reviews",
+            title="فہرست",
+            body="\n".join(p.body.split("\n")[0] for p in poems),
+            order=99,
+        )
+        report = checks.flag_first_line_index(poems + [index])
+        self.assertIn(checks.INDEX_FLAG, index.flags)
+        self.assertEqual(len(report), 1)
+        self.assertIn("order 99", report[0])
+        for poem in poems:
+            self.assertEqual(poem.flags, [])
+
+    def test_an_essay_quoting_a_poem_is_not_an_index(self):
+        # The highest real essay in the corpus quotes the poet in 8% of its
+        # lines. A quotation or two must never read as an index.
+        poems = [
+            Segment(kind="ghazals", title="غزل",
+                    body=f"مطلع کی سطر یہاں {n}\nدوسری سطر {n}", order=n)
+            for n in range(1, 6)
+        ]
+        essay = Segment(
+            kind="reviews", title="تنقید", order=99,
+            body="\n".join(
+                [poems[0].body.split("\n")[0]]
+                + [f"یہ تنقیدی جملہ ہے جو شاعری پر بات کرتا ہے {i}" for i in range(9)]
+            ),
+        )
+        self.assertEqual(checks.flag_first_line_index(poems + [essay]), [])
+        self.assertEqual(essay.flags, [])
+
+    def test_the_index_share_clears_both_measured_extremes(self):
+        # Measured over every reviews piece in the four books: the three
+        # index blocks sit at 68-87%, the most quotation-heavy real essay at
+        # 8%. The floor must have room on both sides.
+        self.assertLess(checks.INDEX_LINE_SHARE, 0.68 / 1.2)
+        self.assertGreater(checks.INDEX_LINE_SHARE, 0.08 * 2)
+
+    def test_unpublishable_names_every_flag_that_bars_the_site(self):
+        self.assertEqual(
+            checks.UNPUBLISHABLE,
+            frozenset({
+                checks.GARBAGE_FLAG,
+                checks.INDEX_FLAG,
+                checks.SINGLE_LINE_FLAG,
+            }),
+        )
+
     def test_the_fragment_ceiling_clears_both_measured_extremes(self):
         # Measured over all 1,308 staged pieces of the four books: the
         # highest real poem sits at 0.48 and the scratch this catches at

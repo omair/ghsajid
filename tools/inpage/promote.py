@@ -10,7 +10,7 @@ import json
 import shutil
 from pathlib import Path
 
-from .checks import GARBAGE_FLAG
+from .checks import UNPUBLISHABLE
 from .emit import resolve_book_records, resolve_slugs
 from .groundtruth import skeleton
 from .models import Segment
@@ -79,17 +79,20 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
     written: list[Path] = []
     problems: list[str] = []
     for segment, slug in zip(segments, slugs):
-        # A piece the pipeline itself called not-text is never published.
-        # `flag_decode_garbage` marks end-of-stream scratch that segments into
-        # a piece like any other — کلیات جلد ۱ ends in nine lines of it that
-        # became a `nazm`, and باغِ نشاط in 190 characters that became a
-        # `reviews` — and both kinds are promotable, so an approved report
-        # would have put them on the site as a poem and an essay. Reported,
-        # not silent: the report already names every flagged piece, and this
-        # says which of them promotion refused.
-        if GARBAGE_FLAG in segment.flags:
+        # Three things a piece can be that are not a poem and not criticism,
+        # each detected by its own check and each confirmed by hand against
+        # the printed book before being refused here:
+        #
+        #   the volume's own first-line فہرست, read as three essays
+        #   an essay's byline, orphaned into a one-line "poem"
+        #   end-of-stream scratch, read as a poem and as an essay
+        #
+        # All three stay in staging, flagged and named in the report. What
+        # they may not do is reach the site.
+        refused = [flag for flag in UNPUBLISHABLE if flag in segment.flags]
+        if refused:
             problems.append(
-                f"flagged {GARBAGE_FLAG}, not published: order "
+                f"flagged {', '.join(refused)}, not published: order "
                 f"{segment.order} ({segment.kind}) {slug!r}"
             )
             continue
