@@ -5,6 +5,11 @@ D0CF11E0A1B11AE1) — the same container legacy .doc used. The document text
 lives in a stream named InPage100; two fixed 5 MB PPicts streams hold picture
 scratch and account for almost all of a file's size.
 
+InPage 3 uses the same container and a stream named InPage300, but nothing
+else is shared: its text is plain UTF-16LE where InPage 1's is byte pairs
+against a codepage. `format_of` tells them apart so a caller can pick a
+decoder; `inpage3` handles the newer one.
+
 This module uses `olefile` rather than parsing the container by hand. The book
 files are 11-14 MB, which pushes the FAT past the 109 sectors addressable from
 the header into DIFAT chaining — correctness risk with no upside. olefile is
@@ -16,6 +21,28 @@ from pathlib import Path
 import olefile
 
 TEXT_STREAM = "InPage100"
+INPAGE3_STREAM = "InPage300"
+
+
+def format_of(path: Path) -> str:
+    """`"inpage1"`, `"inpage3"`, or raise.
+
+    Which stream a file carries IS its format — the two versions share the
+    container and nothing above it.
+    """
+    if not olefile.isOleFile(str(path)):
+        raise MissingStreamError(f"{path} is not an OLE2 compound file")
+    ole = olefile.OleFileIO(str(path))
+    try:
+        if ole.exists(TEXT_STREAM):
+            return "inpage1"
+        if ole.exists(INPAGE3_STREAM):
+            return "inpage3"
+    finally:
+        ole.close()
+    raise MissingStreamError(
+        f"{path} carries neither {TEXT_STREAM} nor {INPAGE3_STREAM}"
+    )
 
 
 class MissingStreamError(Exception):

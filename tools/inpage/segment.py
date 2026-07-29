@@ -409,6 +409,7 @@ def segment(
     collection_boundary_problems: list[str] | None = None,
     sections: Iterable[str] = (),
     prose_titles: Iterable[str] = (),
+    explicit_pieces: bool = False,
 ) -> list[Segment]:
     """Assemble classified paragraphs into pieces.
 
@@ -675,7 +676,18 @@ def segment(
             # the ghazal's own کے لیے radif for عناصر's dedication and lost
             # the attribution of all 100 of its poems) and welded the نظم
             # جادو onto نیند میں چلتے ہوئے's title poem.
-            while index < len(paragraphs) and kinds[index] == VERSE:
+            # `explicit_pieces` is set for a source that marks its own piece
+            # boundaries — InPage 3 sets an ornament between poems, and a
+            # blank line between shers. There a running header really is
+            # nothing but page furniture: اِعادہ prints an …… ornament at the
+            # top of all 104 of its pages, and breaking the run at each one
+            # cut a ghazal at every page turn. In an InPage 1 کلیات the same
+            # kind is evidence of a collection's title page, which is exactly
+            # where a piece must end — so the two must not share a rule.
+            while index < len(paragraphs) and (
+                kinds[index] == VERSE
+                or (explicit_pieces and kinds[index] == RUNNING_HEADER)
+            ):
                 index += 1
             # `run` and `run_collections` are built in the same pass, kept
             # parallel: `split_ghazals` returns groups of shers, each 1 or 2
@@ -683,9 +695,17 @@ def segment(
             # lockstep with those groups is what lets each piece take the
             # collection where its OWN first line sits, rather than the
             # collection in force once the whole run has been scanned.
-            run: list[Paragraph] = list(paragraphs[start:index])
-            run_collections: list[str] = collections[start:index]
-            run_indices: list[int] = list(range(start, index))
+            # Built in one pass so all three stay parallel. Only under
+            # `explicit_pieces` can the span hold anything but VERSE — a page
+            # ornament read through — and dropping those from `run` alone
+            # would shift the cursor that walks the other two, giving each
+            # piece the collection and source position of a different piece.
+            keep = [
+                i for i in range(start, index) if kinds[i] == VERSE
+            ]
+            run: list[Paragraph] = [paragraphs[i] for i in keep]
+            run_collections: list[str] = [collections[i] for i in keep]
+            run_indices: list[int] = keep
             if _is_ghazal_shaped(run):
                 # A ghazal is titled by its matlaa, never by title_candidate —
                 # a pending candidate here is moot and reaches no piece.
@@ -700,7 +720,13 @@ def segment(
                 # has to read that bare second misra as a candidate matlaa,
                 # the ghazal's rhyme is measured with it included, and the
                 # line-count cursor below counts it as the two lines it is.
-                for group in split_ghazals(merge_orphan_shers(pair_shers(run))):
+                # Where the source states its own boundaries there is nothing
+                # for rhyme to find: اِعادہ's ornament already says where each
+                # of its hundred poems ends, and splitting again on rhyme took
+                # it to 204.
+                shers = merge_orphan_shers(pair_shers(run))
+                groups = [shers] if explicit_pieces else split_ghazals(shers)
+                for group in groups:
                     # `group_end` counts the lines the SOURCE holds, so it is
                     # taken before the dedication is lifted out of the body —
                     # the cursor walks the run's own lines and must not skip

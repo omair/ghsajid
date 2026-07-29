@@ -16,6 +16,9 @@ tools/bin/
 
 # InPage source files -- inputs to tools/inpage/, like scans. Large binaries.
 inp/
+# Source material Omair supplies: InPage files and cover artwork. Large
+# binaries, and his originals — the archive is built FROM them, not of them.
+in/
 
 # Ingestion staging -- rebuildable output, reviewed before it reaches content/
 out/
