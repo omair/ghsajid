@@ -825,6 +825,105 @@ def _essay_region(
     return start, end
 
 
+# A critic's opinion closes with its own attribution: the critic's name and,
+# in the book's own ‘‘…’’ quotes, which collection they are writing about.
+# `(مرزا حامد بیگ- ‘‘موسم’’)`, `(شمس الرحمن فاروقی- ‘‘آیندہ’’)`.
+ATTRIBUTION = re.compile(r"^\(\s*(?P<who>[^‘]+?)\s*[-–—]?\s*‘‘(?P<book>[^’]+)’’\s*\)$")
+
+# How many attributions make a region an anthology rather than an essay that
+# happens to cite someone. Measured across all four books: exactly one region
+# carries any at all — کلیات جلد ۱'s آرا, with ten — and every other essay in
+# every book has zero. Three is well clear of both.
+ANTHOLOGY_MIN_ATTRIBUTIONS = 3
+
+
+def _attribution(line: str) -> tuple[str, str] | None:
+    """`(critic, book)` if this line closes a critic's opinion."""
+    match = ATTRIBUTION.match(line.strip())
+    if not match:
+        return None
+    return match.group("who").strip(), match.group("book").strip()
+
+
+def _split_anthology(
+    add,
+    region: list[Paragraph],
+    region_kinds: list[str],
+    collection: str,
+) -> list[Segment] | None:
+    """Emit one piece per critic where a region is an anthology of opinions.
+
+    کلیات جلد ۱ closes with آرا — ten critics on the poet's books, each
+    opinion signed with its author and the collection it discusses. Staged as
+    one region it is a single unbrowsable page; split, each is a piece by a
+    named critic about a named book, which is what the archive's `reviews`
+    collection is for. شمس الرحمن فاروقی on آیندہ becomes something you can
+    link to.
+
+    Returns None where the region is an ordinary essay, so every other essay
+    in every book takes the untouched path.
+
+    Whatever follows the last attribution is emitted as its own piece: in this
+    book that is تعارف, the poet's life and bibliography, which the printed
+    index lists as a separate section and which no attribution closes.
+    """
+    # Walked with the kinds alongside, not over the flattened body, so each
+    # date attaches to the opinion it actually closes. Two of the ten carry
+    # no date at all; taking the colophons in order and handing them out one
+    # per piece put every date on the wrong critic.
+    kept = [
+        (para.text, kind)
+        for para, kind in zip(region, region_kinds)
+        if kind != RUNNING_HEADER
+    ]
+    if sum(1 for text, _ in kept if _attribution(text)) < ANTHOLOGY_MIN_ATTRIBUTIONS:
+        return None
+
+    pieces: list[Segment] = []
+    lines: list[str] = []
+    dates: list[str] = []
+
+    def flush(title: str, author: str, book: str) -> None:
+        body = [line for line in lines if line.strip()]
+        if not body:
+            return
+        piece = add(
+            "reviews", (title or body[0])[:MAX_TITLE_LENGTH],
+            "\n\n".join(body), [], collection,
+        )
+        piece.reviewed_author = author
+        piece.reviewed_book = book
+        piece.written_note = " ".join(dates)
+        pieces.append(piece)
+
+    for text, kind in kept:
+        if kind == COLOPHON:
+            # A critic dates their opinion BELOW their signature, so a date
+            # arriving with nothing yet gathered closes the piece just
+            # emitted rather than opening the next one. Getting this wrong
+            # shifted every date by one critic — and two of the ten are
+            # undated, so the error did not even stay a constant offset.
+            if not lines and pieces:
+                pieces[-1].written_note = (
+                    f"{pieces[-1].written_note} {text}".strip()
+                )
+            else:
+                dates.append(text)
+            continue
+        signed = _attribution(text)
+        # The attribution itself stays in the body: it is how the book prints
+        # the piece, and dropping a critic's signature would be editing them.
+        lines.append(text)
+        if signed:
+            flush(signed[0], signed[0], signed[1])
+            lines, dates = [], []
+
+    # Whatever follows the last attribution: in this book تعارف, which the
+    # printed index lists as its own section and which no attribution closes.
+    flush("", "", "")
+    return pieces
+
+
 def _add_review(
     add,
     region: list[Paragraph],
@@ -842,6 +941,10 @@ def _add_review(
         p.text for p, k in zip(region, region_kinds)
         if k not in (COLOPHON, RUNNING_HEADER)
     ]
+    anthology = _split_anthology(add, region, region_kinds, collection)
+    if anthology:
+        return anthology[0]
+
     first_prose = next(
         (i for i, k in enumerate(region_kinds) if k == PROSE), 0
     )

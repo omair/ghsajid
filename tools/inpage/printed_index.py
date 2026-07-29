@@ -65,6 +65,12 @@ class PrintedCollection:
     devotional_pages: tuple[int, ...] = ()
     # Prose the collection carries: forewords, afterwords. Not poems.
     prose: tuple[tuple[str, str, int], ...] = ()
+    # Prose entries the index lists as ONE section but which stage as many
+    # pieces. روداد's آرا is ten critics' opinions, each signed and dated;
+    # the index counts the section, the archive wants the critics. Named here
+    # so `apply_printed_titles` does not try to match one printed entry
+    # against ten staged pieces and report a disagreement that is not one.
+    anthologies: tuple[str, ...] = ()
 
     @property
     def poems(self) -> int:
@@ -172,6 +178,7 @@ RODAD = PrintedCollection(
         ("آرا", "", 901),
         ("تعارف", "", 911),
     ),
+    anthologies=("آرا",),
     devotional_pages=(739, 740, 741, 742),   # نعت, نعت, نعت, سلام
     poem_pages=(
         745, 746, 747, 748, 749, 750, 751, 752, 753, 754,
@@ -224,21 +231,29 @@ def apply_printed_titles(
         return []
     problems: list[str] = []
     for collection in VOLUME_1:
+        # An anthology's pieces name themselves — the critic signs each one —
+        # so they are neither matched nor counted here, and neither is the
+        # single index entry that covers them all.
         staged = [
             piece for piece in segments
             if piece.kind == "reviews"
             and piece.collection == collection.name
             and not (unpublishable & set(piece.flags))
+            and not piece.reviewed_author
         ]
-        if len(staged) != len(collection.prose):
+        expected = [
+            entry for entry in collection.prose
+            if entry[0] not in collection.anthologies
+        ]
+        if len(staged) != len(expected):
             problems.append(
                 f"{collection.name}: the printed فہرست lists "
-                f"{len(collection.prose)} prose piece(s) "
-                f"({', '.join(title for title, _, _ in collection.prose)}) but "
+                f"{len(expected)} unattributed prose piece(s) "
+                f"({', '.join(title for title, _, _ in expected)}) but "
                 f"{len(staged)} were staged — left untitled, name them by hand"
             )
             continue
-        for piece, (title, author, _) in zip(staged, collection.prose):
+        for piece, (title, author, _) in zip(staged, expected):
             piece.title = title
             piece.reviewed_author = author
     return problems

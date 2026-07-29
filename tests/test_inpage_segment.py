@@ -1,6 +1,8 @@
 import unittest
 from unittest import mock
 
+from tools.inpage import segment as segment_module
+from tools.inpage.classify import COLOPHON, PROSE, VERSE
 from tools.inpage.models import Paragraph, Segment
 from tools.inpage.segment import (
     KULLIYAT_JILD_1_COLLECTIONS, MAX_TITLE_LENGTH, _is_ghazal_shaped,
@@ -960,3 +962,99 @@ class TestAttributeGatheredCollections(unittest.TestCase):
         for name, evidence in KULLIYAT_JILD_1_COLLECTIONS.values():
             with self.subTest(name=name):
                 self.assertTrue(evidence.strip(), "every name carries evidence")
+
+
+class TestAnthologySplit(unittest.TestCase):
+    """آرا is ten critics, not one page.
+
+    کلیات جلد ۱ closes with a section of opinions, each signed with its
+    author and the collection it discusses, most of them dated. Staged as one
+    region it is a single unbrowsable page; split, each is a piece by a named
+    critic about a named book.
+    """
+
+    def _region(self):
+        return [
+            para("پہلی رائے کا متن یہاں ہے اور یہ کافی لمبا ہے۔ " * 4, 300),
+            para("(مرزا حامد بیگ- ‘‘موسم’’)", 11),
+            para("دوسری رائے کا متن یہاں ہے اور یہ بھی لمبا ہے۔ " * 4, 300),
+            para("(شمس الرحمن فاروقی- ‘‘آیندہ’’)", 27),
+            para("۱۵مئی ۲۰۰۳ئ", 11),
+            para("تیسری رائے کا متن یہاں ہے اور یہ بھی لمبا ہے۔ " * 4, 300),
+            para("(صابر ظفر- ‘‘رُوداد’’)", 22),
+            para("۱۴مارچ ۲۰۱۰ئ", 12),
+            para("غلام حسین ساجد یکم دسمبر کو پیدا ہوئے۔ " * 6, 299),
+        ]
+
+    def _kinds(self):
+        return [
+            PROSE, VERSE, PROSE, VERSE, COLOPHON,
+            PROSE, VERSE, COLOPHON, PROSE,
+        ]
+
+    def _split(self):
+        made = []
+
+        def add(kind, title, body, flags, collection):
+            piece = Segment(
+                kind=kind, title=title, body=body, order=len(made) + 1,
+                collection=collection, flags=list(flags),
+            )
+            made.append(piece)
+            return piece
+
+        result = segment_module._split_anthology(
+            add, self._region(), self._kinds(), "روداد"
+        )
+        return result
+
+    def test_each_critic_becomes_a_piece_named_for_them(self):
+        pieces = self._split()
+        self.assertIsNotNone(pieces)
+        self.assertEqual(
+            [p.reviewed_author for p in pieces[:3]],
+            ["مرزا حامد بیگ", "شمس الرحمن فاروقی", "صابر ظفر"],
+        )
+        self.assertEqual(
+            [p.reviewed_book for p in pieces[:3]],
+            ["موسم", "آیندہ", "رُوداد"],
+        )
+        self.assertEqual(pieces[0].title, "مرزا حامد بیگ")
+
+    def test_a_date_below_a_signature_belongs_to_the_piece_above_it(self):
+        # A critic dates their opinion under their name, so a date arriving
+        # after the signature closes the piece just emitted. Taking the dates
+        # in order and handing them out one per piece shifted every one — and
+        # two of the real ten are undated, so it was not even a fixed offset.
+        pieces = self._split()
+        self.assertEqual(pieces[0].written_note, "")
+        self.assertEqual(pieces[1].written_note, "۱۵مئی ۲۰۰۳ئ")
+        self.assertEqual(pieces[2].written_note, "۱۴مارچ ۲۰۱۰ئ")
+
+    def test_what_follows_the_last_signature_is_its_own_piece(self):
+        # تعارف: the poet's life and bibliography, which the printed index
+        # lists as its own section and which no attribution closes.
+        pieces = self._split()
+        self.assertEqual(len(pieces), 4)
+        self.assertEqual(pieces[3].reviewed_author, "")
+        self.assertIn("یکم دسمبر", pieces[3].body)
+
+    def test_the_signature_is_kept_in_the_body(self):
+        # Dropping a critic's own signature would be editing them.
+        self.assertIn("(مرزا حامد بیگ- ‘‘موسم’’)", self._split()[0].body)
+
+    def test_an_ordinary_essay_is_untouched(self):
+        region = [
+            para("ایک عام تنقیدی مضمون کا متن یہاں ہے۔ " * 8, 300),
+            para("(مرزا حامد بیگ- ‘‘موسم’’)", 11),
+        ]
+        made = []
+
+        def add(*a, **k):
+            made.append(a)
+            return Segment(kind="reviews", title="x", body="y", order=1)
+
+        self.assertIsNone(
+            segment_module._split_anthology(add, region, [PROSE, VERSE], "")
+        )
+        self.assertEqual(made, [])

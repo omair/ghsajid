@@ -164,8 +164,12 @@ def cmd_segment(book_slug: str) -> None:
     # A review's `reviewed_book` is the book it prefaces. Set here rather than
     # in segmentation, which only ever sees one book's paragraphs and has no
     # way to know its title.
+    # Only where segmentation could not already tell. An anthology's opinions
+    # each name the collection they are about — شمس الرحمن فاروقی on آیندہ,
+    # not on the volume that gathers it — and overwriting that with the
+    # volume's title threw away the one thing those pieces know.
     for piece in segments:
-        if piece.kind == "reviews":
+        if piece.kind == "reviews" and not piece.reviewed_book:
             piece.reviewed_book = TITLES[book_slug]
 
     # Gate C (ground truth) is a property of the codepage, not of any one
