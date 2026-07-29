@@ -200,6 +200,50 @@ BY_NAME: dict[str, PrintedCollection] = {c.name: c for c in VOLUME_1}
 
 YEARS: dict[str, int] = {c.name: c.year for c in VOLUME_1}
 
+def apply_printed_titles(
+    segments: list, book_slug: str, unpublishable: frozenset[str]
+) -> list[str]:
+    """Title each essay from the printed فہرست, and name its author.
+
+    Segmentation cannot title an essay. It has only the block's own lines to
+    work from, and those give it the author's name (کتابِ صبح's foreword is
+    staged as "سیّد عامر سہیل"), the collection's name (موسم's as "موسم"), or
+    a stray fragment of the page before it (عناصر's اعتذار as "(محمدخالد)",
+    which is موسم's foreword's byline). The printed index names all eight,
+    with their authors, and is the only thing here that actually knows.
+
+    Matched by POSITION within a collection, never by guessing at the text:
+    the index lists a collection's prose in the order the book prints it, and
+    segmentation emits pieces in that same order. Where the two disagree on
+    how many there are, nothing is renamed and the disagreement is reported —
+    a wrong byline on a critic's essay is worse than none.
+
+    Pieces flagged unpublishable are skipped: they are not the book's prose.
+    """
+    if book_slug not in ("kulliyat-jild-1",):
+        return []
+    problems: list[str] = []
+    for collection in VOLUME_1:
+        staged = [
+            piece for piece in segments
+            if piece.kind == "reviews"
+            and piece.collection == collection.name
+            and not (unpublishable & set(piece.flags))
+        ]
+        if len(staged) != len(collection.prose):
+            problems.append(
+                f"{collection.name}: the printed فہرست lists "
+                f"{len(collection.prose)} prose piece(s) "
+                f"({', '.join(title for title, _, _ in collection.prose)}) but "
+                f"{len(staged)} were staged — left untitled, name them by hand"
+            )
+            continue
+        for piece, (title, author, _) in zip(staged, collection.prose):
+            piece.title = title
+            piece.reviewed_author = author
+    return problems
+
+
 # Section names to hand `classify` for a given book slug — see
 # `classify.heading_map` for why these are passed per book instead of joining
 # the global SECTION_HEADINGS set. A slug that is absent gets `()`, which

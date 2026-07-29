@@ -55,6 +55,7 @@ from .groundtruth import (
 )
 from .models import Book, Segment
 from .ole import read_text_stream
+from .printed_index import apply_printed_titles
 from .promote import promote
 from .report import render, restamp_report
 from .segment import GATHERED_COLLECTIONS, SECTION_NAMES_BY_BOOK, segment_book
@@ -207,6 +208,8 @@ def cmd_segment(book_slug: str) -> None:
         # guessed at or dropped.
         + flag_single_line_pieces(segments)
         + flag_first_line_index(segments)
+        # After the flags: an unpublishable piece is not the book's prose.
+        + apply_printed_titles(segments, book_slug, UNPUBLISHABLE)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(
             paragraphs, segments, SECTION_NAMES_BY_BOOK.get(book_slug, ())

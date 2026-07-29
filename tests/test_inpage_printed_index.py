@@ -11,6 +11,7 @@ from tools.inpage.printed_index import (
     RODAD,
     VOLUME_1,
     YEARS,
+    apply_printed_titles,
 )
 
 
@@ -126,6 +127,69 @@ class TestDeclaredCounts(unittest.TestCase):
         # apparatus; counting them would inflate every gate by a few.
         self.assertEqual(MUAMLA.poems, len(MUAMLA.poem_pages))
         self.assertEqual(len(RODAD.prose), 3)
+
+
+class TestPrintedTitles(unittest.TestCase):
+    """The printed فہرست names the essays; segmentation cannot."""
+
+    class _Piece:
+        def __init__(self, kind, collection, title="", flags=None):
+            self.kind = kind
+            self.collection = collection
+            self.title = title
+            self.reviewed_author = ""
+            self.flags = flags or []
+
+    NONE = frozenset()
+
+    def test_titles_and_authors_come_from_the_index(self):
+        pieces = [
+            self._Piece("reviews", "عناصر", "(محمدخالد)"),
+            self._Piece("reviews", "عناصر", "یہ ویں صدی کی نویں دھائی ہے"),
+            self._Piece("ghazals", "عناصر", "کوئی غزل"),
+        ]
+        problems = apply_printed_titles(pieces, "kulliyat-jild-1", self.NONE)
+        # Only عناصر is supplied here, so every other collection reports its
+        # prose as unstaged. What matters is that عناصر does not.
+        self.assertEqual([p for p in problems if p.startswith("عناصر")], [])
+        self.assertEqual(pieces[0].title, "اعتذار")
+        self.assertEqual(pieces[0].reviewed_author, "غلام حسین ساجد")
+        self.assertEqual(pieces[1].title, "ابتدائیہ")
+        self.assertEqual(pieces[1].reviewed_author, "ڈاکٹر مرزا حامد بیگ")
+        # a poem is never renamed
+        self.assertEqual(pieces[2].title, "کوئی غزل")
+
+    def test_a_disagreement_renames_nothing_and_is_reported(self):
+        # One staged where the book prints two. A wrong byline on a critic's
+        # essay is worse than none, so neither is touched.
+        pieces = [self._Piece("reviews", "عناصر", "کچھ اور")]
+        problems = apply_printed_titles(pieces, "kulliyat-jild-1", self.NONE)
+        reported = [p for p in problems if p.startswith("عناصر")]
+        self.assertEqual(len(reported), 1)
+        self.assertIn("اعتذار", reported[0])
+        self.assertIn("ابتدائیہ", reported[0])
+        self.assertEqual(pieces[0].title, "کچھ اور")
+        self.assertEqual(pieces[0].reviewed_author, "")
+
+    def test_an_unpublishable_piece_is_not_the_books_prose(self):
+        # The volume's index is staged as a `reviews` piece too; counting it
+        # here would shift every essay's title by one.
+        pieces = [
+            self._Piece("reviews", "عناصر", "فہرست", flags=["first-line-index"]),
+            self._Piece("reviews", "عناصر", "(محمدخالد)"),
+            self._Piece("reviews", "عناصر", "یہ ویں صدی"),
+        ]
+        problems = apply_printed_titles(
+            pieces, "kulliyat-jild-1", frozenset({"first-line-index"})
+        )
+        self.assertEqual([p for p in problems if p.startswith("عناصر")], [])
+        self.assertEqual(pieces[0].title, "فہرست")
+        self.assertEqual(pieces[1].title, "اعتذار")
+
+    def test_another_book_is_untouched(self):
+        pieces = [self._Piece("reviews", "", "تجاوز کا دیباچہ")]
+        self.assertEqual(apply_printed_titles(pieces, "tajawuz", self.NONE), [])
+        self.assertEqual(pieces[0].title, "تجاوز کا دیباچہ")
 
 
 if __name__ == "__main__":
