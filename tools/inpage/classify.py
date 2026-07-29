@@ -77,7 +77,11 @@ MONTH_YEAR = re.compile(
 WHOLLY_BRACKETED = re.compile(r"\(.*\)")
 
 SECTION_HEADINGS = frozenset({
-    "غزلیں", "نعت", "نظمیں", "حمد", "قطعات", "رباعیات",
+    # سلام belongs with نعت and حمد: the same devotional forms, printed the
+    # same way. Without it the word fell inside the نعت run as a line of
+    # verse, so the نعت that precedes it ended on a phantom half-sher and
+    # the سلام itself lost its own section.
+    "غزلیں", "نعت", "نظمیں", "حمد", "سلام", "قطعات", "رباعیات",
     "نیند میں چلتے ہوئے", "چہار دریا", "ہست و بود", "اعادہ", "حقیقت", "گل سیمیا",
 })
 

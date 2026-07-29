@@ -46,7 +46,11 @@ class Segment:
     # inside a book: کلیات جلد ۲ gathers six separately-published collections,
     # and a poem belongs to one of them regardless of its form.
     collection: str = ""
-    written_note: str = ""          # date and place, verbatim from the source
+    written_note: str = ""        # date and place, verbatim from the source
+    # A tribute the poet set under a ghazal — (نذرِ غالب), (نذرِ فراقؔ),
+    # (نذرِ دردؔ). Bracketed and short, so it paired as a misra and left the
+    # poem ending on a half sher that no missing line could explain.
+    dedication: str = ""
     # Only for `reviews`: who wrote the criticism, and which book it prefaces.
     # `reviewed_book` is filled by the CLI, which is what knows a book's title;
     # segmentation only ever sees one book's paragraphs.

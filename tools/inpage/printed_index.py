@@ -27,6 +27,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from .flags import BYLINE_FLAG
+
 
 @dataclass(frozen=True)
 class Section:
@@ -256,6 +258,13 @@ def apply_printed_titles(
         for piece, (title, author, _) in zip(staged, expected):
             piece.title = title
             piece.reviewed_author = author
+            # The byline flag asks a human to confirm an attribution
+            # segmentation had to guess at from an honorific. The printed
+            # index is better evidence than the guess, so the question is
+            # answered and the flag comes down — leaving it up would send a
+            # reviewer to check something already settled by the book.
+            if BYLINE_FLAG in piece.flags:
+                piece.flags.remove(BYLINE_FLAG)
     return problems
 
 

@@ -601,10 +601,15 @@ def conservation_errors(
     in_source = collections.Counter(
         para.text.strip() for para in paragraphs if para.text.strip()
     )
+    # A piece's body is not the only place its text survives. A dedication —
+    # (نذرِ غالب) and the two like it — is lifted out of the verse so the
+    # ghazal does not end on a phantom half sher, and the site prints it under
+    # the poem. Counting only bodies reported those three lines as lost, which
+    # is the one thing this gate exists to mean.
     emitted = collections.Counter(
         line.strip()
         for segment in segments
-        for line in segment.body.split("\n")
+        for line in [*segment.body.split("\n"), segment.dedication]
         if line.strip()
     )
     errors = []

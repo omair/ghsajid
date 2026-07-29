@@ -19,7 +19,7 @@ from .classify import (
 )
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
-from .flags import TITLE_PAGE_FLAG
+from .flags import BYLINE_FLAG, TITLE_PAGE_FLAG
 from .printed_index import SECTION_NAMES_BY_BOOK
 
 # A real ghazal's matlaa is a line of verse, not a paragraph. When the
@@ -105,7 +105,6 @@ REGION_CLOSE_KINDS = (SEPARATOR, HEADING, RUNNING_HEADER)
 # the title, and raises the flag for a human, because attributing the wrong
 # person to criticism of the poet's work is not a mistake worth risking.
 HONORIFICS = ("ڈاکٹر", "پروفیسر", "سیّد", "سید", "پیر", "مولانا")
-BYLINE_FLAG = "confirm-review-byline"
 
 
 def _split_byline(heading_lines: list[str]) -> tuple[str, str, bool]:
@@ -701,10 +700,15 @@ def segment(
                 # the ghazal's rhyme is measured with it included, and the
                 # line-count cursor below counts it as the two lines it is.
                 for group in split_ghazals(merge_orphan_shers(pair_shers(run))):
-                    flags = ["half-sher"] if any(not s[1] for s in group) else []
+                    # `group_end` counts the lines the SOURCE holds, so it is
+                    # taken before the dedication is lifted out of the body —
+                    # the cursor walks the run's own lines and must not skip
+                    # one just because it stopped being verse.
                     group_end = cursor + sum(
                         2 if second else 1 for _, second in group
                     )
+                    group, dedication = _lift_dedication(group)
+                    flags = ["half-sher"] if any(not s[1] for s in group) else []
                     # Backfilled from the book's first header only when
                     # THIS group's own last line still precedes it — a
                     # group whose text runs past the header keeps its
@@ -718,6 +722,7 @@ def segment(
                         "ghazals", group[0][0], _ghazal_body(group), flags,
                         piece_collection,
                     )
+                    piece.dedication = dedication
                     if attributed and position_attributed is not None:
                         position_attributed.append(piece)
             else:
@@ -851,6 +856,32 @@ def _attribution(line: str) -> tuple[str, str] | None:
     if not match:
         return None
     return match.group("who").strip(), match.group("book").strip()
+
+
+# A tribute the poet set under a ghazal: نذر, then whose. Bracketed as a
+# whole line, which is how the book sets it apart from the verse above.
+DEDICATION = re.compile(r"^\(\s*نذرِ?\s+.+\)$")
+
+
+def _lift_dedication(
+    group: list[tuple[str, str]]
+) -> tuple[list[tuple[str, str]], str]:
+    """Take a trailing `(نذرِ …)` out of a ghazal's body and return it.
+
+    Three ghazals in جلد ۱ close on a tribute — to غالب, to فراقؔ, to دردؔ.
+    Each is a short bracketed line, so `pair_shers` had nothing to pair it
+    with and the poem ended on a half sher: a flag saying a misra was
+    missing, when nothing was missing at all.
+
+    Lifted rather than dropped. The poet chose to dedicate these three, and
+    the site shows it under the poem the way it already shows the colophon.
+    """
+    if len(group) < 2:
+        return group, ""
+    first, second = group[-1]
+    if second or not DEDICATION.match(first.strip()):
+        return group, ""
+    return group[:-1], first.strip()
 
 
 def _split_anthology(

@@ -30,6 +30,14 @@ INDEX_FLAG = "first-line-index"
 # poet's parents, presented as poems of موسم.
 TITLE_PAGE_FLAG = "collection-title-page"
 
+# Not a bar on publishing — a question. Segmentation has to tell an essay's
+# title from its author's name, and does it by honorific (a critic is
+# introduced as ڈاکٹر or پروفیسر, a title is not). Where that cannot decide,
+# the piece carries this so a human confirms the attribution rather than the
+# wrong person being credited with criticism of the poet's work. The printed
+# فہرست answers the question outright, and clears it.
+BYLINE_FLAG = "confirm-review-byline"
+
 UNPUBLISHABLE = frozenset(
     {GARBAGE_FLAG, SINGLE_LINE_FLAG, INDEX_FLAG, TITLE_PAGE_FLAG}
 )

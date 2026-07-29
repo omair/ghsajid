@@ -35,6 +35,8 @@ export const collections = {
   ghazals: piece("ghazals", {
     // Date and place of composition, preserved verbatim from the source.
     written_note: z.string().optional(),
+    // A tribute set under the poem — (نذرِ غالب), (نذرِ فراقؔ), (نذرِ دردؔ).
+    dedication: z.string().optional(),
   }),
   nazms: piece("nazms"),
   memoir: piece("memoir", { part: z.number().int().positive() }),
