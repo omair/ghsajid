@@ -19,6 +19,9 @@ from .classify import (
 )
 from .codepage import decode_byte, encode_char, unmapped
 from .decode import all_codes
+from .flags import (
+    GARBAGE_FLAG, INDEX_FLAG, SINGLE_LINE_FLAG, UNPUBLISHABLE,
+)
 from .groundtruth import (
     EXPECTED_LINES_TOTAL,
     KNOWN_GHAZALS,
@@ -116,9 +119,6 @@ def lexicon_report(paragraphs: list[Paragraph], lexicon: set[str]) -> list[str]:
     )
     return [f"{word} ({n}x)" for word, n in counts.most_common(50)]
 
-
-# The flag a piece carries when its text is not believable as text at all.
-GARBAGE_FLAG = "likely-decode-garbage"
 
 # The share of a piece's words that must already appear in the archive's own
 # lexicon (`groundtruth.corpus_lexicon`) before the piece reads as language.
@@ -236,24 +236,10 @@ def flag_decode_garbage(segments: list[Segment], lexicon: set[str]) -> list[str]
     ]
 
 
-# The flag a piece carries when its whole body is one surviving line.
-SINGLE_LINE_FLAG = "single-line-piece"
 
 # The flag a `reviews` piece carries when it is the book's own index rather
 # than criticism.
-INDEX_FLAG = "first-line-index"
 
-# Flags that bar a piece from the site. Each marks real text the source
-# contains — so segmentation keeps it and the report names it — that is
-# neither a poem nor criticism. `promote` refuses them, and they are left out
-# of the poem counts and of a book record's contents.
-#
-# SINGLE_LINE_FLAG is here because a poem cannot be one line: a فرد is a whole
-# sher, two misras. A single surviving line is a byline, a stray title, or
-# half a sher whose partner was lost. عناصر's ابتدائیہ byline — the one line
-# `ڈاکٹر مرزا حامد بیگ` — was staged as a نظم AND counted as one of عناصر's
-# hundred poems, which is what hid a real ghazal missing from ہَوا.
-UNPUBLISHABLE = frozenset({GARBAGE_FLAG, INDEX_FLAG, SINGLE_LINE_FLAG})
 
 # How much of a piece must be poem openings before it is an index. کلیات
 # جلد ۱ opens with its partial first-line فہرست, and the classifier reads it

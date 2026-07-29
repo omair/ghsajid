@@ -10,8 +10,8 @@ import json
 import shutil
 from pathlib import Path
 
-from .checks import UNPUBLISHABLE
 from .emit import resolve_book_records, resolve_slugs
+from .flags import UNPUBLISHABLE
 from .groundtruth import skeleton
 from .models import Segment
 from .report import is_approved
@@ -79,16 +79,11 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
     written: list[Path] = []
     problems: list[str] = []
     for segment, slug in zip(segments, slugs):
-        # Three things a piece can be that are not a poem and not criticism,
-        # each detected by its own check and each confirmed by hand against
-        # the printed book before being refused here:
-        #
-        #   the volume's own first-line فہرست, read as three essays
-        #   an essay's byline, orphaned into a one-line "poem"
-        #   end-of-stream scratch, read as a poem and as an essay
-        #
-        # All three stay in staging, flagged and named in the report. What
-        # they may not do is reach the site.
+        # What a piece can be that is neither a poem nor criticism — see
+        # `flags.UNPUBLISHABLE`. Each was confirmed by hand against the
+        # printed book before being refused here. All of them stay in
+        # staging, flagged and named in the report; what they may not do is
+        # reach the site.
         refused = [flag for flag in UNPUBLISHABLE if flag in segment.flags]
         if refused:
             problems.append(

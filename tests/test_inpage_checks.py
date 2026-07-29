@@ -1,6 +1,6 @@
 import unittest
 
-from tools.inpage import checks
+from tools.inpage import checks, flags
 from tools.inpage.checks import conservation_errors, toc_count_errors
 from tools.inpage.groundtruth import (
     EXPECTED_LINES_TOTAL, KNOWN_GHAZALS, MIN_LINES_MATCHED,
@@ -281,12 +281,16 @@ class TestDecodeGarbageFlag(unittest.TestCase):
         self.assertGreater(checks.INDEX_LINE_SHARE, 0.08 * 2)
 
     def test_unpublishable_names_every_flag_that_bars_the_site(self):
+        # Named exhaustively rather than by iteration: adding a flag to this
+        # set stops pieces reaching the site, which is not a change that
+        # should be able to happen without a test noticing.
         self.assertEqual(
-            checks.UNPUBLISHABLE,
+            flags.UNPUBLISHABLE,
             frozenset({
-                checks.GARBAGE_FLAG,
-                checks.INDEX_FLAG,
-                checks.SINGLE_LINE_FLAG,
+                flags.GARBAGE_FLAG,
+                flags.INDEX_FLAG,
+                flags.SINGLE_LINE_FLAG,
+                flags.TITLE_PAGE_FLAG,
             }),
         )
 

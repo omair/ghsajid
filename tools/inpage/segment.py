@@ -19,6 +19,7 @@ from .classify import (
 )
 from .groundtruth import skeleton
 from .models import Paragraph, Segment
+from .flags import TITLE_PAGE_FLAG
 from .printed_index import SECTION_NAMES_BY_BOOK
 
 # A real ghazal's matlaa is a line of verse, not a paragraph. When the
@@ -352,6 +353,13 @@ def attribute_gathered_collections(
         current = by_dedication.get(skeleton(dedication), "")
         boundaries.append((piece.order, current))
         piece.collection = ""
+        # A title page is not a poem of the book it opens. Left unattributed
+        # it already stays out of every contents list and every count, but it
+        # is still a `nazms` or `ghazals` piece and would publish as poetry:
+        # an imprint, a dedication to the poet's parents, and an epigraph
+        # couplet, presented as three poems of موسم.
+        if TITLE_PAGE_FLAG not in piece.flags:
+            piece.flags.append(TITLE_PAGE_FLAG)
         if not current:
             problems.append(
                 f"the title page at order {piece.order} (dedication "

@@ -22,8 +22,6 @@ from pathlib import Path
 
 from .checks import (
     COLLECTION_INDEX_BASELINE,
-    GARBAGE_FLAG,
-    UNPUBLISHABLE,
     DECLARED_COLLECTION_COUNTS,
     KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE,
@@ -47,6 +45,7 @@ from .checks import (
 from .classify import running_headers
 from .decode import decode, excluded_report
 from .emit import resolve_book_records, write_book, write_segments
+from .flags import UNPUBLISHABLE
 from .groundtruth import (
     EXPECTED_LINES_TOTAL,
     MIN_LINES_MATCHED,
@@ -111,11 +110,12 @@ def book_contents_and_slugs(
     are filtered together, in lockstep, so the pairing (segment, its
     resolved slug) stays positional and in book order.
 
-    A piece flagged as decode garbage is left out too, and must be, because
-    `promote` refuses to publish one: listing it here would put a row in the
-    book record pointing at a file that never reaches content/, which is
-    exactly the dead reference `resolveBook` throws on. کلیات جلد ۱ ends in
-    nine lines of scratch that segment as a `nazm` inside روداد.
+    A piece flagged `flags.UNPUBLISHABLE` is left out too, and must be,
+    because `promote` refuses to publish one: listing it here would put a row
+    in the book record pointing at a file that never reaches content/, which
+    is exactly the dead reference `resolveBook` throws on. جلد ۱ has six such
+    rows waiting to happen — five collection title pages and the scratch at
+    the end of the stream.
     """
     contents: list = []
     resolved: list[str] = []
