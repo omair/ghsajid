@@ -9,7 +9,8 @@ from unittest import mock
 
 from tools.inpage import __main__ as cli
 from tools.inpage.checks import (
-    COLLECTION_INDEX_BASELINE, DECLARED_COLLECTION_COUNTS, KULLIYAT_VOLUMES,
+    COLLECTION_INDEX_BASELINE, DECLARED_COLLECTION_COUNTS, GARBAGE_FLAG,
+    KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE, collection_index_errors, completeness_errors,
     conservation_errors, declared_collection_count_errors,
     flag_decode_garbage, roundtrip_errors,
@@ -760,15 +761,21 @@ class TestSegmentDirectCallMatchesThePipeline(unittest.TestCase):
     def _direct_book_record_counts(self, book_slug: str) -> dict[str, int]:
         """Poems per book record, from calling `segment()` directly."""
         paragraphs = decode(read_text_stream(KULLIYAT[book_slug]))
-        segments = segment_book(
-            book_slug, paragraphs,
-        )
+        segments = segment_book(book_slug, paragraphs)
+        # The pipeline flags decode garbage before it builds book contents,
+        # and `book_contents_and_slugs` leaves a flagged piece out — so a
+        # direct call that skips the flagging really does describe a
+        # different book. Exactly the divergence this class exists to catch,
+        # in its newest form.
+        flag_decode_garbage(segments, corpus_lexicon())
         records, problems = resolve_book_records(segments, book_slug)
         self.assertEqual(problems, [])
         return {
             slug: sum(
                 1 for s in segments
-                if s.kind in ("ghazals", "nazms") and s.collection == collection
+                if s.kind in ("ghazals", "nazms")
+                and s.collection == collection
+                and GARBAGE_FLAG not in s.flags
             )
             for collection, slug in records
         }

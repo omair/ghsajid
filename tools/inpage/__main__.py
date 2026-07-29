@@ -22,6 +22,7 @@ from pathlib import Path
 
 from .checks import (
     COLLECTION_INDEX_BASELINE,
+    GARBAGE_FLAG,
     DECLARED_COLLECTION_COUNTS,
     KULLIYAT_VOLUMES,
     TOC_FIRST_LINE_BASELINE,
@@ -106,11 +107,17 @@ def book_contents_and_slugs(
     report; they are simply not book-contents rows. `segments` and `slugs`
     are filtered together, in lockstep, so the pairing (segment, its
     resolved slug) stays positional and in book order.
+
+    A piece flagged as decode garbage is left out too, and must be, because
+    `promote` refuses to publish one: listing it here would put a row in the
+    book record pointing at a file that never reaches content/, which is
+    exactly the dead reference `resolveBook` throws on. کلیات جلد ۱ ends in
+    nine lines of scratch that segment as a `nazm` inside روداد.
     """
     contents: list = []
     resolved: list[str] = []
     for segment, slug in zip(segments, slugs, strict=True):
-        if segment.kind in VERSE_KINDS:
+        if segment.kind in VERSE_KINDS and GARBAGE_FLAG not in segment.flags:
             contents.append(segment)
             resolved.append(slug)
     return contents, resolved

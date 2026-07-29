@@ -10,6 +10,7 @@ import json
 import shutil
 from pathlib import Path
 
+from .checks import GARBAGE_FLAG
 from .emit import resolve_book_records, resolve_slugs
 from .groundtruth import skeleton
 from .models import Segment
@@ -78,6 +79,20 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
     written: list[Path] = []
     problems: list[str] = []
     for segment, slug in zip(segments, slugs):
+        # A piece the pipeline itself called not-text is never published.
+        # `flag_decode_garbage` marks end-of-stream scratch that segments into
+        # a piece like any other — کلیات جلد ۱ ends in nine lines of it that
+        # became a `nazm`, and باغِ نشاط in 190 characters that became a
+        # `reviews` — and both kinds are promotable, so an approved report
+        # would have put them on the site as a poem and an essay. Reported,
+        # not silent: the report already names every flagged piece, and this
+        # says which of them promotion refused.
+        if GARBAGE_FLAG in segment.flags:
+            problems.append(
+                f"flagged {GARBAGE_FLAG}, not published: order "
+                f"{segment.order} ({segment.kind}) {slug!r}"
+            )
+            continue
         if segment.kind not in KNOWN_KINDS:
             problems.append(
                 f"unexpected kind {segment.kind!r} for piece {slug!r}, skipped "
