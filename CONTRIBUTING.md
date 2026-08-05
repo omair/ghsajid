@@ -64,6 +64,12 @@ isn't listed there, the build will reject it.
   inventing one. Omission is honest; a wrong `published` year is not.
 - **Keep the slug stable.** The `slug` is the piece's URL. Changing it breaks
   every existing link, so leave it alone once a piece is published.
+- **List a new memoir chapter in its container.** The درس گاہ index lists every
+  file in `content/memoir/`, but the individual chapter pages are generated only
+  from the ordered `contents` in `content/containers/dars-gah.yaml`. Add a new
+  chapter's reference there too, in reading order — otherwise the index links to
+  a chapter that 404s. Adding a ghazal or nazm to a book works the same way: add
+  it to that book's `contents` in `content/books/`.
 
 ## Running the site locally
 
