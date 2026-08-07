@@ -161,13 +161,14 @@ informally with `restamp` ("a human hand-corrected after approval").
 - **backend:** `github`, repo `omair/ghsajid`, with
   `publish_mode: editorial_workflow` so every save opens a pull request (see the
   review model below).
-- **collections — start small:** **`ghazals`** first (the largest, 782 pieces),
-  plus **`nazms`** since it is the identical verse shape and nearly free to add.
-  `reviews`, `memoir`, and `videos` come in a later pass once he's comfortable.
-  `books` and `containers` are never exposed; they are kept in sync
-  automatically (see couplings).
-- **fields — kept minimal:** title and the verse body, `dir: rtl`. That is all
-  he needs to add or fix a poem.
+- **collections — all existing categories:** every category he'd contribute to
+  is visible — **`ghazals`, `nazms`, `reviews`, `memoir`, `videos`** — matching
+  what a reader sees in the site nav. `books` and `containers` are never
+  exposed; they are kept in sync automatically (see couplings).
+- **fields — as simple as each category allows,** `dir: rtl` where the value is
+  Urdu: the verse categories (`ghazals`, `nazms`) show title + body; `reviews`
+  add the reviewed book/author; `videos` need their source + link fields
+  (`source`, `url`, `video_id`). No tags on any of them.
 - **hidden field** `origin` defaulted to `human` on create, so every save he
   makes is correctly stamped.
 - **tags are not in his editor.** He won't be tagging; that stays your job.
@@ -242,14 +243,14 @@ Because these are generated, the studio does not expose them for hand-editing.
   checkout of `ghsajid` and switch it to open PRs. Delete `tools/`, `tests/`
   from `ghsajid`; update both READMEs.
 
-- **Phase 2 — stand up the studio (repo C), ghazals only.**
-  Create `ghsajid-studio` with Sveltia config for **`ghazals`** (then `nazms`),
-  title + RTL body fields, no tags, `origin: human` default, and
-  `editorial_workflow`. Add the GitHub OAuth app + token Worker. Deploy to
-  `studio.ghsajid.com`. Add the **auto-merge Action** on `ghsajid` (modified =
-  live, created/deleted = review). Verify a text edit auto-merges and a new
-  ghazal waits for you to tag and approve. Add the remaining collections once
-  he's comfortable.
+- **Phase 2 — stand up the studio (repo C).**
+  Create `ghsajid-studio` with Sveltia config for all editable categories
+  (`ghazals`, `nazms`, `reviews`, `memoir`, `videos`), per-category RTL fields,
+  no tags, `origin: human` default, and `editorial_workflow`. Add the GitHub
+  OAuth app + token Worker. Deploy to `studio.ghsajid.com`. Add the
+  **auto-merge Action** on `ghsajid` (modified = live, created/deleted =
+  review). Verify a text edit auto-merges and a new piece waits for you to tag
+  and approve.
 
 - **Phase 3 — close the loops.**
   Build step to regenerate `dars-gah.yaml` and book `contents` from the pieces;
