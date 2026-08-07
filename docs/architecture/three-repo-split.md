@@ -106,7 +106,9 @@ deploy, and access wholly apart from the public site, and lets him have a stable
                         Pull request  ──────────────►  ghsajid (repo B)
                                                           content/
                                                             ▲
-                                  commits origin: human     │
+                          PR, origin: human                 │
+                          (auto-merge if a safe edit,        │
+                           else held for review)            │
                         ghsajid-studio (repo C)  ───────────┘
                         (Sveltia, your father edits)
                                   │
@@ -156,24 +158,44 @@ informally with `restamp` ("a human hand-corrected after approval").
 
 `config.yml` sketch — one collection per content type, mirroring the zod schema:
 
-- **backend:** `github`, repo `omair/ghsajid`, branch `main` (or a `studio`
-  branch that opens PRs, if you'd rather review his edits before they go live).
-- **collections:** `ghazals`, `nazms`, `reviews`, `memoir`, `videos`, `books`,
-  `containers` — each with its fields, all `dir: rtl` where the value is Urdu.
+- **backend:** `github`, repo `omair/ghsajid`, with
+  `publish_mode: editorial_workflow` so every save opens a pull request (see the
+  review model below).
+- **collections:** `ghazals`, `nazms`, `reviews`, `memoir`, `videos` — each with
+  its fields, all `dir: rtl` where the value is Urdu. `books` and `containers`
+  are **not** exposed; they are kept in sync automatically (see couplings).
 - **hidden field** `origin` defaulted to `human` on create, so every save he
   makes is correctly stamped.
 - **tags:** a `list` widget on the existing `tags` field.
 
-Two content couplings need handling so his edits never produce a broken page
-(both already noted in `CONTRIBUTING.md`):
+### Review model — the middle ground
 
-- A **new memoir chapter** must also be referenced in
-  `content/containers/dars-gah.yaml`, or the index links to a 404. Options: give
-  him a container-editing view, or add a small build step that rebuilds the
-  container from the memoir files. **Recommendation:** the build step — he
-  shouldn't have to think about it.
-- Adding a ghazal/nazm to a **book** means editing that book's `contents` list.
-  Same choice; same recommendation.
+He doesn't want everything gated, and he doesn't want everything unguarded.
+Sveltia runs in **editorial-workflow** mode, so every save becomes a pull
+request; a small **auto-merge GitHub Action** then decides each PR's fate:
+
+| The edit is…                                             | Outcome                        |
+| -------------------------------------------------------- | ------------------------------ |
+| text or `tags` change to an **existing** piece           | **auto-merged** — live in ~1 min |
+| a **new** piece, a **deletion**, or a slug/title rename  | **held** for your one-click approval |
+
+Corrections stay frictionless; a work entering or leaving the archive — where a
+mistake is costly — waits for you. From his side it is always one "publish"
+button; from yours it is a short queue holding only the consequential changes.
+The Action reads the PR's file diff (created/deleted/renamed vs. modified, and
+which fields changed) and either merges or applies a `needs-review` label.
+
+### Couplings kept in sync automatically (decided)
+
+Two indexes depend on separate list files (both noted in `CONTRIBUTING.md`).
+Rather than ask him to edit them, a **build step rebuilds them from the pieces**:
+
+- `content/containers/dars-gah.yaml` is regenerated from the `content/memoir/`
+  files (ordered by their `part`), so a new chapter can never 404.
+- each book's `contents` is regenerated from the pieces that name it via
+  `source_book` / `book_order`.
+
+Because these are generated, the studio does not expose them for hand-editing.
 
 ## 5. Risks & open questions
 
@@ -185,11 +207,16 @@ Two content couplings need handling so his edits never produce a broken page
 3. **Does `migrate/` even belong in the generator repo,** or should it be
    archived read-only? It was a one-shot. — *Recommend: move it, mark it
    historical; it documents how the corpus was born.*
-4. **Studio branch strategy.** Commit straight to `main`, or open PRs for his
-   edits too? PRs give a safety net but add friction for a non-technical author.
-   — *Recommend: straight to `main` for his edits; the site build's schema
-   validation is the safety net.*
-5. **Repo names** — `ghsajid-generator`, `ghsajid`, `ghsajid-studio` are
+4. **Studio review model — DECIDED.** Editorial-workflow + auto-merge Action:
+   text/tag edits to existing pieces go live, new pieces / deletions / renames
+   wait for review (§4).
+5. **Container & book sync — DECIDED.** A build step regenerates
+   `dars-gah.yaml` and each book's `contents` from the pieces; the studio never
+   exposes them (§4).
+6. **Auto-merge policy edge cases.** The Action's "safe edit" definition needs
+   pinning down (e.g. is editing a piece's `title` safe, or a rename? is a
+   `source_book` change structural?). Worth a short list before Phase 2.
+7. **Repo names** — `ghsajid-generator`, `ghsajid`, `ghsajid-studio` are
    placeholders; rename freely.
 
 ## 6. Execution plan (phased, each phase shippable)
@@ -205,13 +232,16 @@ Two content couplings need handling so his edits never produce a broken page
   from `ghsajid`; update both READMEs.
 
 - **Phase 2 — stand up the studio (repo C).**
-  Create `ghsajid-studio` with Sveltia config for every collection, RTL fields,
-  tags, and the `origin: human` default. Add the GitHub OAuth app + token Worker.
-  Deploy to `studio.ghsajid.com`. Verify a test edit lands as a `human` commit.
+  Create `ghsajid-studio` with Sveltia config for the editable collections, RTL
+  fields, tags, `origin: human` default, and `editorial_workflow`. Add the
+  GitHub OAuth app + token Worker. Deploy to `studio.ghsajid.com`. Add the
+  **auto-merge Action** on `ghsajid` implementing the review model (§4), and
+  agree the "safe edit" list (open question 6). Verify a text edit auto-merges
+  and a new piece waits for review.
 
 - **Phase 3 — close the loops.**
-  Build step to keep `dars-gah.yaml` and book `contents` in sync with their
-  pieces; CI on `ghsajid` validating schema on every studio commit; a short
-  one-page guide for your father.
+  Build step to regenerate `dars-gah.yaml` and book `contents` from the pieces;
+  CI on `ghsajid` validating schema on every studio commit; a short one-page
+  guide for your father.
 
 Each phase is independently reviewable and leaves a working system.
