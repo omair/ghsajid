@@ -161,12 +161,19 @@ informally with `restamp` ("a human hand-corrected after approval").
 - **backend:** `github`, repo `omair/ghsajid`, with
   `publish_mode: editorial_workflow` so every save opens a pull request (see the
   review model below).
-- **collections:** `ghazals`, `nazms`, `reviews`, `memoir`, `videos` — each with
-  its fields, all `dir: rtl` where the value is Urdu. `books` and `containers`
-  are **not** exposed; they are kept in sync automatically (see couplings).
+- **collections — start small:** **`ghazals`** first (the largest, 782 pieces),
+  plus **`nazms`** since it is the identical verse shape and nearly free to add.
+  `reviews`, `memoir`, and `videos` come in a later pass once he's comfortable.
+  `books` and `containers` are never exposed; they are kept in sync
+  automatically (see couplings).
+- **fields — kept minimal:** title and the verse body, `dir: rtl`. That is all
+  he needs to add or fix a poem.
 - **hidden field** `origin` defaulted to `human` on create, so every save he
   makes is correctly stamped.
-- **tags:** a `list` widget on the existing `tags` field.
+- **tags are not in his editor.** He won't be tagging; that stays your job.
+  Tags remain in the schema (default `[]`), just hidden from the studio. The
+  natural moment to add them is the review of a new piece (below) — so tagging
+  costs no extra step.
 
 ### Review model — the middle ground
 
@@ -176,14 +183,16 @@ request; a small **auto-merge GitHub Action** then decides each PR's fate:
 
 | The edit is…                                             | Outcome                        |
 | -------------------------------------------------------- | ------------------------------ |
-| text or `tags` change to an **existing** piece           | **auto-merged** — live in ~1 min |
-| a **new** piece, a **deletion**, or a slug/title rename  | **held** for your one-click approval |
+| a text change to an **existing** poem                    | **auto-merged** — live in ~1 min |
+| a **new** poem, or a **deletion**                        | **held** for your review       |
 
 Corrections stay frictionless; a work entering or leaving the archive — where a
-mistake is costly — waits for you. From his side it is always one "publish"
-button; from yours it is a short queue holding only the consequential changes.
-The Action reads the PR's file diff (created/deleted/renamed vs. modified, and
-which fields changed) and either merges or applies a `needs-review` label.
+mistake is costly — waits for you. That review is also **where you add the
+tags** to a new poem before merging, so tagging never becomes a separate chore.
+From his side it is always one "publish" button; from yours it is a short queue
+holding only the consequential changes. The Action reads the PR's file diff
+(created/deleted vs. modified) and either merges or applies a `needs-review`
+label.
 
 ### Couplings kept in sync automatically (decided)
 
@@ -213,9 +222,11 @@ Because these are generated, the studio does not expose them for hand-editing.
 5. **Container & book sync — DECIDED.** A build step regenerates
    `dars-gah.yaml` and each book's `contents` from the pieces; the studio never
    exposes them (§4).
-6. **Auto-merge policy edge cases.** The Action's "safe edit" definition needs
-   pinning down (e.g. is editing a piece's `title` safe, or a rename? is a
-   `source_book` change structural?). Worth a short list before Phase 2.
+6. **Auto-merge policy.** With his editor limited to title + body on existing
+   poems, the rule is simple: **modified file = auto-merge, created/deleted file
+   = review.** A title fix on an existing poem thus auto-merges (it's a
+   correction); only a genuinely new or removed poem waits. Confirm that's the
+   line you want before Phase 2.
 7. **Repo names** — `ghsajid-generator`, `ghsajid`, `ghsajid-studio` are
    placeholders; rename freely.
 
@@ -231,13 +242,14 @@ Because these are generated, the studio does not expose them for hand-editing.
   checkout of `ghsajid` and switch it to open PRs. Delete `tools/`, `tests/`
   from `ghsajid`; update both READMEs.
 
-- **Phase 2 — stand up the studio (repo C).**
-  Create `ghsajid-studio` with Sveltia config for the editable collections, RTL
-  fields, tags, `origin: human` default, and `editorial_workflow`. Add the
-  GitHub OAuth app + token Worker. Deploy to `studio.ghsajid.com`. Add the
-  **auto-merge Action** on `ghsajid` implementing the review model (§4), and
-  agree the "safe edit" list (open question 6). Verify a text edit auto-merges
-  and a new piece waits for review.
+- **Phase 2 — stand up the studio (repo C), ghazals only.**
+  Create `ghsajid-studio` with Sveltia config for **`ghazals`** (then `nazms`),
+  title + RTL body fields, no tags, `origin: human` default, and
+  `editorial_workflow`. Add the GitHub OAuth app + token Worker. Deploy to
+  `studio.ghsajid.com`. Add the **auto-merge Action** on `ghsajid` (modified =
+  live, created/deleted = review). Verify a text edit auto-merges and a new
+  ghazal waits for you to tag and approve. Add the remaining collections once
+  he's comfortable.
 
 - **Phase 3 — close the loops.**
   Build step to regenerate `dars-gah.yaml` and book `contents` from the pieces;
