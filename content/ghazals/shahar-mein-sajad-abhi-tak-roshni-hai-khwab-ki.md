@@ -3,6 +3,7 @@ title: "شہر میں ساجدؔ ابھی تک روشنی ہے خواب کی"
 slug: "shahar-mein-sajad-abhi-tak-roshni-hai-khwab-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 231
 ---

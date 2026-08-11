@@ -3,6 +3,7 @@ title: "سوچیں تو آس پاس ہیں، دیکھیں یہیں کہیں ہی
 slug: "sochin-to-aas-pas-hin-dikhin-yahin-kahin-hain-ham"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 29
 ---

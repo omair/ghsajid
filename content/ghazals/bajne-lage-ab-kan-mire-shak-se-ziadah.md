@@ -3,6 +3,7 @@ title: "بجنے لگے اب کان مِرے شک سے زیادہ"
 slug: "bajne-lage-ab-kan-mire-shak-se-ziadah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 77
 ---

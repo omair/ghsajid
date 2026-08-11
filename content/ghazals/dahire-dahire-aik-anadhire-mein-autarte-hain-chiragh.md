@@ -3,6 +3,7 @@ title: "دھیرے دھیرے اِک اندھیرے میں اُترتے ہیں �
 slug: "dahire-dahire-aik-anadhire-mein-autarte-hain-chiragh"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 566
 ---

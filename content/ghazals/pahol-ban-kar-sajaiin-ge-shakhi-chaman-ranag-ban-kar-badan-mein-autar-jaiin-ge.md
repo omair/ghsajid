@@ -3,6 +3,7 @@ title: "پھول بَن کر سجائیں گے شاخِ چمن، رنگ بَن �
 slug: "pahol-ban-kar-sajaiin-ge-shakhi-chaman-ranag-ban-kar-badan-mein-autar-jaiin-ge"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 44
 ---

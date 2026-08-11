@@ -3,6 +3,7 @@ title: "جب نہیں اپنی رواداری پہ کوئی شک مجھے"
 slug: "jab-nahin-apni-roadari-pah-koi-shak-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 496
 ---

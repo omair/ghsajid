@@ -3,6 +3,7 @@ title: "اچھی گزر گئی / محمد سعید جاوید"
 slug: "achhi-gazar-gii-muhammad-saeed-jaoid"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "اچھی گزر گئی"
 reviewed_author: "محمد سعید جاوید"

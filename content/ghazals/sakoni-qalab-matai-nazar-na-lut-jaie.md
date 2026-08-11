@@ -3,6 +3,7 @@ title: "سکونِ قلب، متاعِ نظر نہ لُٹ جائے"
 slug: "sakoni-qalab-matai-nazar-na-lut-jaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 427
 ---

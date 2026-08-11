@@ -3,6 +3,7 @@ title: "جھلک پائے گا کیسے رات کو مہتاب پانی کی"
 slug: "jahalak-paie-ga-kise-raat-ko-mahtab-pani-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 170
 ---

@@ -3,6 +3,7 @@ title: "ایک گھر اپنے لیے تیّار کرنا ہے مجھے"
 slug: "ek-gahar-apne-lie-tiar-karna-hai-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 73
 ---

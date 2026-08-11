@@ -3,6 +3,7 @@ title: "اسیرِ دامِ عدو ہے نہ میری حد میں ہے"
 slug: "asiri-dami-do-hai-na-meri-had-mein-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 434
 ---

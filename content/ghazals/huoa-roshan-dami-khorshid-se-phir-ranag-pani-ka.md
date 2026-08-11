@@ -3,6 +3,7 @@ title: "ہُوا روشن دمِ خورشید سے پھر رنگ پانی کا"
 slug: "huoa-roshan-dami-khorshid-se-phir-ranag-pani-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 172
 ---

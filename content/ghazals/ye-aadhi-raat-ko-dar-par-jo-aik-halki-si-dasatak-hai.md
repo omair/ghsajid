@@ -3,6 +3,7 @@ title: "یہ آدھی رات کو در پر جو اِک ہلکی سی دستک �
 slug: "ye-aadhi-raat-ko-dar-par-jo-aik-halki-si-dasatak-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 253
 ---

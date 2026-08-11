@@ -3,6 +3,7 @@ title: "بہت محتاط ہو کر اِس لیے چلنا پڑا ہے"
 slug: "bahat-mahtat-ho-kar-ais-lie-chalna-para-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 419
 ---

@@ -3,6 +3,7 @@ title: "یوں تو کیا کیا نہیں کِیا مَیں نے"
 slug: "yon-to-kya-kya-nahin-kiia-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 65
 ---

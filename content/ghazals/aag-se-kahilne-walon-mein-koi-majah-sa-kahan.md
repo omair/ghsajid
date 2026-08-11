@@ -3,6 +3,7 @@ title: "آگ سے کھیلنے والوں میں کوئی مجھ سا کہاں"
 slug: "aag-se-kahilne-walon-mein-koi-majah-sa-kahan"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 58
 ---

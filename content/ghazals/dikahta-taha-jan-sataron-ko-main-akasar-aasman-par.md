@@ -3,6 +3,7 @@ title: "دیکھتا تھا جن ستاروں کو مَیں اکثر آسماں 
 slug: "dikahta-taha-jan-sataron-ko-main-akasar-aasman-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 355
 ---

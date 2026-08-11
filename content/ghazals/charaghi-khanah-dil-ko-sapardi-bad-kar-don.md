@@ -3,6 +3,7 @@ title: "چراغِ خانۂ دل کو سپردِ باد کر دوں"
 slug: "charaghi-khanah-dil-ko-sapardi-bad-kar-don"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 41
 ---

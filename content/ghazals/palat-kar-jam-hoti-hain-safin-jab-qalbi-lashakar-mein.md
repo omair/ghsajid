@@ -3,6 +3,7 @@ title: "پلٹ کر جمع ہوتی ہیں صفیں جب قلبِ لشکر می�
 slug: "palat-kar-jam-hoti-hain-safin-jab-qalbi-lashakar-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 269
 ---

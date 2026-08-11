@@ -3,6 +3,7 @@ title: "کارِ دنیا سے دامن بچاتے ہوئے، آپ کے در س�
 slug: "kari-dania-se-daman-bachate-hoie-aap-ke-dar-se-khirat-pate-hoie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 3
 ---

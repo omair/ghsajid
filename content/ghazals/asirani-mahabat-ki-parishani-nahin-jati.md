@@ -3,6 +3,7 @@ title: "اسیرانِ محبّت کی پریشانی نہیں جاتی"
 slug: "asirani-mahabat-ki-parishani-nahin-jati"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 33
 ---

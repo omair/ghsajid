@@ -3,6 +3,7 @@ title: "دیکھے غلط کہا کوئی سوچے غلط کہا"
 slug: "dikhe-ghalat-kaha-koi-soche-ghalat-kaha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

@@ -3,6 +3,7 @@ title: "میرے حصّے میں بھی آئی ہے نشانی خواب کی"
 slug: "mere-hase-mein-bhi-aaii-hai-nashani-khwab-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 239
 ---

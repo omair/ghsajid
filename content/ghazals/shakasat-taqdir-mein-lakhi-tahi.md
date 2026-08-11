@@ -3,6 +3,7 @@ title: "شکست تقدیر میں لکھی تھی"
 slug: "shakasat-taqdir-mein-lakhi-tahi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 118
 ---

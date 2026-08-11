@@ -3,6 +3,7 @@ title: "اسیر کیسے کروں گا اِس نیلمیں ہَوا کو"
 slug: "asir-kise-karon-ga-ais-nilmin-haoa-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 223
 ---

@@ -3,6 +3,7 @@ title: "ترس جاتے ہیں میرے کان جب اُس گُل کی دستک 
 slug: "taras-jate-hain-mere-kan-jab-us-gul-ki-dasatak-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 512
 ---

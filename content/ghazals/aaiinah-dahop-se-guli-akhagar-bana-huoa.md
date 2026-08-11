@@ -3,6 +3,7 @@ title: "آئینہ دھوپ سے گُلِ اخگر بنا ہُوا"
 slug: "aaiinah-dahop-se-guli-akhagar-bana-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 9
 ---

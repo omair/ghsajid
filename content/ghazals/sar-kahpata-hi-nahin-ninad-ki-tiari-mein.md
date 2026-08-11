@@ -3,6 +3,7 @@ title: "سر کھپاتا ہی نہیں نیند کی تیّاری میں"
 slug: "sar-kahpata-hi-nahin-ninad-ki-tiari-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 77
 ---

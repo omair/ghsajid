@@ -3,6 +3,7 @@ title: "مجھ سے تعظیم چاہتا ہے میاں"
 slug: "majah-se-tazim-chahta-hai-mian"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 60
 ---

@@ -3,6 +3,7 @@ title: "صبحِ مراد سی ہے شام اُس کے دماغ کے لیے"
 slug: "sabhi-marad-si-hai-sham-us-ke-damagh-ke-lie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 82
 ---

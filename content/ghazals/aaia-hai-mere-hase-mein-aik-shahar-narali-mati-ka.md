@@ -3,6 +3,7 @@ title: "آیا ہے میرے حصّے میں اِک شہر نرالی مٹّی �
 slug: "aaia-hai-mere-hase-mein-aik-shahar-narali-mati-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 157
 ---

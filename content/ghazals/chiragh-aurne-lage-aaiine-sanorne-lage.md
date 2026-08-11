@@ -3,6 +3,7 @@ title: "چراغ اُڑنے لگے، آئینے سنورنے لگے"
 slug: "chiragh-aurne-lage-aaiine-sanorne-lage"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 62
 ---

@@ -3,6 +3,7 @@ title: "اپنی تلاش میں کہیں خود ہی کو کھو رہے ہیں 
 slug: "apni-talash-mein-kahin-khod-hi-ko-kaho-rahe-hain-ham"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 42
 ---

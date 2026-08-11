@@ -3,6 +3,7 @@ title: "متاعِ ہجر میں کسی کا خواب کس لیے نہیں"
 slug: "matai-hajar-mein-kisi-ka-khwab-kas-lie-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 105
 ---

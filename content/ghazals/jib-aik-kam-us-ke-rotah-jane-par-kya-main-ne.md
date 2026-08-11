@@ -3,6 +3,7 @@ title: "عجیب اِک کام اُس کے روٹھ جانے پر کیا مَی�
 slug: "jib-aik-kam-us-ke-rotah-jane-par-kya-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 289
 ---

@@ -3,6 +3,7 @@ title: "عالمِ حیرت میں اپنا آپ کھونے پر ہوں خوش"
 slug: "almi-hirat-mein-apna-aap-kahone-par-hun-khosh"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 572
 ---

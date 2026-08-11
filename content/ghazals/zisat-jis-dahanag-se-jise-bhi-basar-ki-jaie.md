@@ -3,6 +3,7 @@ title: "زیست جس ڈھنگ سے، جیسے بھی بسر کی جائے"
 slug: "zisat-jis-dahanag-se-jise-bhi-basar-ki-jaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 536
 ---

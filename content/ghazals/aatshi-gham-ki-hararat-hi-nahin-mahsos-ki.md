@@ -3,6 +3,7 @@ title: "آتشِ غم کی حرارت ہی نہیں محسوس کی"
 slug: "aatshi-gham-ki-hararat-hi-nahin-mahsos-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 36
 ---

@@ -3,6 +3,7 @@ title: "نقش بُجھے بُجھے ہوئے، عکس دُھلا دُھلا ہ�
 slug: "naqash-bujhe-bujhe-hoie-kas-duhla-duhla-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 25
 ---

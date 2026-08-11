@@ -3,6 +3,7 @@ title: "خوش نہیں راحتِ نایاب مرے پانی کو"
 slug: "khosh-nahin-rahti-naiab-mare-pani-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 177
 ---

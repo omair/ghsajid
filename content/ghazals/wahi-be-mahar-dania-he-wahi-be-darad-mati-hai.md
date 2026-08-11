@@ -3,6 +3,7 @@ title: "وہی بے مہر دنیا ہے، وہی بے درد مٹّی ہے"
 slug: "wahi-be-mahar-dania-he-wahi-be-darad-mati-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 163
 ---

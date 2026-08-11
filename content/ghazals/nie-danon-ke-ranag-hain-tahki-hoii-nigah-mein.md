@@ -3,6 +3,7 @@ title: "نئے دنوں کے رنگ ہیں تھکی ہوئی نگاہ میں"
 slug: "nie-danon-ke-ranag-hain-tahki-hoii-nigah-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 68
 ---

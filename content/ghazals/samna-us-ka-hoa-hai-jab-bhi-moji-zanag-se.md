@@ -3,6 +3,7 @@ title: "سامنا اُس کا ہوا ہے جب بھی موجِ زنگ سے"
 slug: "samna-us-ka-hoa-hai-jab-bhi-moji-zanag-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 368
 ---

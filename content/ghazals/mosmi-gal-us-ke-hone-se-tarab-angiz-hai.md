@@ -3,6 +3,7 @@ title: "موسمِ گل اُس کے ہونے سے طرب انگیز ہے"
 slug: "mosmi-gal-us-ke-hone-se-tarab-angiz-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 369
 ---

@@ -3,6 +3,7 @@ title: "طلسمی آئنے میں دیکھ لیتے ہیں اُسے ہم بھی
 slug: "talasmi-aaine-mein-dikah-lite-hain-ause-ham-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 257
 ---

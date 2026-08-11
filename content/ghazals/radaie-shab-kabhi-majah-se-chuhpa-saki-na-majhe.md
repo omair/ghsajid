@@ -3,6 +3,7 @@ title: "ردائے شب کبھی مجھ سے چُھپا سکی نہ مجھے!"
 slug: "radaie-shab-kabhi-majah-se-chuhpa-saki-na-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 513
 ---

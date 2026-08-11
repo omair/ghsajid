@@ -3,6 +3,7 @@ title: "زمیں سے کوئی تعلق نہ آسماں سے عشق"
 slug: "zamin-se-koi-talaq-na-aasman-se-ishq"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

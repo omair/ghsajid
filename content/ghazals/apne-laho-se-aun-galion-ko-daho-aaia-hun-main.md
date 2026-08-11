@@ -3,6 +3,7 @@ title: "اپنے لہو سے اُن گلیوں کو دھو آیا ہوں مَی�
 slug: "apne-laho-se-aun-galion-ko-daho-aaia-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 499
 ---

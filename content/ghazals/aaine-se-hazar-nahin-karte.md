@@ -3,6 +3,7 @@ title: "آئنے سے حذر نہیں کرتے"
 slug: "aaine-se-hazar-nahin-karte"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 288
 ---

@@ -3,6 +3,7 @@ title: "مرے نجمِ خواب کے روبرو کوئی شے نہیں مرے �
 slug: "mare-najmi-khwab-ke-robro-koi-she-nahin-mare-dahanag-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 18
 ---

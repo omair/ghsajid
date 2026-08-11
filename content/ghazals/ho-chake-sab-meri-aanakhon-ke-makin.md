@@ -3,6 +3,7 @@ title: "ہو چکے سب میری آنکھوں کے مکیں"
 slug: "ho-chake-sab-meri-aanakhon-ke-makin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 67
 ---

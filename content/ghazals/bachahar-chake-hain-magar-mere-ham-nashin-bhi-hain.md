@@ -3,6 +3,7 @@ title: "بچھڑ چکے ہیں مگر میرے ہم نشیں بھی ہیں"
 slug: "bachahar-chake-hain-magar-mere-ham-nashin-bhi-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 372
 ---

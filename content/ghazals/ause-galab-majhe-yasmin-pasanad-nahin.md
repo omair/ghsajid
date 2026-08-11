@@ -3,6 +3,7 @@ title: "اُسے گلاب، مجھے یاسمیں پسند نہیں"
 slug: "ause-galab-majhe-yasmin-pasanad-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 531
 ---

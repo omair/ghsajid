@@ -3,6 +3,7 @@ title: "لہو میں زندہ وصال کا دن گزار لیں گے"
 slug: "laho-mein-zanadah-wasal-ka-dan-gazar-lin-ge"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 98
 ---

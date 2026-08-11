@@ -3,6 +3,7 @@ title: "روز بناتا ہوں پُل / عتیق احمد جیلانی"
 slug: "roz-banata-hun-pul-tiq-ahmad-jilani"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "روز بناتا ہوں پُل"
 reviewed_author: "عتیق احمد جیلانی"

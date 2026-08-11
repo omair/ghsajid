@@ -3,6 +3,7 @@ title: "حکومت کاروانِ دہر پر مٹّی ہی کرتی ہے"
 slug: "hakomat-karoani-dahar-par-mati-hi-karti-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 147
 ---

@@ -3,6 +3,7 @@ title: "بھرا نہیں ہے مِری روح کا خلا اب تک"
 slug: "bahra-nahin-hai-miri-roh-ka-khala-ab-tak"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 22
 ---

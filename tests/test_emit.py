@@ -3,7 +3,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.migrate.emit import frontmatter, write_container, write_piece, write_postmap
+from tools.migrate.emit import (
+    existing_origin,
+    frontmatter,
+    write_container,
+    write_piece,
+    write_postmap,
+)
 from tools.migrate.models import Piece
 
 
@@ -24,6 +30,12 @@ class TestFrontmatter(unittest.TestCase):
         self.assertIn('language: "urdu"', fm)
         self.assertIn('script: "nastaliq"', fm)
         self.assertIn("published: 2020-03-25", fm)
+
+    def test_origin_defaults_to_tool(self):
+        self.assertIn('origin: "tool"', frontmatter(piece()))
+
+    def test_origin_human_is_rendered(self):
+        self.assertIn('origin: "human"', frontmatter(piece(origin="human")))
 
     def test_omits_empty_optional_fields(self):
         fm = frontmatter(piece())
@@ -62,6 +74,57 @@ class TestWrite(unittest.TestCase):
         text = path.read_text(encoding="utf-8")
         self.assertTrue(text.startswith("---\n"))
         self.assertTrue(text.rstrip().endswith("مصرع"))
+
+    def test_write_piece_stamps_tool_origin_by_default(self):
+        path = write_piece(piece(), self.root)
+        self.assertEqual(existing_origin(path), "tool")
+
+    def test_write_piece_never_overwrites_a_human_file(self):
+        # A person's own piece sits where the generator would write. It must be
+        # left byte-for-byte untouched, and the write reports the skip as None.
+        path = self.root / "ghazals" / "abc.md"
+        path.parent.mkdir(parents=True)
+        human = '---\ntitle: "دستی"\norigin: "human"\n---\n\nمصرعِ آدمی\n'
+        path.write_text(human, encoding="utf-8")
+
+        result = write_piece(piece(body="regenerated"), self.root)
+
+        self.assertIsNone(result)
+        self.assertEqual(path.read_text(encoding="utf-8"), human)
+
+    def test_write_piece_overwrites_a_tool_file(self):
+        write_piece(piece(body="first"), self.root)
+        result = write_piece(piece(body="second"), self.root)
+        self.assertIsNotNone(result)
+        self.assertIn("second", result.read_text(encoding="utf-8"))
+
+    def test_existing_origin_is_none_when_absent(self):
+        self.assertIsNone(existing_origin(self.root / "nope.md"))
+
+    def test_existing_origin_ignores_a_body_without_frontmatter(self):
+        # A file that does not open with a `---` fence but whose body contains
+        # `---`-delimited text with an origin-like line must not be mistaken
+        # for a protected human piece.
+        path = self.root / "loose.md"
+        path.write_text(
+            "just prose\n\n---\norigin: human\n---\nmore\n", encoding="utf-8"
+        )
+        self.assertIsNone(existing_origin(path))
+
+    def test_container_keeps_a_human_added_chapter(self):
+        # A human memoir chapter on disk must survive regeneration of the
+        # container from the export's (tool) survivors.
+        (self.root / "memoir").mkdir(parents=True)
+        (self.root / "memoir" / "dars-gah-2.md").write_text(
+            '---\ntitle: "نیا باب"\nslug: "dars-gah-2"\norigin: "human"\npart: 2\n---\n\nمتن\n',
+            encoding="utf-8",
+        )
+        tool_part = piece(kind="memoir", slug="dars-gah-1", extra={"part": 1})
+        path = write_container([tool_part], self.root)
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("dars-gah-1", text)
+        self.assertIn("dars-gah-2", text)
+        self.assertLess(text.index("dars-gah-1"), text.index("dars-gah-2"))
 
     def test_write_container_lists_parts_in_order(self):
         parts = [

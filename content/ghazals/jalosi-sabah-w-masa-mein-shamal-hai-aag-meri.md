@@ -3,6 +3,7 @@ title: "جلوسِ صبح و مسا میں شامل ہے آگ میری"
 slug: "jalosi-sabah-w-masa-mein-shamal-hai-aag-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 192
 ---

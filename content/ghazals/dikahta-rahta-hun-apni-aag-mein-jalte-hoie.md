@@ -3,6 +3,7 @@ title: "دیکھتا رہتا ہوں اپنی آگ میں جلتے ہوئے"
 slug: "dikahta-rahta-hun-apni-aag-mein-jalte-hoie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 479
 ---

@@ -3,6 +3,7 @@ title: "سبز کی ہے اِس سلیقے سے زمیں زہراب نے"
 slug: "sabz-ki-hai-ais-saliqe-se-zamin-zahrab-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 36
 ---

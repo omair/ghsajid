@@ -3,6 +3,7 @@ title: "سَحر ہوتے ہی دُنیا کے رگ و پے میں اُتر آئ
 slug: "sahar-hote-hi-dunia-ke-rag-w-pe-mein-autar-aaii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 76
 ---

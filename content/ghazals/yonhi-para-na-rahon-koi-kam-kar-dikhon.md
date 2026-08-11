@@ -3,6 +3,7 @@ title: "یونہی پڑا نہ رہوں کوئی کام کر دیکھوں"
 slug: "yonhi-para-na-rahon-koi-kam-kar-dikhon"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 589
 ---

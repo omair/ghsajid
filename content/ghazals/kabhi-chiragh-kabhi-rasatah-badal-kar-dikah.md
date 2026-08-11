@@ -3,6 +3,7 @@ title: "کبھی چراغ کبھی راستہ بدل کر دیکھ"
 slug: "kabhi-chiragh-kabhi-rasatah-badal-kar-dikah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

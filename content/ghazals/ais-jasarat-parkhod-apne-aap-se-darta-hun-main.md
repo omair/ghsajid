@@ -3,6 +3,7 @@ title: "اِس جسارت پرخود اپنے آپ سے ڈرتا ہوں مَیں
 slug: "ais-jasarat-parkhod-apne-aap-se-darta-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 557
 ---

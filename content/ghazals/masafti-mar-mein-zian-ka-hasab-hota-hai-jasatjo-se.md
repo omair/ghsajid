@@ -3,6 +3,7 @@ title: "مسافتِ عمر میں زیاں کا حساب ہوتا ہے جستج
 slug: "masafti-mar-mein-zian-ka-hasab-hota-hai-jasatjo-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 22
 ---

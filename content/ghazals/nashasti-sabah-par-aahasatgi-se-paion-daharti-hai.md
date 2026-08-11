@@ -3,6 +3,7 @@ title: "نشستِ صبح پر آہستگی سے پائوں دھرتی ہے"
 slug: "nashasti-sabah-par-aahasatgi-se-paion-daharti-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 75
 ---

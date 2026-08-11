@@ -3,6 +3,7 @@ title: "نڈھال، دم توڑتی صدائوں کے ہاتھ تھامے ہو�
 slug: "nadhal-dam-torti-sadaion-ke-hatah-tahame-hoie-kahra-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 133
 ---

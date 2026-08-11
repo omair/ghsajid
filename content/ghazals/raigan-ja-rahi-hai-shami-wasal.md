@@ -3,6 +3,7 @@ title: "رایگاں جا رہی ہے شامِ وصال"
 slug: "raigan-ja-rahi-hai-shami-wasal"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 60
 ---

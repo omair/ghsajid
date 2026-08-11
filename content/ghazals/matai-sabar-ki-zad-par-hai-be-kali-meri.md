@@ -3,6 +3,7 @@ title: "متاعِ صبر کی زد پر ہے بے کلی میری"
 slug: "matai-sabar-ki-zad-par-hai-be-kali-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 563
 ---

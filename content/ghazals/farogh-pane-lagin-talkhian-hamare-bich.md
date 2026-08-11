@@ -3,6 +3,7 @@ title: "فروغ پانے لگیں تلخیاں ہمارے بیچ"
 slug: "farogh-pane-lagin-talkhian-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 458
 ---

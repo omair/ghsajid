@@ -3,6 +3,7 @@ title: "گلی میں آتے تھے دالان میں نہ آتے تھے"
 slug: "gali-mein-aate-tahe-dalan-mein-na-aate-tahe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 26
 ---

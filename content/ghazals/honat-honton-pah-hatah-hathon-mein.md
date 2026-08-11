@@ -3,6 +3,7 @@ title: "ہونٹ ہونٹوں پہ، ہاتھ ہاتھوں میں"
 slug: "honat-honton-pah-hatah-hathon-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 80
 ---

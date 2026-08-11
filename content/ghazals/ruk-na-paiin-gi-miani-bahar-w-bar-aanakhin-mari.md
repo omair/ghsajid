@@ -3,6 +3,7 @@ title: "رُک نہ پائیں گی میانِ بحر و بر آنکھیں مر�
 slug: "ruk-na-paiin-gi-miani-bahar-w-bar-aanakhin-mari"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 366
 ---

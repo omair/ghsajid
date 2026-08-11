@@ -3,6 +3,7 @@ title: "خیال و خواب کہیں اور دماغ تھا کہیں اور"
 slug: "khial-w-khwab-kahin-aur-damagh-taha-kahin-aur"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 75
 ---

@@ -3,6 +3,7 @@ title: "متاعِ نفع سے اب تک کنارہ کرتی ہے"
 slug: "matai-naf-se-ab-tak-kanarah-karti-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 337
 ---

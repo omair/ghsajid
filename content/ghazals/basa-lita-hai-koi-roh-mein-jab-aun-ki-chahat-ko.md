@@ -3,6 +3,7 @@ title: "بسا لیتا ہے کوئی روح میں جب اُن کی چاہت ک
 slug: "basa-lita-hai-koi-roh-mein-jab-aun-ki-chahat-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 351
 ---

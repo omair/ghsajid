@@ -3,6 +3,7 @@ title: "بے گھری حاصلِ سفر ہے کیا"
 slug: "be-gahri-hasli-safar-hai-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 22
 ---

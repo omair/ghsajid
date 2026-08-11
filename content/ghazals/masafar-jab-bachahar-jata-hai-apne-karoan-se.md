@@ -3,6 +3,7 @@ title: "مسافر جب بچھڑ جاتا ہے اپنے کارواں سے"
 slug: "masafar-jab-bachahar-jata-hai-apne-karoan-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 286
 ---

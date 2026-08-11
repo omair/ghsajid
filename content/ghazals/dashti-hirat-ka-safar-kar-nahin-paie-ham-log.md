@@ -3,6 +3,7 @@ title: "دشتِ حیرت کا سفر کر نہیں پائے ہم لوگ"
 slug: "dashti-hirat-ka-safar-kar-nahin-paie-ham-log"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 408
 ---

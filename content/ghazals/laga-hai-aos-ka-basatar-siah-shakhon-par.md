@@ -3,6 +3,7 @@ title: "لگا ہے اوس کا بستر سیاہ شاخوں پر"
 slug: "laga-hai-aos-ka-basatar-siah-shakhon-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 110
 ---

@@ -3,6 +3,7 @@ title: "اِس خواب کے ورثے میں اِک دہر ہَوا کا ہے"
 slug: "ais-khwab-ke-warse-mein-aik-dahar-haoa-ka-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 224
 ---

@@ -3,6 +3,7 @@ title: "اگر فرماں روائی صاحب ِ توقیر کا حق ہے"
 slug: "agar-farman-roaii-sahab-i-toqir-ka-haq-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

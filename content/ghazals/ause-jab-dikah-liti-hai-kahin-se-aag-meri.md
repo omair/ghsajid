@@ -3,6 +3,7 @@ title: "اُسے جب دیکھ لیتی ہے کہیں سے آگ میری"
 slug: "ause-jab-dikah-liti-hai-kahin-se-aag-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 203
 ---

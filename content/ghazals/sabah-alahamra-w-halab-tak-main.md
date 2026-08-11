@@ -3,6 +3,7 @@ title: "صبح الحمرا و حلب تک مَیں"
 slug: "sabah-alahamra-w-halab-tak-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 303
 ---

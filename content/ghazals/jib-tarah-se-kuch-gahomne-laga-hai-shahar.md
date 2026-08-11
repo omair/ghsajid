@@ -3,6 +3,7 @@ title: "عجیب طرح سے کچھ گھومنے لگا ہے شہر"
 slug: "jib-tarah-se-kuch-gahomne-laga-hai-shahar"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 295
 ---

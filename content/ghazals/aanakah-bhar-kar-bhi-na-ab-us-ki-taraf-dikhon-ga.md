@@ -3,6 +3,7 @@ title: "آنکھ بھر کر بھی نہ اب اُس کی طرف دیکھوں گ
 slug: "aanakah-bhar-kar-bhi-na-ab-us-ki-taraf-dikhon-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 546
 ---

@@ -3,6 +3,7 @@ title: "مَیں اپنے سورج کے ساتھ زندہ رہوں گا تو ی�
 slug: "main-apne-soraj-ke-satah-zanadah-rahon-ga-to-ye-khabar-male-gi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 25
 ---

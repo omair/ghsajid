@@ -3,6 +3,7 @@ title: "مکاں بنانے کی کوشش میں لامکاں ہوں مَیں"
 slug: "makan-banane-ki-koshash-mein-lamkan-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 50
 ---

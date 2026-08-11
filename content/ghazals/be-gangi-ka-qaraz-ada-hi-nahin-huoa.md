@@ -3,6 +3,7 @@ title: "بے گانگی کا قرض ادا ہی نہیں ہُوا"
 slug: "be-gangi-ka-qaraz-ada-hi-nahin-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 46
 ---

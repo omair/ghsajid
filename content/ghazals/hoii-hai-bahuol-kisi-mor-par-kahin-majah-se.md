@@ -3,6 +3,7 @@ title: "ہوئی ہے بھُول کسی موڑ پر کہیں مجھ سے"
 slug: "hoii-hai-bahuol-kisi-mor-par-kahin-majah-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 264
 ---

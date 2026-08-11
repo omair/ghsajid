@@ -3,6 +3,7 @@ title: "ختم ہوا پھر ملنے کا امکان ہمارے بیچ"
 slug: "khatam-hoa-phir-malne-ka-amkan-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 467
 ---

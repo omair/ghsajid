@@ -3,6 +3,7 @@ title: "مَیں جب تھک کر درِ خیرالورا پر سرجھکاتا 
 slug: "main-jab-tahak-kar-dari-khiralora-par-sarajahkata-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 472
 ---

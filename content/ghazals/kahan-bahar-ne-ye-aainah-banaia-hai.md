@@ -3,6 +3,7 @@ title: "کہاں بہار نے یہ آئنہ بنایا ہے"
 slug: "kahan-bahar-ne-ye-aainah-banaia-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 52
 ---

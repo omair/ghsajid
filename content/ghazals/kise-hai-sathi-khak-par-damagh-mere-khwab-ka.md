@@ -3,6 +3,7 @@ title: "کسے ہے سطحِ خاک پر دماغ میرے خواب کا"
 slug: "kise-hai-sathi-khak-par-damagh-mere-khwab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 236
 ---

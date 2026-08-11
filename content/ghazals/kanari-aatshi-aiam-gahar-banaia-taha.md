@@ -3,6 +3,7 @@ title: "کنارِ آتشِ ایّام گھر بنایا تھا"
 slug: "kanari-aatshi-aiam-gahar-banaia-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 46
 ---

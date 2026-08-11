@@ -3,6 +3,7 @@ title: "خوابِ دنیا سے گزرنے کی اجازت چاہتا ہوں"
 slug: "khoabi-dania-se-gazarne-ki-ajazat-chahta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 381
 ---

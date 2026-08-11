@@ -3,6 +3,7 @@ title: "ہمارا میزباں ہونے سے منکر تو نہیں پانی"
 slug: "hamara-mizban-hone-se-manakar-to-nahin-pani"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 173
 ---

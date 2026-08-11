@@ -3,6 +3,7 @@ title: "اِک جانب وصل کا جھگڑا ہے، اِک جانب ہجر ک�
 slug: "aik-janab-wasal-ka-jahagra-he-aik-janab-hajar-ki-duori-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 97
 ---

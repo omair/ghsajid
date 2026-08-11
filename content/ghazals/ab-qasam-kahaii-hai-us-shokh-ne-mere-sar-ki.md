@@ -3,6 +3,7 @@ title: "اب قسم کھائی ہے اُس شوخ نے میرے سر کی"
 slug: "ab-qasam-kahaii-hai-us-shokh-ne-mere-sar-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 535
 ---

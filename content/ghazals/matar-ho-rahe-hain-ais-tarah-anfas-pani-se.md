@@ -3,6 +3,7 @@ title: "معطّر ہو رہے ہیں اِس طرح انفاس پانی سے"
 slug: "matar-ho-rahe-hain-ais-tarah-anfas-pani-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 180
 ---

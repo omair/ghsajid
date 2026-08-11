@@ -3,6 +3,7 @@ title: "زمیں کا اَور ہی کچھ رنگ تھا، فضا کا اَور"
 slug: "zamin-ka-aaor-hi-kuch-ranag-taha-faza-ka-aaor"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 76
 ---

@@ -3,6 +3,7 @@ title: "ہُوا ہے طرزِ تغافل سے کیا کسے معلوم"
 slug: "huoa-hai-tarzi-taghafal-se-kya-kise-malom"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 52
 ---

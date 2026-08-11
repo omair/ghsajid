@@ -3,6 +3,7 @@ title: "مشتاقِ لبِ خنداں آواز ہے پانی کی"
 slug: "mashtaqi-labi-khandan-aaoaz-hai-pani-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 181
 ---

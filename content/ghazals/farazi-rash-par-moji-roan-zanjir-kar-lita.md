@@ -3,6 +3,7 @@ title: "فرازِ عرش پر موجِ رواں زنجیر کر لیتا"
 slug: "farazi-rash-par-moji-roan-zanjir-kar-lita"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 382
 ---

@@ -3,6 +3,7 @@ title: "روشن کِیا ہے خواب نگر اُس چراغ نے"
 slug: "roshan-kiia-hai-khwab-nagar-us-chiragh-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 57
 ---

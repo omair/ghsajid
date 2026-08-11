@@ -3,6 +3,7 @@ title: "فیری میڈوز/ آغا سلمان باقر"
 slug: "firi-midoz-aagha-salman-baqar"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "فیری میڈوز"
 reviewed_author: "آغا سلمان باقر"

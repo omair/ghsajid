@@ -3,6 +3,7 @@ title: "اِک مہرباں کا رنگ بدلتا چلا گیا"
 slug: "aik-maharban-ka-ranag-badalta-chala-gia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 584
 ---

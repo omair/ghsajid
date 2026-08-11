@@ -3,6 +3,7 @@ title: "رِدائے شب سے رُکا اور نہ رنگ و بُو سے رُک
 slug: "ridaie-shab-se-ruka-aur-na-ranag-w-buo-se-ruka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 45
 ---

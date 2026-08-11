@@ -3,6 +3,7 @@ title: "دستک پہ بھروسا ہے نہ کانوں پہ بھروسا"
 slug: "dasatak-pah-bahrosa-hai-na-kanon-pah-bahrosa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 30
 ---

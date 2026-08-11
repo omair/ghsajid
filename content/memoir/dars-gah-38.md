@@ -3,6 +3,7 @@ title: "درس گاہ - 38"
 slug: "dars-gah-38"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 part: 38
 ---

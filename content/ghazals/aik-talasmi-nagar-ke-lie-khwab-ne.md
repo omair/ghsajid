@@ -3,6 +3,7 @@ title: "اِک طلسمی نگر کے لیے خواب نے"
 slug: "aik-talasmi-nagar-ke-lie-khwab-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 233
 ---

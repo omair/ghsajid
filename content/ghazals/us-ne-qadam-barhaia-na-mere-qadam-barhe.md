@@ -3,6 +3,7 @@ title: "اُس نے قدم بڑھایا نہ میرے قدم بڑھے"
 slug: "us-ne-qadam-barhaia-na-mere-qadam-barhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

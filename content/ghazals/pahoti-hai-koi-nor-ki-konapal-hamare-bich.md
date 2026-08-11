@@ -3,6 +3,7 @@ title: "پھوٹی ہے کوئی نور کی کونپل ہمارے بیچ"
 slug: "pahoti-hai-koi-nor-ki-konapal-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 462
 ---

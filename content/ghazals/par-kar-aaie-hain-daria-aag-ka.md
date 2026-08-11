@@ -3,6 +3,7 @@ title: "پار کر آئے ہیں دریا آگ کا"
 slug: "par-kar-aaie-hain-daria-aag-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 201
 ---

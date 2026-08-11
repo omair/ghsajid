@@ -3,6 +3,7 @@ title: "مَیں اپنے آپ کو جب آئنہ بنا نہ سکا"
 slug: "main-apne-aap-ko-jab-aainah-bana-na-saka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 293
 ---

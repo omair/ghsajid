@@ -3,6 +3,7 @@ title: "چراغِ ابر کرتا ہے محبت میری مٹّی سے"
 slug: "charaghi-abar-karta-hai-mahabat-meri-mati-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 161
 ---

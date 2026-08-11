@@ -3,6 +3,7 @@ title: "عرش سے بھی اونچا ہے آج نام مٹّی کا"
 slug: "rash-se-bhi-aoncha-hai-aaj-nam-mati-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 155
 ---

@@ -3,6 +3,7 @@ title: "عشق آساں نہیں ہوتا ہے غزل خوانی سے"
 slug: "ishq-aasan-nahin-hota-hai-ghazal-khoani-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 32
 ---

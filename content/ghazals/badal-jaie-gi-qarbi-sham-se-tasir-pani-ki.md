@@ -3,6 +3,7 @@ title: "بدل جائے گی قربِ شمع سے تاثیر پانی کی"
 slug: "badal-jaie-gi-qarbi-sham-se-tasir-pani-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 168
 ---

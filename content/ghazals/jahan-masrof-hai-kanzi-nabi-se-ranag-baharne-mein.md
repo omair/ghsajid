@@ -3,6 +3,7 @@ title: "جہاں مصروف ہے کنزِ نبی سے رنگ بھرنے میں"
 slug: "jahan-masrof-hai-kanzi-nabi-se-ranag-baharne-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 350
 ---

@@ -3,6 +3,7 @@ title: "سوچ سے ماورا اندھیرا ہے"
 slug: "soch-se-maora-anadhira-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 9
 ---

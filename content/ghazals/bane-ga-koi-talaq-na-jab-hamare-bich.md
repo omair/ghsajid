@@ -3,6 +3,7 @@ title: "بنے گا کوئی تعلّق نہ جب ہمارے بیچ"
 slug: "bane-ga-koi-talaq-na-jab-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 459
 ---

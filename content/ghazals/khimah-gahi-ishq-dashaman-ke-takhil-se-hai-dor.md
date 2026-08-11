@@ -3,6 +3,7 @@ title: "خیمہ گاہِ عشق دشمن کے تخیل سے ہے دور"
 slug: "khimah-gahi-ishq-dashaman-ke-takhil-se-hai-dor"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 401
 ---

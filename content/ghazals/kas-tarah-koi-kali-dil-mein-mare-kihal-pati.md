@@ -3,6 +3,7 @@ title: "کس طرح کوئی کلی دل میں مرے کِھل پاتی"
 slug: "kas-tarah-koi-kali-dil-mein-mare-kihal-pati"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 431
 ---

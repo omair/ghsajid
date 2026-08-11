@@ -3,6 +3,7 @@ title: "کھِلی ہوئی ہے کہیں یاسمیں قرینے سے"
 slug: "kahili-hoii-hai-kahin-yasmin-qarine-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 552
 ---

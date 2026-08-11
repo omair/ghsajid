@@ -3,6 +3,7 @@ title: "ہجر کے دن، وصل کی راتیں بہت اچھّی لگیں"
 slug: "hajar-ke-dan-wasal-ki-ratin-bahat-achhi-lagin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 475
 ---

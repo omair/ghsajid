@@ -3,6 +3,7 @@ title: "کسی خوابِ حقیقت پر نہ تعبیرِ گماں پر ہے!"
 slug: "kisi-khoabi-haqiqat-par-na-tabiri-gaman-par-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 414
 ---

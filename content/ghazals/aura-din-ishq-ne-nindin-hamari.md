@@ -3,6 +3,7 @@ title: "اُڑا دیں عشق نے نیندیں ہماری"
 slug: "aura-din-ishq-ne-nindin-hamari"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 88
 ---

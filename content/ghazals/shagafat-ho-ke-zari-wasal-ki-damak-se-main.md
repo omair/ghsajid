@@ -3,6 +3,7 @@ title: "شگفت ہو کے زرِ وصل کی دمک سے مَیں"
 slug: "shagafat-ho-ke-zari-wasal-ki-damak-se-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 273
 ---

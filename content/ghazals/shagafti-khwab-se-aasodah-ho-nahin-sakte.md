@@ -3,6 +3,7 @@ title: "شگفتِ خواب سے آسودہ ہو نہیں سکتے"
 slug: "shagafti-khwab-se-aasodah-ho-nahin-sakte"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 275
 ---

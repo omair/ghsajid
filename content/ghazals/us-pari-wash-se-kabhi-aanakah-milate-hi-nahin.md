@@ -3,6 +3,7 @@ title: "اُس پَری وش سے کبھی آنکھ مِلاتے ہی نہیں"
 slug: "us-pari-wash-se-kabhi-aanakah-milate-hi-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 65
 ---

@@ -3,6 +3,7 @@ title: "باندھ لیا ہے آج مقدر کو فتراک سے مَیں نے 
 slug: "banadah-lia-hai-aaj-maqadar-ko-fatrak-se-main-ne-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 283
 ---

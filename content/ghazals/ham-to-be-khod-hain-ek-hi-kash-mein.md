@@ -3,6 +3,7 @@ title: "ہم تو بے خود ہیں ایک ہی کش میں"
 slug: "ham-to-be-khod-hain-ek-hi-kash-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 74
 ---

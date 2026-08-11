@@ -3,6 +3,7 @@ title: "اُس کے جلو میں تیغ و سِپر جانا چاہتے ہیں"
 slug: "us-ke-jalo-mein-tigh-w-sipar-jana-chahte-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 342
 ---

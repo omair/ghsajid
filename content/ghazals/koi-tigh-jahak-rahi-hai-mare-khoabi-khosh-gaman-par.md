@@ -3,6 +3,7 @@ title: "کوئی تیغ جھک رہی ہے مرے خوابِ خوش گماں پ�
 slug: "koi-tigh-jahak-rahi-hai-mare-khoabi-khosh-gaman-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 398
 ---

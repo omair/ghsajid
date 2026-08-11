@@ -3,6 +3,7 @@ title: "کہیں محبت کے آسماں پر وصال کا چاند ڈھل ر�
 slug: "kahin-mahabat-ke-aasman-par-wasal-ka-chanad-dahal-raha-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 26
 ---

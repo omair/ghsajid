@@ -3,6 +3,7 @@ title: "محفل میں اُس چراغ کی آیا ہُوا تھا مَیں"
 slug: "mahafal-mein-us-chiragh-ki-aaia-huoa-taha-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 99
 ---

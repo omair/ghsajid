@@ -3,6 +3,7 @@ title: "غرض ہے فقر و غنا سے کوئی نہ آرزو تاج و تخ�
 slug: "gharaz-hai-faqar-w-ghana-se-koi-na-aarzo-taj-w-takhat-ki-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 328
 ---

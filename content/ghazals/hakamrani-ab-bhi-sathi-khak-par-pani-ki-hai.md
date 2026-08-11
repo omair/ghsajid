@@ -3,6 +3,7 @@ title: "حکمرانی اب بھی سطحِ خاک پر پانی کی ہے"
 slug: "hakamrani-ab-bhi-sathi-khak-par-pani-ki-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 186
 ---

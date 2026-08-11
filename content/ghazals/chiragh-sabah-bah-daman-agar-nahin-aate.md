@@ -3,6 +3,7 @@ title: "چراغ صبح بہ داماں اگر نہیں آتے"
 slug: "chiragh-sabah-bah-daman-agar-nahin-aate"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 40
 ---

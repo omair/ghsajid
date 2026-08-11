@@ -3,6 +3,7 @@ title: "مَیں اُس بے مہر سے کسبِ سہولت کر نہیں سک�
 slug: "main-us-be-mahar-se-kasbi-saholat-kar-nahin-sakta"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 522
 ---

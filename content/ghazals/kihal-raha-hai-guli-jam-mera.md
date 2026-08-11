@@ -3,6 +3,7 @@ title: "کِھل رہا ہے گُلِ عجم میرا"
 slug: "kihal-raha-hai-guli-jam-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 17
 ---

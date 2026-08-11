@@ -3,6 +3,7 @@ title: "کوئی تو اِس خرابے میں مرا دم ساز ہو گا"
 slug: "koi-to-ais-kharabe-mein-mira-dam-saz-ho-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 263
 ---

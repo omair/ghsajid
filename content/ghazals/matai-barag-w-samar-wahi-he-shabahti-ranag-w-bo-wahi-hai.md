@@ -3,6 +3,7 @@ title: "متاعِ برگ و ثمر وہی ہے، شباہتِ رنگ و بو و
 slug: "matai-barag-w-samar-wahi-he-shabahti-ranag-w-bo-wahi-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 7
 ---

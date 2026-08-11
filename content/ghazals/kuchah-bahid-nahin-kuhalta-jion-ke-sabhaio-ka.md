@@ -3,6 +3,7 @@ title: "کُچھ بھید نہیں کُھلتا، جیون کے سبھائو ک�
 slug: "kuchah-bahid-nahin-kuhalta-jion-ke-sabhaio-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 94
 ---

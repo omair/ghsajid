@@ -3,6 +3,7 @@ title: "ہَوا چلنے لگی ہے، کم ہوئی آزردگی میری"
 slug: "haoa-chalne-lagi-he-kam-hoii-aazaradgi-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 61
 ---

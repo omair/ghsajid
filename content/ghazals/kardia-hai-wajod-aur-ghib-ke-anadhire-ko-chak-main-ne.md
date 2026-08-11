@@ -3,6 +3,7 @@ title: "کردیا ہے وجود اور غیب کے اندھیرے کو چاک �
 slug: "kardia-hai-wajod-aur-ghib-ke-anadhire-ko-chak-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 363
 ---

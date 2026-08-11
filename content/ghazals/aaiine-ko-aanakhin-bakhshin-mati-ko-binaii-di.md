@@ -3,6 +3,7 @@ title: "آئینے کو آنکھیں بخشیں، مٹّی کو بینائی د�
 slug: "aaiine-ko-aanakhin-bakhshin-mati-ko-binaii-di"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 44
 ---

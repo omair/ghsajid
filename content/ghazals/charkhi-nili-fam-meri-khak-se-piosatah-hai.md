@@ -3,6 +3,7 @@ title: "چرخِ نیلی فام میری خاک سے پیوستہ ہے"
 slug: "charkhi-nili-fam-meri-khak-se-piosatah-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 571
 ---

@@ -3,6 +3,7 @@ title: "پُوچھ کر آیا ہوں مَیں اِک صاحبِ ادراک سے
 slug: "puochah-kar-aaia-hun-main-aik-sahbi-adrak-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 331
 ---

@@ -3,6 +3,7 @@ title: "اُس کے قریب تو نہیں پھر بھی وہیں کہیں ہی�
 slug: "us-ke-qarib-to-nahin-phir-bhi-wahin-kahin-hain-ham"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 24
 ---

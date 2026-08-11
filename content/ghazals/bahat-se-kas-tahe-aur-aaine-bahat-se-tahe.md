@@ -3,6 +3,7 @@ title: "بہت سے عکس تھے اور آئنے بہت سے تھے"
 slug: "bahat-se-kas-tahe-aur-aaine-bahat-se-tahe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 576
 ---

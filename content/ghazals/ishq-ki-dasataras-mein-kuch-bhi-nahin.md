@@ -3,6 +3,7 @@ title: "عشق کی دسترس میں کچھ بھی نہیں"
 slug: "ishq-ki-dasataras-mein-kuch-bhi-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 554
 ---

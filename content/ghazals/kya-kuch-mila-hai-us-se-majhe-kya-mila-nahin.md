@@ -3,6 +3,7 @@ title: "کیا کچھ مِلا ہے اُس سے مجھے، کیا مِلا نہ�
 slug: "kya-kuch-mila-hai-us-se-majhe-kya-mila-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 590
 ---

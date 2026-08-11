@@ -3,6 +3,7 @@ title: "باغِ نشاط کی طرف اپنے قدم نہیں بڑھے"
 slug: "baghi-nashat-ki-taraf-apne-qadam-nahin-barhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 2
 ---

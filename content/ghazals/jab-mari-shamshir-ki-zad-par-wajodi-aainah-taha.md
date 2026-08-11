@@ -3,6 +3,7 @@ title: "جب مری شمشیر کی زد پر وجودِ آئنہ تھا"
 slug: "jab-mari-shamshir-ki-zad-par-wajodi-aainah-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 317
 ---

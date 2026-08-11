@@ -3,6 +3,7 @@ title: "طلسمی شہر اِک اِس راستے میں خواب کا ہے"
 slug: "talasmi-shahar-aik-ais-raste-mein-khwab-ka-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 244
 ---

@@ -3,6 +3,7 @@ title: "نہیں ہے اِس نیند کے نگر میں ابھی کسی کو د
 slug: "nahin-hai-ais-ninad-ke-nagar-mein-abhi-kisi-ko-damagh-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 15
 ---

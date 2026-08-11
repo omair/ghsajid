@@ -3,6 +3,7 @@ title: "کسی کے دھیان میں روتا ہوں اور ہنستا ہوں"
 slug: "kisi-ke-dahian-mein-rota-hun-aur-hanasta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 582
 ---

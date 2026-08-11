@@ -3,6 +3,7 @@ title: "ابھی میرے جلو میں ایک ایسا آدمی ہے"
 slug: "abhi-mere-jalo-mein-ek-aisa-aadmi-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 291
 ---

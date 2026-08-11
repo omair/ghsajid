@@ -3,6 +3,7 @@ title: "بڑھائے جاتا ہے دستِ ہوس خدا کی پناہ"
 slug: "barhaie-jata-hai-dasti-hos-khada-ki-panah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 80
 ---

@@ -45,6 +45,7 @@ def frontmatter(piece: Piece) -> str:
         f"slug: {_quote(piece.slug)}",
         f"language: {_quote(piece.language)}",
         f"script: {_quote(piece.script)}",
+        f"origin: {_quote(piece.origin)}",
     ]
     # Book-sourced pieces have no publication date of their own — only the
     # book's year, which is a different fact — and set published=None to say
@@ -64,9 +65,83 @@ def frontmatter(piece: Piece) -> str:
     return "\n".join(lines)
 
 
-def write_piece(piece: Piece, root: Path) -> Path:
-    """Write one piece to <root>/<kind>/<slug>.md."""
+def _frontmatter_fields(path: Path) -> dict[str, str] | None:
+    """Parse a piece file's frontmatter into a flat {key: raw_value} map.
+
+    Returns None unless the file actually opens with a `---` fence: a naive
+    split on `---` would otherwise treat body text that merely contains the
+    sequence (a stanza rule, say) as frontmatter. Values are returned raw,
+    quotes and all; callers strip what they need.
+    """
+    if not path.exists():
+        return None
+    text = path.read_text(encoding="utf-8")
+    parts = text.split("---", 2)
+    # parts[0] is the text before the first `---`; anything non-blank there
+    # means the file does not open with a frontmatter fence.
+    if len(parts) < 3 or parts[0].strip():
+        return None
+    fields: dict[str, str] = {}
+    for line in parts[1].splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or ":" not in stripped:
+            continue
+        key, _, value = stripped.partition(":")
+        fields[key.strip()] = value.strip()
+    return fields
+
+
+def existing_origin(path: Path) -> str | None:
+    """Return the `origin` value in a file's frontmatter, or None.
+
+    None means the file is absent, does not open with frontmatter fences, or
+    names no `origin` — anything the generator is free to write. A returned
+    "human" is the one value that makes a file off-limits to regeneration.
+    """
+    fields = _frontmatter_fields(path)
+    if fields is None:
+        return None
+    origin = fields.get("origin")
+    return origin.strip().strip('"') if origin is not None else None
+
+
+def _human_memoir_chapters(root: Path) -> list[tuple[int, str]]:
+    """Find (part, slug) for every human-authored memoir chapter on disk.
+
+    A person can add a memoir chapter the WordPress export never had; it is
+    stamped origin: "human" and `write_piece` already refuses to overwrite it.
+    The container must include it too, or the درس گاہ index would silently drop
+    the chapter every time it is regenerated from the export's survivors.
+    """
+    chapters: list[tuple[int, str]] = []
+    memoir_dir = root / "memoir"
+    if not memoir_dir.is_dir():
+        return chapters
+    for path in sorted(memoir_dir.glob("*.md")):
+        fields = _frontmatter_fields(path)
+        if not fields or fields.get("origin", "").strip('"') != "human":
+            continue
+        part = fields.get("part")
+        if part is None:
+            continue
+        try:
+            chapters.append((int(part), path.stem))
+        except ValueError:
+            continue
+    return chapters
+
+
+def write_piece(piece: Piece, root: Path) -> Path | None:
+    """Write one piece to <root>/<kind>/<slug>.md.
+
+    Returns the path written, or None if a human-authored file already sits
+    there: a person's own work is never overwritten by regeneration. The
+    caller reports the skip; staying silent about it would hide that the
+    generator declined to touch a file it normally owns.
+    """
     path = root / piece.kind / f"{piece.slug}.md"
+    if existing_origin(path) == "human":
+        return None
     path.parent.mkdir(parents=True, exist_ok=True)
     body = piece.body.strip()
     # newline="\n" so the corpus is byte-identical whichever OS regenerates it;
@@ -78,8 +153,16 @@ def write_piece(piece: Piece, root: Path) -> Path:
 
 
 def write_container(pieces: list[Piece], root: Path) -> Path:
-    """Write the dars-gah container, parts in reading order."""
-    ordered = sorted(pieces, key=lambda p: p.extra["part"])
+    """Write the dars-gah container, parts in reading order.
+
+    Built from the passed (tool-authored) pieces plus any human-authored
+    memoir chapters already on disk, so regeneration never drops a chapter a
+    person added by hand. A slug in both keeps its passed part.
+    """
+    part_by_slug: dict[str, int] = {p.slug: p.extra["part"] for p in pieces}
+    for part, slug in _human_memoir_chapters(root):
+        part_by_slug.setdefault(slug, part)
+    ordered = sorted(part_by_slug.items(), key=lambda item: item[1])
     path = root / "containers" / "dars-gah.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
@@ -88,7 +171,7 @@ def write_container(pieces: list[Piece], root: Path) -> Path:
         'description: "ایک خودنوشت"',
         "contents:",
     ]
-    lines += [f'  - "{p.slug}"' for p in ordered]
+    lines += [f'  - "{slug}"' for slug, _ in ordered]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     return path
 

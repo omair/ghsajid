@@ -3,6 +3,7 @@ title: "کہاں نمودِ تغیر سے رُستگاری ہے"
 slug: "kahan-namodi-taghir-se-rusatgari-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 266
 ---

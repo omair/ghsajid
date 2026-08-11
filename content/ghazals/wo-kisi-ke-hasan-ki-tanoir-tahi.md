@@ -3,6 +3,7 @@ title: "وہ کسی کے حسن کی تنویر تھی"
 slug: "wo-kisi-ke-hasan-ki-tanoir-tahi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 278
 ---

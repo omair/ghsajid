@@ -3,6 +3,7 @@ title: "مرے وجود سے یوں بے خبر نہیں ہوتے"
 slug: "mare-wajod-se-yon-be-khabar-nahin-hote"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 371
 ---

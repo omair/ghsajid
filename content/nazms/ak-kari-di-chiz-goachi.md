@@ -3,6 +3,7 @@ title: "اک کڑی دی چیز گواچی"
 slug: "ak-kari-di-chiz-goachi"
 language: "punjabi"
 script: "shahmukhi"
+origin: "tool"
 published: 2020-05-10
 ---
 

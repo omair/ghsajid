@@ -3,6 +3,7 @@ title: "نقّارے پر چوٹ پڑی ہے، پِڑ باندھا سیّارو�
 slug: "naqare-par-chot-pari-he-pir-banadha-siaron-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 28
 ---

@@ -3,6 +3,7 @@ title: "نہیں چراغِ دہر سے کلام میرے خواب کو"
 slug: "nahin-charaghi-dahar-se-kalam-mere-khwab-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 243
 ---

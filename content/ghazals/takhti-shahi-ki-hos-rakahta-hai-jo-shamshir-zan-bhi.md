@@ -3,6 +3,7 @@ title: "تختِ شاہی کی ہوس رکھتا ہے جو شمشیر زن بھ�
 slug: "takhti-shahi-ki-hos-rakahta-hai-jo-shamshir-zan-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 339
 ---

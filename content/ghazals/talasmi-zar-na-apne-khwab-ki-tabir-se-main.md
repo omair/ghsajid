@@ -3,6 +3,7 @@ title: "طلسمِ زر نہ اپنے خواب کی تعبیر سے مَیں"
 slug: "talasmi-zar-na-apne-khwab-ki-tabir-se-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 341
 ---

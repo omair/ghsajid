@@ -3,6 +3,7 @@ title: "دوسرا وار کرنے کو رہوار پر میرے مدِّ مقا
 slug: "dosra-war-karne-ko-rahoar-par-mere-madi-maqabal-ka-saia-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 281
 ---

@@ -3,6 +3,7 @@ title: "اِس کارِ محبّت میں ہم آہ تو بھرتے ہیں"
 slug: "ais-kari-mahabat-mein-ham-aah-to-baharte-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 72
 ---

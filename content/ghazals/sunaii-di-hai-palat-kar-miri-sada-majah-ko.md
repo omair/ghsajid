@@ -3,6 +3,7 @@ title: "سُنائی دی ہے پلٹ کر مِری صدا مجھ کو"
 slug: "sunaii-di-hai-palat-kar-miri-sada-majah-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 8
 ---

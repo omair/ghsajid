@@ -3,6 +3,7 @@ title: "اگر رات دن یہ زمیں آسماں یونہی گردش کریں
 slug: "agar-raat-dan-ye-zamin-aasman-yonhi-garadash-karin-ge"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 70
 ---

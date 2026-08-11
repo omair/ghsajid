@@ -3,6 +3,7 @@ title: "بدن چُراتے ہوئے اُس نے جب چُرائے ہونٹ"
 slug: "badan-churate-hoie-us-ne-jab-churaie-honat"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 18
 ---

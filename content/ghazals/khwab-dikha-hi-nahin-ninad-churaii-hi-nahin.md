@@ -3,6 +3,7 @@ title: "خواب دیکھا ہی نہیں، نیند چُرائی ہی نہیں"
 slug: "khwab-dikha-hi-nahin-ninad-churaii-hi-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 19
 ---

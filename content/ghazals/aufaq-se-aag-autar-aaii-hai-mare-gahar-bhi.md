@@ -3,6 +3,7 @@ title: "اُفق سے آگ اُتر آئی ہے مرے گھر بھی"
 slug: "aufaq-se-aag-autar-aaii-hai-mare-gahar-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 29
 ---

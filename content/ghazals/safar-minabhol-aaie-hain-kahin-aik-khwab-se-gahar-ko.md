@@ -3,6 +3,7 @@ title: "سفر میںبھول آئے ہیں کہیں اِک خواب سے گھر
 slug: "safar-minabhol-aaie-hain-kahin-aik-khwab-se-gahar-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 40
 ---

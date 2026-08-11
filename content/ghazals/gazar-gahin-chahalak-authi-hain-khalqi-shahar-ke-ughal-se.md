@@ -3,6 +3,7 @@ title: "گزر گاہیں چھلک اُٹھی ہیں خلقِ شہر کے ُغل
 slug: "gazar-gahin-chahalak-authi-hain-khalqi-shahar-ke-ughal-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 403
 ---

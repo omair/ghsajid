@@ -3,6 +3,7 @@ title: "فلک مختلف ہے، فضا مختلف"
 slug: "falak-makhatalaf-he-faza-makhatalaf"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 43
 ---

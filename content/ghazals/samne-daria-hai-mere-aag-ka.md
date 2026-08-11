@@ -3,6 +3,7 @@ title: "سامنے دریا ہے میرے آگ کا"
 slug: "samne-daria-hai-mere-aag-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 199
 ---

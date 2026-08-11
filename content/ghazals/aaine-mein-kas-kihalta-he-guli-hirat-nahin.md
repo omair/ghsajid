@@ -3,6 +3,7 @@ title: "آئنے میں عکس کِھلتا ہے، گُلِ حیرت نہیں"
 slug: "aaine-mein-kas-kihalta-he-guli-hirat-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 394
 ---

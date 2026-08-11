@@ -3,6 +3,7 @@ title: "گلاب ِعشق کھِل سکتا ہے اُس بے مہر کے دل م
 slug: "galab-ishaq-kahil-sakta-hai-us-be-mahar-ke-dil-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 541
 ---

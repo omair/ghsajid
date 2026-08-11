@@ -3,6 +3,7 @@ title: "ماورائے سراغ ہوں مَیں بھی"
 slug: "maoraie-saragh-hun-main-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 published_in: ["caarwan.com"]
 ---

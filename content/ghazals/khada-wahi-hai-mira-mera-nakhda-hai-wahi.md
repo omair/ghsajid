@@ -3,6 +3,7 @@ title: "خدا وہی ہے مِرا، میرا ناخدا ہے وہی"
 slug: "khada-wahi-hai-mira-mera-nakhda-hai-wahi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 35
 ---

@@ -3,6 +3,7 @@ title: "کسی کا حق ہے نہ کچھ اختیار ہے مجھ پر"
 slug: "kisi-ka-haq-hai-na-kuch-akhtiar-hai-majah-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 421
 ---

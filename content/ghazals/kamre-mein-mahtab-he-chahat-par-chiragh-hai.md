@@ -3,6 +3,7 @@ title: "کمرے میں ماہتاب ہے، چھت پر چراغ ہے"
 slug: "kamre-mein-mahtab-he-chahat-par-chiragh-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 48
 ---

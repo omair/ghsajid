@@ -3,6 +3,7 @@ title: "ریاظ احمد کا\" شجر ِحیات\""
 slug: "riaz-ahmad-ka-shajar-ihiat"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "شجر ِحیات"
 reviewed_author: "ریاض احمد"

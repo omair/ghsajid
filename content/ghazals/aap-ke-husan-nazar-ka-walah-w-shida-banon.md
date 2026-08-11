@@ -3,6 +3,7 @@ title: "آپ کے حُسن نظر کا والہ و شیدا بنوں"
 slug: "aap-ke-husan-nazar-ka-walah-w-shida-banon"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 27
 ---

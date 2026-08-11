@@ -3,6 +3,7 @@ title: "درس گاہ - 45"
 slug: "dars-gah-45"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 part: 45
 ---

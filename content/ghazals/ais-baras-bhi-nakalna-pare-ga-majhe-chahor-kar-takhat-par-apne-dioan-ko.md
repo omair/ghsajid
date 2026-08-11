@@ -3,6 +3,7 @@ title: "اِس برس بھی نکلنا پڑے گا مجھے چھوڑ کر تخ�
 slug: "ais-baras-bhi-nakalna-pare-ga-majhe-chahor-kar-takhat-par-apne-dioan-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 282
 ---

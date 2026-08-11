@@ -3,6 +3,7 @@ title: "تعارف"
 slug: "taraf"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 reviewed_book: "مزامیر ۔ کلیات، جلد اول"
 source_book: "kulliyat-jild-1"
 book_order: 605

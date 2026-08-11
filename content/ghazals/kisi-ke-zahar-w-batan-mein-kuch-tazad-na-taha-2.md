@@ -3,6 +3,7 @@ title: "کسی کے ظاہر و باطن میں کچھ تضاد نہ تھا"
 slug: "kisi-ke-zahar-w-batan-mein-kuch-tazad-na-taha-2"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 476
 ---

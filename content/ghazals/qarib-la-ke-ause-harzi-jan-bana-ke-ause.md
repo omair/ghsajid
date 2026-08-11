@@ -3,6 +3,7 @@ title: "قریب لا کے اُسے، حرزِ جاں بنا کے اُسے"
 slug: "qarib-la-ke-ause-harzi-jan-bana-ke-ause"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 10
 ---

@@ -3,6 +3,7 @@ title: "قیس کا قصہ الگ ہے، میرا افسانہ الگ"
 slug: "qis-ka-qasah-alag-he-mera-afsanah-alag"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 6
 ---

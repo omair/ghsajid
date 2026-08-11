@@ -3,6 +3,7 @@ title: "نہیں ہے کوئی اگر سلسلہ ہمارے بیچ"
 slug: "nahin-hai-koi-agar-salasalah-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 454
 ---

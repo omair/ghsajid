@@ -3,6 +3,7 @@ title: "ادائے خاص سے باغِ عدن چُرائے ہوئے"
 slug: "adaie-khas-se-baghi-dan-churaie-hoie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 495
 ---

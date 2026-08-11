@@ -3,6 +3,7 @@ title: "تم پر دوش نہیں جو ہو اَن جان ابھی"
 slug: "tam-par-dosh-nahin-jo-ho-aan-jan-abhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 66
 ---

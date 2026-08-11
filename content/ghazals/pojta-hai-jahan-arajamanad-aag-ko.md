@@ -3,6 +3,7 @@ title: "پوجتا ہے جہاں ارجمند آگ کو"
 slug: "pojta-hai-jahan-arajamanad-aag-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 195
 ---

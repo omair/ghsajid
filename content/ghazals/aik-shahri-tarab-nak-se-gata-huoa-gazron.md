@@ -3,6 +3,7 @@ title: "اِک شہرِ طرب ناک سے گاتا ہُوا گزروں"
 slug: "aik-shahri-tarab-nak-se-gata-huoa-gazron"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 96
 ---

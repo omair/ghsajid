@@ -3,6 +3,7 @@ title: "ہے مِرے گمان میں کیا بسا کوئی خواب ڈھوتا
 slug: "hai-mire-gaman-mein-kya-basa-koi-khwab-dahota-huoa-badan"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 67
 ---

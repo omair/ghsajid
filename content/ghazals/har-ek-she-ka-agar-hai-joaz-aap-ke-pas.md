@@ -3,6 +3,7 @@ title: "ہر ایک شے کا اگر ہے جواز آپ کے پاس"
 slug: "har-ek-she-ka-agar-hai-joaz-aap-ke-pas"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 592
 ---

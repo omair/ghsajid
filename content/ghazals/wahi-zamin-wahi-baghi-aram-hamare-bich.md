@@ -3,6 +3,7 @@ title: "وہی زمیں، وہی باغِ ارم ہمارے بیچ"
 slug: "wahi-zamin-wahi-baghi-aram-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 468
 ---

@@ -3,6 +3,7 @@ title: "گلابِ وصل کھلے گا نہ شمعداں پر چاند"
 slug: "galabi-wasal-kahle-ga-na-shamdan-par-chanad"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 540
 ---

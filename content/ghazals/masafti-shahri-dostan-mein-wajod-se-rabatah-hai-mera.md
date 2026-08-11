@@ -3,6 +3,7 @@ title: "مسافتِ شہرِ دوستاں میں وجود سے رابطہ ہے 
 slug: "masafti-shahri-dostan-mein-wajod-se-rabatah-hai-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 58
 ---

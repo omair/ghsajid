@@ -3,6 +3,7 @@ title: "رُکا ہوں کس کے وہم میں، مرے گُمان میں نہ�
 slug: "ruka-hun-kas-ke-waham-min-mare-guman-mein-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 99
 ---

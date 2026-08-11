@@ -3,6 +3,7 @@ title: "عمر کس موڑ پر آتے ہی گئی تھم میری"
 slug: "mar-kas-mor-par-aate-hi-gii-taham-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 497
 ---

@@ -3,6 +3,7 @@ title: "مٹا کر میرے ہاتھوں سے مقدّر کی لکیر اُس �
 slug: "mata-kar-mere-hathon-se-maqadar-ki-lakir-us-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 348
 ---

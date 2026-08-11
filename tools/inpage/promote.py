@@ -10,6 +10,8 @@ import json
 import shutil
 from pathlib import Path
 
+from tools.migrate.emit import existing_origin
+
 from .emit import resolve_book_records, resolve_slugs
 from .flags import UNPUBLISHABLE
 from .groundtruth import skeleton
@@ -104,6 +106,11 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
             )
             continue
         target = content / segment.kind / f"{slug}.md"
+        if existing_origin(target) == "human":
+            problems.append(
+                f"human-authored, left untouched: {target.relative_to(content)}"
+            )
+            continue
         if target.exists():
             try:
                 existing_body = _existing_body(target)

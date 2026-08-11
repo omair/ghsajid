@@ -3,6 +3,7 @@ title: "عشق سے اور کار دنیا سے حذر کرتا ہوں میں"
 slug: "ishq-se-aur-kar-dania-se-hazar-karta-hun-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

@@ -3,6 +3,7 @@ title: "چراغِ شام نے سایے کو خیر باد کہا"
 slug: "charaghi-sham-ne-saie-ko-khir-bad-kaha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 25
 ---

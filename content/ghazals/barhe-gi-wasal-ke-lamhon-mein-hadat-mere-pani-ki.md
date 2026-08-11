@@ -3,6 +3,7 @@ title: "بڑھے گی وصل کے لمحوں میں حدّت میرے پانی �
 slug: "barhe-gi-wasal-ke-lamhon-mein-hadat-mere-pani-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 176
 ---

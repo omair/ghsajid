@@ -3,6 +3,7 @@ title: "متاعِ خاک کو کچھ اور سربلند کیا"
 slug: "matai-khak-ko-kuch-aur-sarabalanad-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 517
 ---

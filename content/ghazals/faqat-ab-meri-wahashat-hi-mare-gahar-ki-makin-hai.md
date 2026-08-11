@@ -3,6 +3,7 @@ title: "فقط اب میری وحشت ہی مرے گھر کی مکیں ہے"
 slug: "faqat-ab-meri-wahashat-hi-mare-gahar-ki-makin-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 256
 ---

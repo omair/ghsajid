@@ -3,6 +3,7 @@ title: "کس کام آئے گی مری شمشیر میرے بعد"
 slug: "kas-kam-aaie-gi-mari-shamshir-mere-bad"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 345
 ---

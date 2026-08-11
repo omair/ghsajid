@@ -3,6 +3,7 @@ title: "آسماں زیرِ قدم ہے نہ زمیں سر پر ہے"
 slug: "aasman-ziri-qadam-hai-na-zamin-sar-par-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 55
 ---

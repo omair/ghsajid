@@ -3,6 +3,7 @@ title: "بنائے خُبث کا اظہار کر دیا اُس نے"
 slug: "banaie-khubas-ka-azhar-kar-dia-us-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 587
 ---

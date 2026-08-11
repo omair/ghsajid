@@ -3,6 +3,7 @@ title: "نہیں کہ غیر کی امداد کر رہا ہوں مَیں"
 slug: "nahin-keh-ghir-ki-amdad-kar-raha-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 300
 ---

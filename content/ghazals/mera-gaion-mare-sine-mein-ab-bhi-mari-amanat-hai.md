@@ -3,6 +3,7 @@ title: "میرا گائوں مرے سینے میں اب بھی مری امانت
 slug: "mera-gaion-mare-sine-mein-ab-bhi-mari-amanat-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 63
 ---

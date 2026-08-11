@@ -3,6 +3,7 @@ title: "دیارِ دل میں گلِ موسمِ یقیں ہے تو"
 slug: "diari-dil-mein-gali-mosmi-yaqin-hai-to"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 6
 ---

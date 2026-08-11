@@ -3,6 +3,7 @@ title: "اسیرِ حلقۂ زنجیرِ در نہیں ہوتے"
 slug: "asiri-halaqah-zanjiri-dar-nahin-hote"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 561
 ---

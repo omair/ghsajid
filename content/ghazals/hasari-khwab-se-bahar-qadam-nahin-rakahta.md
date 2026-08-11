@@ -3,6 +3,7 @@ title: "حصارِ خواب سے باہر قدم نہیں رکھتا"
 slug: "hasari-khwab-se-bahar-qadam-nahin-rakahta"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 311
 ---

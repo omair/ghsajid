@@ -3,6 +3,7 @@ title: "آج آئینے میں جو کچھ بھی نظر آتا ہے"
 slug: "aaj-aaiine-mein-jo-kuch-bhi-nazar-aata-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 409
 ---

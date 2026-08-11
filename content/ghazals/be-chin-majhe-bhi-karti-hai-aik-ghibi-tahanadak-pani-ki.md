@@ -3,6 +3,7 @@ title: "بے چین مجھے بھی کرتی ہے اِک غیبی ٹھنڈک پ�
 slug: "be-chin-majhe-bhi-karti-hai-aik-ghibi-tahanadak-pani-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 183
 ---

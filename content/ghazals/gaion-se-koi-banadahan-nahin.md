@@ -3,6 +3,7 @@ title: "گائوں سے کوئی بندھن نہیں"
 slug: "gaion-se-koi-banadahan-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 80
 ---

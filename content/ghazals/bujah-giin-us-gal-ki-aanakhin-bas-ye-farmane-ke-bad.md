@@ -3,6 +3,7 @@ title: "بُجھ گئیں اُس گل کی آنکھیں بس یہ فرمانے �
 slug: "bujah-giin-us-gal-ki-aanakhin-bas-ye-farmane-ke-bad"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 521
 ---

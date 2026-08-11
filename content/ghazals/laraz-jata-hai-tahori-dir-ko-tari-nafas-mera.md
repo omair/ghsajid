@@ -3,6 +3,7 @@ title: "لرز جاتا ہے تھوڑی دیر کو تارِ نفس میرا"
 slug: "laraz-jata-hai-tahori-dir-ko-tari-nafas-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 383
 ---

@@ -3,6 +3,7 @@ title: "جب سے اُس شوخ سے ملا ہوں مَیں"
 slug: "jab-se-us-shokh-se-mala-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 287
 ---

@@ -3,6 +3,7 @@ title: "قرض ہیں اِک موجِ گریہ پر مری آنکھیں ابھی
 slug: "qaraz-hain-aik-moji-garih-par-mari-aanakhin-abhi-tak"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 379
 ---

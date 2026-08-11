@@ -3,6 +3,7 @@ title: "وہ کر سکتا تھا ساری زندگی برباد میری"
 slug: "wo-kar-sakta-taha-sari-zanadgi-barbad-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 395
 ---

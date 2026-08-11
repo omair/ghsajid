@@ -3,6 +3,7 @@ title: "رنج پہنچاتا ہے اکثر نغمۂ شادی مجھے"
 slug: "ranaj-pahanchata-hai-akasar-naghamah-shadi-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 318
 ---

@@ -3,6 +3,7 @@ title: "بہت دُور کا راستہ بھی ہے تُو"
 slug: "bahat-duor-ka-rasatah-bhi-hai-tuo"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 27
 ---

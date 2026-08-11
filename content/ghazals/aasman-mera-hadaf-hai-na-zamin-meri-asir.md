@@ -3,6 +3,7 @@ title: "آسماں میرا ہدف ہے نہ زمیں میری اسیر"
 slug: "aasman-mera-hadaf-hai-na-zamin-meri-asir"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 402
 ---

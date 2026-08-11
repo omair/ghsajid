@@ -3,6 +3,7 @@ title: "بے سبب ہے تمام پیکار جانتا ہوں"
 slug: "be-sabab-hai-tamam-pikar-janta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 299
 ---

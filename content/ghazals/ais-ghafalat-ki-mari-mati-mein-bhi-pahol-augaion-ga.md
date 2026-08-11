@@ -3,6 +3,7 @@ title: "اِس غفلت کی ماری مٹّی میں بھی پھول اُگائ
 slug: "ais-ghafalat-ki-mari-mati-mein-bhi-pahol-augaion-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 52
 ---

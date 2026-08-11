@@ -3,6 +3,7 @@ title: "بدن میں اُونگھتے خوں کی روانی تیز کر کے"
 slug: "badan-mein-auonagahte-khon-ki-roani-tiz-kar-ke"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 451
 ---

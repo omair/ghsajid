@@ -3,6 +3,7 @@ title: "عالمِ خواب کا مکیں ہوں مَیں"
 slug: "almi-khwab-ka-makin-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 37
 ---

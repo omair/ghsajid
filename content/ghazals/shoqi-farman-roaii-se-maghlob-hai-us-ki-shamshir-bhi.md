@@ -3,6 +3,7 @@ title: "شوقِ فرماں روائی سے مغلوب ہے اُس کی شمشی
 slug: "shoqi-farman-roaii-se-maghlob-hai-us-ki-shamshir-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 335
 ---

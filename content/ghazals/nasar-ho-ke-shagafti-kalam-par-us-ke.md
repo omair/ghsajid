@@ -3,6 +3,7 @@ title: "نثار ہو کے شگفتِ کلام پر اُس کے"
 slug: "nasar-ho-ke-shagafti-kalam-par-us-ke"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 343
 ---

@@ -3,6 +3,7 @@ title: "کتابِ عشق مکمّل ہوئی، نہیں بھی ہوئی"
 slug: "katabi-ishq-makamal-hoii-nahin-bhi-hoii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 59
 ---

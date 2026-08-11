@@ -3,6 +3,7 @@ title: "اگر اُس ابد کے چراغ کا مرے خاکداں پہ کرم 
 slug: "agar-us-abad-ke-chiragh-ka-mare-khakdan-pah-karam-na-ho"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 477
 ---

@@ -3,6 +3,7 @@ title: "مجھ پہ مشقِ ستم زیادہ نہیں"
 slug: "majah-pah-mashqi-satam-ziadah-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 560
 ---

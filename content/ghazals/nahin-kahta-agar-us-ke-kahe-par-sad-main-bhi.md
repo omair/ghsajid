@@ -3,6 +3,7 @@ title: "نہیں کہتا اگر اُس کے کہے پر صاد مَیں بھی"
 slug: "nahin-kahta-agar-us-ke-kahe-par-sad-main-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 413
 ---

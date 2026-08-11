@@ -3,6 +3,7 @@ title: "حصارِ آتشِ رنگیں سے باہر میری مٹّی ہے"
 slug: "hasari-aatshi-rangin-se-bahar-meri-mati-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 160
 ---

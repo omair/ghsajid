@@ -3,6 +3,7 @@ title: "سرِ شام آبِ رواں میں ہے کوئی عکس اور ہی ق
 slug: "sari-sham-aabi-roan-mein-hai-koi-kas-aur-hi-qasam-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 115
 ---

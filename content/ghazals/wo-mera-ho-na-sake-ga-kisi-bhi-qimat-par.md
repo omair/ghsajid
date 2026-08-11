@@ -3,6 +3,7 @@ title: "وہ میرا ہو نہ سکے گا کسی بھی قیمت پر"
 slug: "wo-mera-ho-na-sake-ga-kisi-bhi-qimat-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 534
 ---

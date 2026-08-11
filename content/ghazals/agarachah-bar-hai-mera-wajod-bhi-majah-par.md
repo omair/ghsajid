@@ -3,6 +3,7 @@ title: "اگرچہ بار ہے میرا وجود بھی مجھ پر"
 slug: "agarachah-bar-hai-mera-wajod-bhi-majah-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 314
 ---

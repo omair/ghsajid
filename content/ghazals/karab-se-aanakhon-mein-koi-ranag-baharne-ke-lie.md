@@ -3,6 +3,7 @@ title: "کرب سے آنکھوں میں کوئی رنگ بھرنے کے لیے"
 slug: "karab-se-aanakhon-mein-koi-ranag-baharne-ke-lie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 141
 ---

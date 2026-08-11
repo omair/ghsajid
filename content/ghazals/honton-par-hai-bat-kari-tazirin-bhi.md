@@ -3,6 +3,7 @@ title: "ہونٹوں پر ہے بات، کڑی تعزیریں بھی"
 slug: "honton-par-hai-bat-kari-tazirin-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 125
 ---

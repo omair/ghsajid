@@ -3,6 +3,7 @@ title: "اتر جائوں گا مَیں اُس روشنی کے تیز دھارے
 slug: "atar-jaion-ga-main-us-roshni-ke-tiz-dahare-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 258
 ---

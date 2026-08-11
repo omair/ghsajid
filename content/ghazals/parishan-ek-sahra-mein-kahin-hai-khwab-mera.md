@@ -3,6 +3,7 @@ title: "پریشاں ایک صحرا میں کہیں ہے خواب میرا"
 slug: "parishan-ek-sahra-mein-kahin-hai-khwab-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 245
 ---

@@ -3,6 +3,7 @@ title: "مجھے اپنی ذات سے ہے غرض نہ ہے جستجو کسی ا
 slug: "majhe-apni-zat-se-hai-gharaz-na-hai-jasatjo-kisi-aur-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 515
 ---

@@ -3,6 +3,7 @@ title: "نچھاور کر دیا ہوتا یہ سارا شہر اُس پر"
 slug: "nachhaor-kar-dia-hota-ye-sara-shahar-us-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 374
 ---

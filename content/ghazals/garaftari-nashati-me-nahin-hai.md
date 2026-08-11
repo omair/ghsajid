@@ -3,6 +3,7 @@ title: "گرفتارِ نشاطِ مے نہیں ہے"
 slug: "garaftari-nashati-me-nahin-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 559
 ---

@@ -3,6 +3,7 @@ title: "دھوپ تھی اور دھوپ کی حد پر کُھلا میدان ت�
 slug: "dahop-tahi-aur-dahop-ki-had-par-kuhla-midan-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 44
 ---

@@ -3,6 +3,7 @@ title: "ا ّکٹھی ہو چکی ہے خلقتِ شہر ایک کونے میں"
 slug: "a-kathi-ho-chaki-hai-khalaqti-shahar-ek-kone-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 262
 ---

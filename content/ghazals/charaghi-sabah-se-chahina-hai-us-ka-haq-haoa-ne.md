@@ -3,6 +3,7 @@ title: "چراغِ صبح سے چھینا ہے اُس کا حق ہَوا نے"
 slug: "charaghi-sabah-se-chahina-hai-us-ka-haq-haoa-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 212
 ---

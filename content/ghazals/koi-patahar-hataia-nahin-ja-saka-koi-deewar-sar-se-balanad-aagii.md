@@ -3,6 +3,7 @@ title: "کوئی پتھّر ہٹایا نہیں جا سکا، کوئی دیوا�
 slug: "koi-patahar-hataia-nahin-ja-saka-koi-deewar-sar-se-balanad-aagii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 38
 ---

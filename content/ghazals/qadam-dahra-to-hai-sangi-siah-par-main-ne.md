@@ -3,6 +3,7 @@ title: "قدم دھرا تو ہے سنگِ سیاہ پر مَیں نے"
 slug: "qadam-dahra-to-hai-sangi-siah-par-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 268
 ---

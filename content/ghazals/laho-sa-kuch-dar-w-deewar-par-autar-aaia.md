@@ -3,6 +3,7 @@ title: "لہو سا کچھ در و دیوار پر اُتر آیا"
 slug: "laho-sa-kuch-dar-w-deewar-par-autar-aaia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 491
 ---

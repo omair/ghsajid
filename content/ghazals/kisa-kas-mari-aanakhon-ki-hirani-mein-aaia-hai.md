@@ -3,6 +3,7 @@ title: "کیسا عکس مری آنکھوں کی حیرانی میں آیا ہے
 slug: "kisa-kas-mari-aanakhon-ki-hirani-mein-aaia-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 53
 ---

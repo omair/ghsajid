@@ -3,6 +3,7 @@ title: "کوکبِ بختِ شہریار آج بھی ارجمند ہے"
 slug: "kokbi-bakhti-shahriar-aaj-bhi-arajamanad-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 112
 ---

@@ -3,6 +3,7 @@ title: "صبح تک جن سے بہت بے زار ہوجاتا ہوں مَیں"
 slug: "sabah-tak-jan-se-bahat-be-zar-hojata-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 42
 ---

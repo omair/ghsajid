@@ -3,6 +3,7 @@ title: "بستر لگا ہُوا، نئی چادر بِچھی ہوئی"
 slug: "basatar-laga-huoa-nii-chadar-bichhi-hoii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 7
 ---

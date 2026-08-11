@@ -3,6 +3,7 @@ title: "مرے وجود کے منظر بدل رہے ہیں کیوں؟"
 slug: "mare-wajod-ke-manazar-badal-rahe-hain-kion"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 428
 ---

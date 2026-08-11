@@ -3,6 +3,7 @@ title: "کھڑا ہوں اُس کنارے پر، جہاں کوئی نہیں ہے
 slug: "kahra-hun-us-kanare-par-jahan-koi-nahin-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 285
 ---

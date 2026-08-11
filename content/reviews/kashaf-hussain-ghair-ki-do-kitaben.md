@@ -3,6 +3,7 @@ title: "کاشف حسین غائر کی دو کتابیں"
 slug: "kashaf-hussain-ghair-ki-do-kitaben"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_author: "کاشف حسین غائر"
 ---

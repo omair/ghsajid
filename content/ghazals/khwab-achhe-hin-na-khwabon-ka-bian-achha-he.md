@@ -3,6 +3,7 @@ title: "خواب اچّھے ھیں نہ خوابوں کا بیاں اچّھا ھ
 slug: "khwab-achhe-hin-na-khwabon-ka-bian-achha-he"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

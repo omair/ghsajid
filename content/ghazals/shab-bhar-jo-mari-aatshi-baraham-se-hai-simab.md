@@ -3,6 +3,7 @@ title: "شب بھر جو مری آتشِ برہم سے ہے سیماب"
 slug: "shab-bhar-jo-mari-aatshi-baraham-se-hai-simab"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 37
 ---

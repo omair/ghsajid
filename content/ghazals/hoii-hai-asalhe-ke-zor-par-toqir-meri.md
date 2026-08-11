@@ -3,6 +3,7 @@ title: "ہوئی ہے اسلحے کے زور پر توقیر میری"
 slug: "hoii-hai-asalhe-ke-zor-par-toqir-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 327
 ---

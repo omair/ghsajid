@@ -3,6 +3,7 @@ title: "انساں تو ہیں اِک دوسرے کے خون کے پیاسے"
 slug: "ansan-to-hain-aik-dosre-ke-khon-ke-piase"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 489
 ---

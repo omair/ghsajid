@@ -3,6 +3,7 @@ title: "اگر فرماں روائی صاحبِ توقیر کا حق ہے"
 slug: "agar-farman-roaii-sahbi-toqir-ka-haq-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 319
 ---

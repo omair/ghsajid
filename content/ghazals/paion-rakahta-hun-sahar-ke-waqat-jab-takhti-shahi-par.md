@@ -3,6 +3,7 @@ title: "پائوں رکھتا ہوں سحر کے وقت جب تختِ شہی پ�
 slug: "paion-rakahta-hun-sahar-ke-waqat-jab-takhti-shahi-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 334
 ---

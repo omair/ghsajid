@@ -3,6 +3,7 @@ title: "شعور / محمد ظفر الحق چشتی"
 slug: "shaoor-muhammad-zafar-alahaq-chashti"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "شعور"
 reviewed_author: "محمد ظفر الحق چشتی"

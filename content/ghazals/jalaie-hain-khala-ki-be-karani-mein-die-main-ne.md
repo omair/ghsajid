@@ -3,6 +3,7 @@ title: "جلائے ہیں خلا کی بے کرانی میں دیے مَیں ن�
 slug: "jalaie-hain-khala-ki-be-karani-mein-die-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 252
 ---

@@ -28,6 +28,9 @@ class Piece:
                                       # date and must still render loudly; None
                                       # means no date exists at all (book-sourced)
     body: str = ""
+    origin: str = "tool"            # everything these tools emit is tool-authored;
+                                     # a person's own pieces are stamped "human"
+                                     # elsewhere and never regenerated over
     tags: list[str] = field(default_factory=list)
     source_post_ids: list[int] = field(default_factory=list)
     extra: dict = field(default_factory=dict)   # kind-specific frontmatter

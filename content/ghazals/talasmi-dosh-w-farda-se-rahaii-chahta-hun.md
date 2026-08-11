@@ -3,6 +3,7 @@ title: "طلسمِ دوش و فردا سے رہائی چاہتا ہوں"
 slug: "talasmi-dosh-w-farda-se-rahaii-chahta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 361
 ---

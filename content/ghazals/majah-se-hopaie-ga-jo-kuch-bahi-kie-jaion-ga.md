@@ -3,6 +3,7 @@ title: "مجھ سے ہوپائے گا جو کچھ بھی، کیے جائوں گ�
 slug: "majah-se-hopaie-ga-jo-kuch-bahi-kie-jaion-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 338
 ---

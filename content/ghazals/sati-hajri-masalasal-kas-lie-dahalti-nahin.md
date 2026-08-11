@@ -3,6 +3,7 @@ title: "ساعتِ ہجرِ مسلسل کس لیے ڈھلتی نہیں!"
 slug: "sati-hajri-masalasal-kas-lie-dahalti-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 523
 ---

@@ -3,6 +3,7 @@ title: "پھیر لیتے ہیں نظر کوہ و دمن پانی سے"
 slug: "pahir-lite-hain-nazar-koh-w-daman-pani-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 175
 ---

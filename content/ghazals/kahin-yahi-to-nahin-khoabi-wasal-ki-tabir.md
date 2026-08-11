@@ -3,6 +3,7 @@ title: "کہیں یہی تو نہیں خوابِ وصل کی تعبیر"
 slug: "kahin-yahi-to-nahin-khoabi-wasal-ki-tabir"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 113
 ---

@@ -3,6 +3,7 @@ title: "اُداسیوں کی معیت میں سب مکان رہے"
 slug: "audasion-ki-mit-mein-sab-makan-rahe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 124
 ---

@@ -3,6 +3,7 @@ title: "اُسے اب چومنا ہے اور نہ سینے سے لگانا ہے"
 slug: "ause-ab-chomna-hai-aur-na-sine-se-lagana-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 542
 ---

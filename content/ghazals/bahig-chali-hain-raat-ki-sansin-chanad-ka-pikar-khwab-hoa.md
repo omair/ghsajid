@@ -3,6 +3,7 @@ title: "بھیگ چلی ہیں رات کی سانسیں، چاند کا پیکر
 slug: "bahig-chali-hain-raat-ki-sansin-chanad-ka-pikar-khwab-hoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 134
 ---

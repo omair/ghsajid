@@ -3,6 +3,7 @@ title: "کشیدِ فرح کرتا ہوں مَیں اِس دلگیر مٹّی س
 slug: "kashidi-farah-karta-hun-main-ais-dalgir-mati-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 164
 ---

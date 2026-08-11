@@ -3,6 +3,7 @@ title: "اِسی وحشت سرائے دہر کا مقسوم ہو کر"
 slug: "aisi-wahashat-saraie-dahar-ka-maqsom-ho-kar"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 344
 ---

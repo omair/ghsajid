@@ -3,6 +3,7 @@ title: "تنگ ہے میرے جنوں پر دشت کی وسعت بھی شاید"
 slug: "tanag-hai-mere-janon-par-dashat-ki-wasat-bhi-shaid"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 357
 ---

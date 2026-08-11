@@ -3,6 +3,7 @@ title: "ہاتھ میں دشمن کے شاید مَیں کماں دیتا نہی
 slug: "hatah-mein-dashaman-ke-shaid-main-kaman-dita-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 93
 ---

@@ -3,6 +3,7 @@ title: "تمام رات جاگنے کے بعد چاند سو گئے"
 slug: "tamam-raat-jagne-ke-bad-chanad-so-gie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 84
 ---

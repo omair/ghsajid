@@ -3,6 +3,7 @@ title: "غیب کے سیّارگاں کو روبرو کرتا ہوں مَیں"
 slug: "ghib-ke-siargan-ko-robro-karta-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 386
 ---

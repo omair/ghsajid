@@ -3,6 +3,7 @@ title: "کسی چراغ سے مَس ہو گیا بدن میرا"
 slug: "kisi-chiragh-se-mas-ho-gia-badan-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 82
 ---

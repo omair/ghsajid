@@ -3,6 +3,7 @@ title: "سایہ / سعید شارق"
 slug: "saya-saeed-sharaq"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "سایہ"
 reviewed_author: "سعید شارق"

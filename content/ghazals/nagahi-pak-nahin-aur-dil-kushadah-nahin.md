@@ -3,6 +3,7 @@ title: "نگاہِ پاک نہیں اور دل کُشادہ نہیں"
 slug: "nagahi-pak-nahin-aur-dil-kushadah-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 274
 ---

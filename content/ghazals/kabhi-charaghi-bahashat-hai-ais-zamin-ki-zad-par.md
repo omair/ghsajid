@@ -3,6 +3,7 @@ title: "کبھی چراغِ بہشت ہے اِس زمیں کی زد پر"
 slug: "kabhi-charaghi-bahashat-hai-ais-zamin-ki-zad-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 354
 ---

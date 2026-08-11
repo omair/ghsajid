@@ -3,6 +3,7 @@ title: "محتسب کی بے کلی پر، میکشوں کی ہا ئو ہُو پ
 slug: "mahatasab-ki-be-kali-par-mikshon-ki-ha-yo-huo-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 442
 ---

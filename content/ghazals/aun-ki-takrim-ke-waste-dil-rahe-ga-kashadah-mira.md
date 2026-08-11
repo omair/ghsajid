@@ -3,6 +3,7 @@ title: "اُن کی تکریم کے واسطے دل رہے گا کشادہ مر�
 slug: "aun-ki-takrim-ke-waste-dil-rahe-ga-kashadah-mira"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 388
 ---

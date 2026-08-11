@@ -3,6 +3,7 @@ title: "نہیں اب روک پائے گی فصیلِ شہر پانی کو"
 slug: "nahin-ab-rok-paie-gi-fasili-shahar-pani-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 178
 ---

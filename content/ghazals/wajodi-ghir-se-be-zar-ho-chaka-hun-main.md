@@ -3,6 +3,7 @@ title: "وجودِ غیر سے بے زار ہو چکا ہوں مَیں"
 slug: "wajodi-ghir-se-be-zar-ho-chaka-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 284
 ---

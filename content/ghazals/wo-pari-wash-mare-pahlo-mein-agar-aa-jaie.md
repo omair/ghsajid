@@ -3,6 +3,7 @@ title: "وہ پری وش مرے پہلو میں اگر آ جائے"
 slug: "wo-pari-wash-mare-pahlo-mein-agar-aa-jaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 537
 ---

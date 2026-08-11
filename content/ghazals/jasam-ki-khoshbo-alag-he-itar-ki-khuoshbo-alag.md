@@ -3,6 +3,7 @@ title: "جسم کی خوشبو الگ ہے، عِطر کی خُوشبو الگ"
 slug: "jasam-ki-khoshbo-alag-he-itar-ki-khuoshbo-alag"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 2
 ---

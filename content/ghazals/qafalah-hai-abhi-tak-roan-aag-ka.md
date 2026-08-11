@@ -3,6 +3,7 @@ title: "قافلہ ہے ابھی تک رواں آگ کا"
 slug: "qafalah-hai-abhi-tak-roan-aag-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 200
 ---

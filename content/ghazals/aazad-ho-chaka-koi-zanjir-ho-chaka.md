@@ -3,6 +3,7 @@ title: "آزاد ہو چکا کوئی زنجیر ہو چکا"
 slug: "aazad-ho-chaka-koi-zanjir-ho-chaka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 583
 ---

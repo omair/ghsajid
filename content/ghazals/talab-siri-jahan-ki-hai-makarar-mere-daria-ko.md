@@ -3,6 +3,7 @@ title: "طلب سیرِ جہاں کی ہے مکرّر میرے دریا کو"
 slug: "talab-siri-jahan-ki-hai-makarar-mere-daria-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 259
 ---

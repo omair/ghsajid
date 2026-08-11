@@ -3,6 +3,7 @@ title: "طاقچے میں شمع روشن ہے، فلک پر آگ ہے"
 slug: "taqche-mein-sham-roshan-he-falak-par-aag-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 188
 ---

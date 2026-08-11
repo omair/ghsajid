@@ -3,6 +3,7 @@ title: "لہو میں ڈُوب گیا ہجر کا خُمار اگر"
 slug: "laho-mein-duob-gia-hajar-ka-khumar-agar"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 97
 ---

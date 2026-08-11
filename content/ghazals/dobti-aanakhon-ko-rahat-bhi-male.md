@@ -3,6 +3,7 @@ title: "ڈوبتی آنکھوں کو راحت بھی ملے"
 slug: "dobti-aanakhon-ko-rahat-bhi-male"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 79
 ---

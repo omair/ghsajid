@@ -3,6 +3,7 @@ title: "اب لَوٹ کر چراغِ شبانہ بھی آئے گا"
 slug: "ab-laot-kar-charaghi-shabanah-bhi-aaie-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 64
 ---

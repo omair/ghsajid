@@ -3,6 +3,7 @@ title: "رشک اپنوں پر نہ غیروں سے حسد کرتا ہوں می�
 slug: "rashak-apnon-par-na-ghiron-se-hasad-karta-hun-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

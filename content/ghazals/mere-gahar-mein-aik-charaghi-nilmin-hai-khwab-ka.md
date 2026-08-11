@@ -3,6 +3,7 @@ title: "میرے گھر میں اِک چراغِ نیلمیں ہے خواب کا
 slug: "mere-gahar-mein-aik-charaghi-nilmin-hai-khwab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 242
 ---

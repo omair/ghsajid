@@ -3,6 +3,7 @@ title: "کسی نگاہ کی زد پر ہے باغِ سبز مِرا"
 slug: "kisi-nigah-ki-zad-par-hai-baghi-sabz-mira"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-03-25
 ---
 

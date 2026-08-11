@@ -3,6 +3,7 @@ title: "اپنی کوشش پہ ندامت نہیں ہوتی ہے مجھے"
 slug: "apni-koshash-pah-nadamat-nahin-hoti-hai-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 447
 ---

@@ -3,6 +3,7 @@ title: "خواب کی دنیا الگ ہے، نیند کی دنیا الگ"
 slug: "khwab-ki-dania-alag-he-ninad-ki-dania-alag"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 3
 ---

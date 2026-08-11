@@ -3,6 +3,7 @@ title: "نہیں ہے انتظار اِس شہر کو ظلِّ ہما کا"
 slug: "nahin-hai-anatzar-ais-shahar-ko-zali-hama-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 323
 ---

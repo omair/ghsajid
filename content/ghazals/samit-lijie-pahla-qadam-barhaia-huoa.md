@@ -3,6 +3,7 @@ title: "سمیٹ لیجیے پہلا قدم بڑھایا ہُوا"
 slug: "samit-lijie-pahla-qadam-barhaia-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 47
 ---

@@ -3,6 +3,7 @@ title: "خون میں مدھم حرارت ہی سہی"
 slug: "khon-mein-madaham-hararat-hi-sahi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 128
 ---

@@ -3,6 +3,7 @@ title: "متاعِ نقد چھوڑوں گا نہ کچھ جاگیر چھوڑوں 
 slug: "matai-naqad-chahoron-ga-na-kuch-jagir-chahoron-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 261
 ---

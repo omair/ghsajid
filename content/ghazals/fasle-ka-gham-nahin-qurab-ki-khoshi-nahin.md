@@ -3,6 +3,7 @@ title: "فاصلے کا غم نہیں، قُرب کی خوشی نہیں"
 slug: "fasle-ka-gham-nahin-qurab-ki-khoshi-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 89
 ---

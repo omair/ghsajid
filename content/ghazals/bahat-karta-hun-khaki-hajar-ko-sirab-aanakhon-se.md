@@ -3,6 +3,7 @@ title: "بہت کرتا ہوں خاکِ ہجر کو سیراب آنکھوں سے
 slug: "bahat-karta-hun-khaki-hajar-ko-sirab-aanakhon-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 28
 ---

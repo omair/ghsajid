@@ -3,6 +3,7 @@ title: "ہاتھ بہت بے تاب تھے لیکن چنچل پوریں شرما
 slug: "hatah-bahat-be-tab-tahe-likan-chanachal-porin-sharmaiiin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 43
 ---

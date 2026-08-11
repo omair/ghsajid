@@ -3,6 +3,7 @@ title: "سیّد الانبیائ آپ خیرالورا، اے رسولِ خدا
 slug: "sid-alanbiai-aap-khiralora-ae-rasoli-khada-ae-habibi-khada"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 4
 ---

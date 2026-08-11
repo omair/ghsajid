@@ -3,6 +3,7 @@ title: "گلے سے بھی لگایا تھا دمِ رخصت ہَوا نے"
 slug: "gale-se-bhi-lagaia-taha-dami-rakhasat-haoa-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 211
 ---

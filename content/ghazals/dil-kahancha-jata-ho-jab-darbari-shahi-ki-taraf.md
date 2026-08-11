@@ -3,6 +3,7 @@ title: "دل کھنچا جاتا ہو جب دربارِ شاہی کی طرف"
 slug: "dil-kahancha-jata-ho-jab-darbari-shahi-ki-taraf"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 321
 ---

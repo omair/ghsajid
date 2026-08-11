@@ -3,6 +3,7 @@ title: "دستکیں دینے سے حاصل، آئنہ  َبننے میں فیض
 slug: "dasatkin-dine-se-hasal-aainah-abanne-mein-fiz"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 74
 ---

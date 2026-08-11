@@ -3,6 +3,7 @@ title: "پُکارا چاہیے کس کو، کسے آواز دی جائے"
 slug: "pukara-chahie-kas-ko-kise-aaoaz-di-jaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 480
 ---

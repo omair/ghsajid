@@ -3,6 +3,7 @@ title: "کچھ روز سے ذرا سی ہے اَن بن ہمارے بیچ"
 slug: "kuch-roz-se-zara-si-hai-aan-ban-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 461
 ---

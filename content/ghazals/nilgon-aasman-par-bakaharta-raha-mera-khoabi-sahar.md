@@ -3,6 +3,7 @@ title: "نیلگوں آسماں پر بکھرتا رہا میرا خوابِ س�
 slug: "nilgon-aasman-par-bakaharta-raha-mera-khoabi-sahar"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 399
 ---

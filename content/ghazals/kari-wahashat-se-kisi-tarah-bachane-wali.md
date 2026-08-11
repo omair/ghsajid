@@ -3,6 +3,7 @@ title: "کارِ وحشت سے کسی طرح بچانے والی"
 slug: "kari-wahashat-se-kisi-tarah-bachane-wali"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 429
 ---

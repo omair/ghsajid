@@ -3,6 +3,7 @@ title: "سحر ہوتے ہی جو خورشید کے پیکر میں ڈھلتی �
 slug: "sahar-hote-hi-jo-khorshid-ke-pikar-mein-dahalti-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 92
 ---

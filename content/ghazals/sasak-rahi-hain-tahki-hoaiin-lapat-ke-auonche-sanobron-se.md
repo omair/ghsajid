@@ -3,6 +3,7 @@ title: "سسک رہی ہیں تھکی ہوائیں لپٹ کے اُونچے صن
 slug: "sasak-rahi-hain-tahki-hoaiin-lapat-ke-auonche-sanobron-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 107
 ---

@@ -3,6 +3,7 @@ title: "بہت گریزاں تھا مجھ سے عالی مزاج پانی"
 slug: "bahat-garizan-taha-majah-se-ali-mazaj-pani"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 179
 ---

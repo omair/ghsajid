@@ -3,6 +3,7 @@ title: "جہاں کے خلق ہونے کا سبب ہے ذاتِ احمد"
 slug: "jahan-ke-khalaq-hone-ka-sabab-hai-zati-ahmad"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 473
 ---

@@ -3,6 +3,7 @@ title: "نہیں اُسے جب آئنہ قبول میری آگ کا"
 slug: "nahin-ause-jab-aainah-qabol-meri-aag-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 202
 ---

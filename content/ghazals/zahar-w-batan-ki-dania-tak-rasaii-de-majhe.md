@@ -3,6 +3,7 @@ title: "ظاہر و باطن کی دنیا تک رسائی دے مجھے"
 slug: "zahar-w-batan-ki-dania-tak-rasaii-de-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 33
 ---

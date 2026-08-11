@@ -3,6 +3,7 @@ title: "سمجھتے ہیں جو سارے شہر کا مقسوم پانی کو"
 slug: "samajahte-hain-jo-sare-shahar-ka-maqsom-pani-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 171
 ---

@@ -3,6 +3,7 @@ title: "آج گلی میں لے آئی ہے کیسی آگ مجھے"
 slug: "aaj-gali-mein-le-aaii-hai-kisi-aag-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 198
 ---

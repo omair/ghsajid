@@ -3,6 +3,7 @@ title: "سوادِ شہر سے اغماض کرنا چاہتا ہوں"
 slug: "soadi-shahar-se-aghmaz-karna-chahta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 578
 ---

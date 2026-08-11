@@ -3,6 +3,7 @@ title: "سبز ہیں میری فصیلیں، نیلمیں میرے چراغ"
 slug: "sabz-hain-meri-fasilin-nilmin-mere-chiragh"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 67
 ---

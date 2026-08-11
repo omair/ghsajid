@@ -3,6 +3,7 @@ title: "مَیں سمجھتا ہوں کہ مجھ میں کچھ کمی مٹّی �
 slug: "main-samajahta-hun-keh-majah-mein-kuch-kami-mati-se-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 153
 ---

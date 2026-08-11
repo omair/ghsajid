@@ -3,6 +3,7 @@ title: "چراغ کی اوٹ میں رکا ہے جو اک ہیولیٰ سا یا
 slug: "chiragh-ki-aot-mein-raka-hai-jo-ak-hioli-sa-yasmin-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 ---
 

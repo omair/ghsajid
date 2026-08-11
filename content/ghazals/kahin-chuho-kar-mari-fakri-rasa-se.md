@@ -3,6 +3,7 @@ title: "کہیں چُھو کر مری فکرِ رسا سے"
 slug: "kahin-chuho-kar-mari-fakri-rasa-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 121
 ---

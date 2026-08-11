@@ -3,6 +3,7 @@ title: "نہیں دُنیائے حیرت کی ضرورت میرے پانی کو"
 slug: "nahin-duniaie-hirat-ki-zarorat-mere-pani-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 169
 ---

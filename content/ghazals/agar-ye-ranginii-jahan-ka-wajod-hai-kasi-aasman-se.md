@@ -3,6 +3,7 @@ title: "اگر یہ رنگینیِ جہاں کا وجود ہے عکسِ آسما
 slug: "agar-ye-ranginii-jahan-ka-wajod-hai-kasi-aasman-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 14
 ---

@@ -3,6 +3,7 @@ title: "کیسا حرف گر ہوں مَیں، بات میں اثر نہیں"
 slug: "kisa-haraf-gar-hun-main-bat-mein-asar-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 12
 ---

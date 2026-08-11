@@ -3,6 +3,7 @@ title: "جب سے وہ چاند سی صورت مِرے آئینے میں ہے"
 slug: "jab-se-wo-chanad-si-sorat-mire-aaiine-mein-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 13
 ---

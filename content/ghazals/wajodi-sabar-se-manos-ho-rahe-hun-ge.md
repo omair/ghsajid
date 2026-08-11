@@ -3,6 +3,7 @@ title: "وجودِ صبر سے مانوس ہو رہے ہوں گے"
 slug: "wajodi-sabar-se-manos-ho-rahe-hun-ge"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 593
 ---

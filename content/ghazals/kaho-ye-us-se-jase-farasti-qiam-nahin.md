@@ -3,6 +3,7 @@ title: "کہو یہ اُس سے، جسے فرصتِ قیام نہیں"
 slug: "kaho-ye-us-se-jase-farasti-qiam-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 406
 ---

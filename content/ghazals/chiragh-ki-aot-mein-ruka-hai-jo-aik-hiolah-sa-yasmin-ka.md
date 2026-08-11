@@ -3,6 +3,7 @@ title: "چراغ کی اوٹ میں رُکا ہے جو اِک ہیولہ سا ی
 slug: "chiragh-ki-aot-mein-ruka-hai-jo-aik-hiolah-sa-yasmin-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 24
 ---

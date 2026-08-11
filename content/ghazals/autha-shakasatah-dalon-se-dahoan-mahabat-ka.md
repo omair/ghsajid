@@ -3,6 +3,7 @@ title: "اُٹھا شکستہ دلوں سے دھواں محبّت کا"
 slug: "autha-shakasatah-dalon-se-dahoan-mahabat-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 279
 ---

@@ -3,6 +3,7 @@ title: "جس کا ہمسر کوئی ستارہ نہیں"
 slug: "jis-ka-hamasar-koi-satarah-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 432
 ---

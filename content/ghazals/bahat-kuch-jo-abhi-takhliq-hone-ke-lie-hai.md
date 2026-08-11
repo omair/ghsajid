@@ -3,6 +3,7 @@ title: "بہت کچھ جو ابھی تخلیق ہونے کے لیے ہے"
 slug: "bahat-kuch-jo-abhi-takhliq-hone-ke-lie-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 439
 ---

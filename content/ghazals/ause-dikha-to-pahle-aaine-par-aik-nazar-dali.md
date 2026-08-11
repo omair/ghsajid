@@ -3,6 +3,7 @@ title: "اُسے دیکھا تو پہلے آئنے پر اِک نظر ڈالی"
 slug: "ause-dikha-to-pahle-aaine-par-aik-nazar-dali"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 69
 ---

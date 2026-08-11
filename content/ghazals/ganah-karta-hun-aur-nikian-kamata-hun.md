@@ -3,6 +3,7 @@ title: "گناہ کرتا ہوں اور نیکیاں کماتا ہوں"
 slug: "ganah-karta-hun-aur-nikian-kamata-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 98
 ---

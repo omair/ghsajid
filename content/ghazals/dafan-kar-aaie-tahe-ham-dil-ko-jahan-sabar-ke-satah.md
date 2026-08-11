@@ -3,6 +3,7 @@ title: "دفن کر آئے تھے ہم دل کو جہاں صبر کے ساتھ"
 slug: "dafan-kar-aaie-tahe-ham-dil-ko-jahan-sabar-ke-satah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 117
 ---

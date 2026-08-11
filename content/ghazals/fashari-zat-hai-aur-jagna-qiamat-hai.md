@@ -3,6 +3,7 @@ title: "فشارِ ذات ہے اور جاگنا قیامت ہے"
 slug: "fashari-zat-hai-aur-jagna-qiamat-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 64
 ---

@@ -3,6 +3,7 @@ title: "اُٹھائی صبح نے اِس ڈھنگ سے دیوار مٹّی کی
 slug: "authaii-sabah-ne-ais-dahanag-se-deewar-mati-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 149
 ---

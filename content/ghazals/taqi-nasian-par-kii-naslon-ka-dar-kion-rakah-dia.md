@@ -3,6 +3,7 @@ title: "طاقِ نسیاں پر کئی نسلوں کا ڈر کیوں رکھ د�
 slug: "taqi-nasian-par-kii-naslon-ka-dar-kion-rakah-dia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 519
 ---

@@ -3,6 +3,7 @@ title: "غیرت ِ گُل کوئی آئے ، بُت ِ شمشاد ائے"
 slug: "ghirat-i-gul-koi-aaie-but-i-shamshad-aie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 written_note: "٢١ مارچ ، بستی کبیر سنپال"
 ---

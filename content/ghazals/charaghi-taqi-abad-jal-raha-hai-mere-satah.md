@@ -3,6 +3,7 @@ title: "چراغِ طاقِ ابد جل رہا ہے میرے ساتھ"
 slug: "charaghi-taqi-abad-jal-raha-hai-mere-satah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 352
 ---

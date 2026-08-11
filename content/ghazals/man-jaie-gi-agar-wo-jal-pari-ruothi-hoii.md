@@ -3,6 +3,7 @@ title: "مان جائے گی اگر وہ جل پری رُوٹھی ہوئی"
 slug: "man-jaie-gi-agar-wo-jal-pari-ruothi-hoii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 45
 ---

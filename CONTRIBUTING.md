@@ -41,6 +41,7 @@ title: "خواب کی دنیا الگ ہے، نیند کی دنیا الگ"
 slug: "khwab-ki-dania-alag-he-ninad-ki-dania-alag"
 language: "urdu"
 script: "nastaliq"
+origin: "human"
 source_book: "tajawuz"
 book_order: 3
 ---
@@ -62,6 +63,11 @@ isn't listed there, the build will reject it.
   modernize or "correct" the poet — only fix genuine transcription errors.
 - **Never guess a fact.** Leave a date, year, or book unset rather than
   inventing one. Omission is honest; a wrong `published` year is not.
+- **Set `origin: "human"` on anything you add or hand-edit.** It marks the piece
+  as authored by a person so the generation tools never overwrite your work.
+  Tool-generated pieces carry `origin: "tool"`; if you correct one of those by
+  hand, change its `origin` to `"human"` so your fix is protected too. The field
+  is required — a piece without it fails the build.
 - **Keep the slug stable.** The `slug` is the piece's URL. Changing it breaks
   every existing link, so leave it alone once a piece is published.
 - **List a new memoir chapter in its container.** The درس گاہ index lists every

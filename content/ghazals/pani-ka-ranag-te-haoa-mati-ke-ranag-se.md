@@ -3,6 +3,7 @@ title: "پانی کا رنگ طے ہَوا مٹّی کے رنگ سے"
 slug: "pani-ka-ranag-te-haoa-mati-ke-ranag-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 48
 ---

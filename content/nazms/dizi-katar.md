@@ -3,6 +3,7 @@ title: "ڈیزی کٹر"
 slug: "dizi-katar"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 published_in: ["caarwan.com"]
 ---

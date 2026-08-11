@@ -3,6 +3,7 @@ title: "مرے خوں میں ابھی تک ہے فروزاں آگ میری"
 slug: "mare-khon-mein-abhi-tak-hai-farozan-aag-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 193
 ---

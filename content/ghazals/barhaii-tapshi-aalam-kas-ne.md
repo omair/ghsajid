@@ -3,6 +3,7 @@ title: "بڑھائی تپشِ آلام کس نے"
 slug: "barhaii-tapshi-aalam-kas-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 73
 ---

@@ -3,6 +3,7 @@ title: "ایک ستارہ جاگے اور یوں میرے من میں آئے"
 slug: "ek-satarah-jage-aur-yon-mere-man-mein-aaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 60
 ---

@@ -3,6 +3,7 @@ title: "حصارِ خوابِ سحر توڑ کر چلا بھی گیا!"
 slug: "hasari-khoabi-sahar-tor-kar-chala-bhi-gia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 494
 ---

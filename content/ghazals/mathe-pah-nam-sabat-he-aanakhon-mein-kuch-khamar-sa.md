@@ -3,6 +3,7 @@ title: "ماتھے پہ نام ثبت ہے، آنکھوں میں کچھ خمار
 slug: "mathe-pah-nam-sabat-he-aanakhon-mein-kuch-khamar-sa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 70
 ---

@@ -3,6 +3,7 @@ title: "مِری نظر میں بہت احترام ہے اُس کا"
 slug: "miri-nazar-mein-bahat-ahatram-hai-us-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 39
 ---

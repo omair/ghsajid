@@ -3,6 +3,7 @@ title: "جانے کیسا جادو سا تھا معبد کے اُس درپن م�
 slug: "jane-kisa-jado-sa-taha-mabad-ke-us-darapan-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 114
 ---

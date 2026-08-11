@@ -3,6 +3,7 @@ title: "سرمئی ڈالیاں دیکھتی رہ گئی"
 slug: "sarmii-dalian-dikahti-rah-gii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 source: "facebook"
 url: "https://www.facebook.com/zarqa.naseem.16/videos/1551503588358975/"

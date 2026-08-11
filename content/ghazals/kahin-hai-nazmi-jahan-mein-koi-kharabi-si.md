@@ -3,6 +3,7 @@ title: "کہیں ہے نظمِ جہاں میں کوئی خرابی سی"
 slug: "kahin-hai-nazmi-jahan-mein-koi-kharabi-si"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 353
 ---

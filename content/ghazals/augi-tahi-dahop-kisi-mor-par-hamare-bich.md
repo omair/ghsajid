@@ -3,6 +3,7 @@ title: "اُگی تھی دھوپ کسی موڑ پر ہمارے بیچ"
 slug: "augi-tahi-dahop-kisi-mor-par-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 457
 ---

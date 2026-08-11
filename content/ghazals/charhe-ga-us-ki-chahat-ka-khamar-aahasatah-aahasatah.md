@@ -3,6 +3,7 @@ title: "چڑھے گا اُس کی چاہت کا خمار آہستہ آہستہ"
 slug: "charhe-ga-us-ki-chahat-ka-khamar-aahasatah-aahasatah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 484
 ---

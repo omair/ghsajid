@@ -3,6 +3,7 @@ title: "رات اک لہر رُکی پانی میں"
 slug: "raat-ak-lehar-ruki-pani-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 published_in: ["caarwan.com"]
 ---

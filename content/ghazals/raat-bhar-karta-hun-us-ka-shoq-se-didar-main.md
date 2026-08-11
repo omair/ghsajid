@@ -3,6 +3,7 @@ title: "رات بھر کرتا ہوں اُس کا شوق سے دیدار مَی�
 slug: "raat-bhar-karta-hun-us-ka-shoq-se-didar-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 298
 ---

@@ -3,6 +3,7 @@ title: "نئی اِک رہ گزر آئے تو کیا ہو"
 slug: "nii-aik-rah-gazar-aaie-to-kya-ho"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 102
 ---

@@ -3,6 +3,7 @@ title: "لگایا ہے بہت سی بار اُس کو یوں تو سینے سے
 slug: "lagaia-hai-bahat-si-bar-us-ko-yon-to-sine-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 543
 ---

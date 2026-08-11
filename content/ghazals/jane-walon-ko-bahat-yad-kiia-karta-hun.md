@@ -3,6 +3,7 @@ title: "جانے والوں کو بہت یاد کِیا کرتا ہوں"
 slug: "jane-walon-ko-bahat-yad-kiia-karta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 57
 ---

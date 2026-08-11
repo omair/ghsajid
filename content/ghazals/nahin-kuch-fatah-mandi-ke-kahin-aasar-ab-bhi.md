@@ -3,6 +3,7 @@ title: "نہیں کچھ فتح مندی کے کہیں آثار اب بھی!"
 slug: "nahin-kuch-fatah-mandi-ke-kahin-aasar-ab-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 524
 ---

@@ -3,6 +3,7 @@ title: "تختِ شاہی صرف ورثے میں اگر ملتا ہے مجھے"
 slug: "takhti-shahi-saraf-warse-mein-agar-malta-hai-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 329
 ---

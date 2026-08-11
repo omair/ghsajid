@@ -3,6 +3,7 @@ title: "خواب اِک یہ بھی ہے میرے خون میں شامل کہی�
 slug: "khwab-aik-ye-bhi-hai-mere-khon-mein-shamal-kahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 478
 ---
