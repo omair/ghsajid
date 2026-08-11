@@ -3,6 +3,7 @@ title: "تھکن آرام کے راحت کدے میں ضم نہیں ہوتی"
 slug: "tahakan-aaram-ke-rahat-kade-mein-zam-nahin-hoti"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 46
 ---

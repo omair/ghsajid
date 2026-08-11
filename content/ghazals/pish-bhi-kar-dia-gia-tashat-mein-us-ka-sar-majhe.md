@@ -3,6 +3,7 @@ title: "پیش بھی کر دیا گیا، طشت میں اُس کا سر مجھ
 slug: "pish-bhi-kar-dia-gia-tashat-mein-us-ka-sar-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 340
 ---

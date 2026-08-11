@@ -3,6 +3,7 @@ title: "کس نے دی آواز سِپر کی اوٹ میں تھا"
 slug: "kas-ne-di-aaoaz-sipar-ki-aot-mein-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 104
 ---

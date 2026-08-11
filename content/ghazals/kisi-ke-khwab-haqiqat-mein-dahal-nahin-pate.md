@@ -3,6 +3,7 @@ title: "کسی کے خواب حقیقت میں ڈھل نہیں پاتے"
 slug: "kisi-ke-khwab-haqiqat-mein-dahal-nahin-pate"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 493
 ---

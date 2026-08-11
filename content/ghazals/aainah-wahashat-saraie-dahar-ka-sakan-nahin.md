@@ -3,6 +3,7 @@ title: "آئنۂ وحشت سرائے دہر کا ساکن نہیں"
 slug: "aainah-wahashat-saraie-dahar-ka-sakan-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 376
 ---

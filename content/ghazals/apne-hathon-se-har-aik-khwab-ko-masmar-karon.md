@@ -3,6 +3,7 @@ title: "اپنے ہاتھوں سے ہر اِک خواب کو مسمار کروں
 slug: "apne-hathon-se-har-aik-khwab-ko-masmar-karon"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 83
 ---

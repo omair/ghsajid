@@ -3,6 +3,7 @@ title: "عرش پر اُڑتے ہوئے، زیرِ زمیں جاتے ہوئے"
 slug: "rash-par-aurte-hoie-ziri-zamin-jate-hoie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 27
 ---

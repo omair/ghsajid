@@ -3,6 +3,7 @@ title: "آپ نے کھینچ دی ہے حد شاید"
 slug: "aap-ne-kahinach-di-hai-had-shaid"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 59
 ---

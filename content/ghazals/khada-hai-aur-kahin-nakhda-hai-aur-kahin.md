@@ -3,6 +3,7 @@ title: "خدا ہے اور کہیں ناخدا ہے اور کہیں"
 slug: "khada-hai-aur-kahin-nakhda-hai-aur-kahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 14
 ---

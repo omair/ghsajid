@@ -3,6 +3,7 @@ title: "سرد سرد آنکھیں ہیں، سانس سانس کھاری ہے"
 slug: "sarad-sarad-aanakhin-hin-sanas-sanas-kahari-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 109
 ---

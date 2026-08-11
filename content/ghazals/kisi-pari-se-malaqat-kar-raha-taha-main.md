@@ -3,6 +3,7 @@ title: "کسی پری سے ملاقات کر رہا تھا مَیں"
 slug: "kisi-pari-se-malaqat-kar-raha-taha-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 40
 ---

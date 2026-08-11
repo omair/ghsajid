@@ -3,6 +3,7 @@ title: "لگائو کیوں نہ ہو گا زندگی سے اور جینے سے!
 slug: "lagaio-kion-na-ho-ga-zanadgi-se-aur-jine-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 548
 ---

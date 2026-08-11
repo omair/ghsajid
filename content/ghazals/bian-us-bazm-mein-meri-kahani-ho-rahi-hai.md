@@ -3,6 +3,7 @@ title: "بیاں اُس بزم میں میری کہانی ہو رہی ہے"
 slug: "bian-us-bazm-mein-meri-kahani-ho-rahi-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 published_in: ["caarwan.com"]
 ---

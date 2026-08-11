@@ -3,6 +3,7 @@ title: "نہ ملے گا قریۂ خاک میں کوئی شخص میری سرش�
 slug: "na-male-ga-qarih-khak-mein-koi-shakhas-meri-sarashat-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 12
 ---

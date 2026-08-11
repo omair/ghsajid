@@ -3,6 +3,7 @@ title: "شمع جو بھی ریگ زارِ عرش پر تابندہ ہے"
 slug: "sham-jo-bhi-rig-zari-rash-par-tabanadah-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 370
 ---

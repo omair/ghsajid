@@ -3,6 +3,7 @@ title: "دعا قبول ہوئی اور خطا معاف ہوئی"
 slug: "da-qabol-hoii-aur-khata-maf-hoii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 506
 ---

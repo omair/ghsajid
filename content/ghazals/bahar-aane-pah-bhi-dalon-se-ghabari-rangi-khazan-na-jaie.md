@@ -3,6 +3,7 @@ title: "بہار آنے پہ بھی دلوں سے غبارِ رنگِ خزاں �
 slug: "bahar-aane-pah-bhi-dalon-se-ghabari-rangi-khazan-na-jaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 416
 ---

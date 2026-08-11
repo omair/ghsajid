@@ -3,6 +3,7 @@ title: "ٹھہر گیا ہے کوئی ستارہ کہیں اُفق پر"
 slug: "tahahar-gia-hai-koi-satarah-kahin-aufaq-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 364
 ---

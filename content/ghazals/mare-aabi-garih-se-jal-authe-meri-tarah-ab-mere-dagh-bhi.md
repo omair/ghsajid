@@ -3,6 +3,7 @@ title: "مرے آبِ گریہ سے جل اُٹھے میری طرح اب میر�
 slug: "mare-aabi-garih-se-jal-authe-meri-tarah-ab-mere-dagh-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 500
 ---

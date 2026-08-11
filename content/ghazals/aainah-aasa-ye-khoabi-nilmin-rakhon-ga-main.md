@@ -3,6 +3,7 @@ title: "آئنہ آسا یہ خوابِ نیلمیں رکھّوں گا مَیں"
 slug: "aainah-aasa-ye-khoabi-nilmin-rakhon-ga-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 9
 ---

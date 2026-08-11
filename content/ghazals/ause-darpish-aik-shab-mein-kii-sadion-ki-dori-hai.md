@@ -3,6 +3,7 @@ title: "اُسے درپیش اِک شب میں کئی صدیوں کی دوری �
 slug: "ause-darpish-aik-shab-mein-kii-sadion-ki-dori-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 254
 ---

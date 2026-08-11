@@ -45,6 +45,7 @@ def frontmatter(piece: Piece) -> str:
         f"slug: {_quote(piece.slug)}",
         f"language: {_quote(piece.language)}",
         f"script: {_quote(piece.script)}",
+        f"origin: {_quote(piece.origin)}",
     ]
     # Book-sourced pieces have no publication date of their own — only the
     # book's year, which is a different fact — and set published=None to say
@@ -64,9 +65,36 @@ def frontmatter(piece: Piece) -> str:
     return "\n".join(lines)
 
 
-def write_piece(piece: Piece, root: Path) -> Path:
-    """Write one piece to <root>/<kind>/<slug>.md."""
+def existing_origin(path: Path) -> str | None:
+    """Return the `origin` value in a file's frontmatter, or None.
+
+    None means the file is absent, has no frontmatter fences, or names no
+    `origin` — anything the generator is free to write. A returned "human" is
+    the one value that makes a file off-limits to regeneration.
+    """
+    if not path.exists():
+        return None
+    parts = path.read_text(encoding="utf-8").split("---", 2)
+    if len(parts) < 3:
+        return None
+    for line in parts[1].splitlines():
+        stripped = line.strip()
+        if stripped.startswith("origin:"):
+            return stripped.split(":", 1)[1].strip().strip('"')
+    return None
+
+
+def write_piece(piece: Piece, root: Path) -> Path | None:
+    """Write one piece to <root>/<kind>/<slug>.md.
+
+    Returns the path written, or None if a human-authored file already sits
+    there: a person's own work is never overwritten by regeneration. The
+    caller reports the skip; staying silent about it would hide that the
+    generator declined to touch a file it normally owns.
+    """
     path = root / piece.kind / f"{piece.slug}.md"
+    if existing_origin(path) == "human":
+        return None
     path.parent.mkdir(parents=True, exist_ok=True)
     body = piece.body.strip()
     # newline="\n" so the corpus is byte-identical whichever OS regenerates it;

@@ -3,6 +3,7 @@ title: "سفر میں چین ملے گا نہ اب سکوں گھر میں"
 slug: "safar-mein-chin-male-ga-na-ab-sakon-gahar-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 423
 ---

@@ -3,6 +3,7 @@ title: "خوش نہ آئے گا ستاروں کا سفر پانی کے ساتھ"
 slug: "khosh-na-aaie-ga-sataron-ka-safar-pani-ke-satah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 185
 ---

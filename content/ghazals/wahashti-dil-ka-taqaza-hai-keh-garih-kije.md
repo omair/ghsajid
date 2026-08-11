@@ -3,6 +3,7 @@ title: "وحشتِ دل کا تقاضا ہے کہ گریہ کیجے"
 slug: "wahashti-dil-ka-taqaza-hai-keh-garih-kije"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 91
 ---

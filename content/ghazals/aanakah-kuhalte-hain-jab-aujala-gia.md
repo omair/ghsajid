@@ -3,6 +3,7 @@ title: "آنکھ کُھلتے ہیں جب اُجالا گیا"
 slug: "aanakah-kuhalte-hain-jab-aujala-gia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 430
 ---

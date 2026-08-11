@@ -3,6 +3,7 @@ title: "دمِ وصال جب اُس گل نے بال کھول دیے"
 slug: "dami-wasal-jab-us-gal-ne-bal-kahol-die"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 490
 ---

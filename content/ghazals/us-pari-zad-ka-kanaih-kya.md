@@ -3,6 +3,7 @@ title: "اُس پری زاد کا کنایہ کیا"
 slug: "us-pari-zad-ka-kanaih-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 75
 ---

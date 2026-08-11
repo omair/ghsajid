@@ -3,6 +3,7 @@ title: "چراغِ نینوا ہے یا کوئی مردنگ کابل کا"
 slug: "charaghi-ninoa-hai-ya-koi-maradanag-kabal-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 437
 ---

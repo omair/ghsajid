@@ -3,6 +3,7 @@ title: "درس گاہ - 41"
 slug: "dars-gah-41"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 part: 41
 ---

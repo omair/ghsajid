@@ -3,6 +3,7 @@ title: "رُکا ہوا ہوں اِسی نخلِ آرزو کے قریں"
 slug: "ruka-hoa-hun-aisi-nakhli-aarzo-ke-qarin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 74
 ---

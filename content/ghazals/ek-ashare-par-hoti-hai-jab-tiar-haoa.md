@@ -3,6 +3,7 @@ title: "ایک اشارے پر ہوتی ہے جب تیّار ہَوا"
 slug: "ek-ashare-par-hoti-hai-jab-tiar-haoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 208
 ---

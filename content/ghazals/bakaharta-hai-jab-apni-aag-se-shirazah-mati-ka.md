@@ -3,6 +3,7 @@ title: "بکھرتا ہے جب اپنی آگ سے شیرازہ مٹّی کا"
 slug: "bakaharta-hai-jab-apni-aag-se-shirazah-mati-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 154
 ---

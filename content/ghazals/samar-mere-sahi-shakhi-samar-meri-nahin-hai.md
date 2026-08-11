@@ -3,6 +3,7 @@ title: "ثمر میرے سہی، شاخِ ثمر میری نہیں ہے"
 slug: "samar-mere-sahi-shakhi-samar-meri-nahin-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 527
 ---

@@ -3,6 +3,7 @@ title: "کیا ضروری ہے کہ چُپ چاپ پڑا رہتا ہو"
 slug: "kya-zarori-hai-keh-chup-chap-para-rahta-ho"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 577
 ---

@@ -3,6 +3,7 @@ title: "جب سکوں پہنچا نہیں سکتا مرا بستر مجھے"
 slug: "jab-sakon-pahancha-nahin-sakta-mira-basatar-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 365
 ---

@@ -3,6 +3,7 @@ title: "نمود پاتے ہی منظروں کی شکست سے فتح کے بہ�
 slug: "namod-pate-hi-manazron-ki-shakasat-se-fatah-ke-bahane"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 23
 ---

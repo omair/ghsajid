@@ -3,6 +3,7 @@ title: "لفظ جو نوکِ زباں پر تھا، وہیں چھوڑا ہے"
 slug: "lafaz-jo-noki-zaban-par-taha-wahin-chahora-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 481
 ---

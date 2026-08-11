@@ -3,6 +3,7 @@ title: "نیند میں چلتی ہے کوئی شے ابھی"
 slug: "ninad-mein-chalti-hai-koi-she-abhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 63
 ---

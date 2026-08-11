@@ -3,6 +3,7 @@ title: "صباحتِ ہجر کی مہک ہو کہ راحتِ وصل کا گما�
 slug: "sabahti-hajar-ki-mahak-ho-keh-rahti-wasal-ka-gaman-ho"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 8
 ---

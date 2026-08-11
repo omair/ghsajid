@@ -3,6 +3,7 @@ title: "پاٹ دیا ہے ایک طلسمی جوئے آب کو مٹّی سے"
 slug: "pat-dia-hai-ek-talasmi-joie-aab-ko-mati-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 162
 ---

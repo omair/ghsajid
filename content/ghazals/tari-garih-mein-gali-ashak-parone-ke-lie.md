@@ -3,6 +3,7 @@ title: "تارِ گریہ میں گلِ اشک پرونے کے لیے"
 slug: "tari-garih-mein-gali-ashak-parone-ke-lie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 547
 ---

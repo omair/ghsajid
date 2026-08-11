@@ -3,6 +3,7 @@ title: "مکاں کے ساتھ مکاں، دشت سے مِلا ہُوا دشت"
 slug: "makan-ke-satah-makan-dashat-se-mila-huoa-dashat"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 85
 ---

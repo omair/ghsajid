@@ -3,6 +3,7 @@ title: "کہاں اب مُنہ چھپائے گا ادھورا پن ہمارا"
 slug: "kahan-ab-munah-chahpaie-ga-adhora-pan-hamara"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 66
 ---

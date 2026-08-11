@@ -3,6 +3,7 @@ title: "کھِل اُٹھا ہے گلِ یاسمیں آگ کا"
 slug: "kahil-autha-hai-gali-yasmin-aag-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 196
 ---

@@ -3,6 +3,7 @@ title: "خوش آئے گا یہ عالمِ ایجاد مجھے بھی"
 slug: "khosh-aaie-ga-ye-almi-aijad-majhe-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 448
 ---

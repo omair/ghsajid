@@ -3,6 +3,7 @@ title: "میانِ دشت و دریا جل رہی ہے آگ میری"
 slug: "miani-dashat-w-daria-jal-rahi-hai-aag-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 205
 ---

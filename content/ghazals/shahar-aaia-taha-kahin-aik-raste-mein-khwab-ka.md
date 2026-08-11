@@ -3,6 +3,7 @@ title: "شہر آیا تھا کہیں اِک راستے میں خواب کا"
 slug: "shahar-aaia-taha-kahin-aik-raste-mein-khwab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 234
 ---

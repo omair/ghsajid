@@ -3,6 +3,7 @@ title: "نہ کوئی فرق پڑے گا کسی کو کھو کر بھی"
 slug: "na-koi-faraq-pare-ga-kisi-ko-kaho-kar-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 83
 ---

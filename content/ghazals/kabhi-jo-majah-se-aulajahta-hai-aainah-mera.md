@@ -3,6 +3,7 @@ title: "کبھی جو مجھ سے اُلجھتا ہے آئنہ میرا"
 slug: "kabhi-jo-majah-se-aulajahta-hai-aainah-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 385
 ---

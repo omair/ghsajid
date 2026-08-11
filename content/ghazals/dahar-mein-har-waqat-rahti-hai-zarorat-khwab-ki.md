@@ -3,6 +3,7 @@ title: "دہر میں ہر وقت رہتی ہے ضرورت خواب کی"
 slug: "dahar-mein-har-waqat-rahti-hai-zarorat-khwab-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 238
 ---

@@ -3,6 +3,7 @@ title: "تری توجّہ سے صبحِ نو کے سفیر ہیں ہم"
 slug: "tari-tojah-se-sabhi-no-ke-safir-hain-ham"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 131
 ---

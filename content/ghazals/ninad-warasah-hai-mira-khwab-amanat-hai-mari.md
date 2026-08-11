@@ -3,6 +3,7 @@ title: "نیند ورثہ ہے مرا ، خواب امانت ہے مری"
 slug: "ninad-warasah-hai-mira-khwab-amanat-hai-mari"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 written_note: "٣ تا ٥ مئی ، بستی کبیر سنپال"
 ---

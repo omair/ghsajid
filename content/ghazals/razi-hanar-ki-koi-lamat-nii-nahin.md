@@ -3,6 +3,7 @@ title: "عرضِ ہنر کی کوئی علامت نئی نہیں"
 slug: "razi-hanar-ki-koi-lamat-nii-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 100
 ---

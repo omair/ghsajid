@@ -3,6 +3,7 @@ title: "کسی کے بوسۂ شیریں کا دھیان آتے ہی"
 slug: "kisi-ke-bosah-shirin-ka-dahian-aate-hi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 21
 ---

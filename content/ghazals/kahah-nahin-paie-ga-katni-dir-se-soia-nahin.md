@@ -3,6 +3,7 @@ title: "کہہ نہیں پائے گا کتنی دیر سے سویا نہیں"
 slug: "kahah-nahin-paie-ga-katni-dir-se-soia-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 367
 ---

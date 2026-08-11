@@ -3,6 +3,7 @@ title: "دِیے کی بے قراری، آئنے کی چھب وہی تو ہے"
 slug: "diie-ki-be-qarari-aaine-ki-chahab-wahi-to-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 24
 ---

@@ -3,6 +3,7 @@ title: "نیند پہنے ہوئے نظر میری"
 slug: "ninad-pahne-hoie-nazar-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 21
 ---

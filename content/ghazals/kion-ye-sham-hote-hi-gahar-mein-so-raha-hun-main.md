@@ -3,6 +3,7 @@ title: "کیوں یہ شام ہوتے ہی گھر میں سو رہا ہوں مَ
 slug: "kion-ye-sham-hote-hi-gahar-mein-so-raha-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 47
 ---

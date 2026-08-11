@@ -3,6 +3,7 @@ title: "خواب آتے ہیں کہاں ایک زمانے سے مجھے"
 slug: "khwab-aate-hain-kahan-ek-zamane-se-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 86
 ---

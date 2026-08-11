@@ -3,6 +3,7 @@ title: "خلقتِ شہر کے لیے ہجر کی رات بھی ہے تُو"
 slug: "khalaqti-shahar-ke-lie-hajar-ki-raat-bhi-hai-tuo"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 90
 ---

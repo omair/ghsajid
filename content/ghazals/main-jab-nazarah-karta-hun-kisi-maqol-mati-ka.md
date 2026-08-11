@@ -3,6 +3,7 @@ title: "مَیں جب نظارہ کرتا ہوں کسی معقول مٹّی کا
 slug: "main-jab-nazarah-karta-hun-kisi-maqol-mati-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 151
 ---

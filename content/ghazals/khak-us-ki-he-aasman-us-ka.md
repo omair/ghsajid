@@ -3,6 +3,7 @@ title: "خاک اُس کی ہے، آسمان اُس کا"
 slug: "khak-us-ki-he-aasman-us-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 518
 ---

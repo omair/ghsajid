@@ -3,6 +3,7 @@ title: "کئی دن سے دشتِ فراق کے وہ سراب میرے نہیں 
 slug: "kii-dan-se-dashti-faraq-ke-wo-sarab-mere-nahin-rahe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 514
 ---

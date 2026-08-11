@@ -3,6 +3,7 @@ title: "مری تلاش میں کوئی مرے سِوا بھی ہے"
 slug: "mari-talash-mein-koi-mare-sioa-bhi-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 307
 ---

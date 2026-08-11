@@ -3,6 +3,7 @@ title: "خود اپنے نور سے یہ ریگ زار روشن ہے"
 slug: "khod-apne-nor-se-ye-rig-zar-roshan-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 397
 ---

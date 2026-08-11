@@ -3,6 +3,7 @@ title: "جب تلک میرے جلو میں لشکرِ شاہی نہ تھا"
 slug: "jab-talak-mere-jalo-mein-lashakri-shahi-na-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 332
 ---

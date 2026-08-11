@@ -3,6 +3,7 @@ title: "مسافت کاٹنی ہو گی ابھی دشتِ ُجنوں کی"
 slug: "masafat-katni-ho-gi-abhi-dashti-ujnon-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 373
 ---

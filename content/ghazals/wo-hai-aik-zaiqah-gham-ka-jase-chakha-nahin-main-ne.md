@@ -3,6 +3,7 @@ title: "وہ ہے اِک ذائقہ غم کا جسے چکھّا نہیں مَی�
 slug: "wo-hai-aik-zaiqah-gham-ka-jase-chakha-nahin-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 135
 ---

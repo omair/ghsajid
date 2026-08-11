@@ -3,6 +3,7 @@ title: "اعتراف کیسے ہو، روح کی ہزیمت کا"
 slug: "atraf-kise-ho-roh-ki-hazimat-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 88
 ---

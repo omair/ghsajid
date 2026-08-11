@@ -3,6 +3,7 @@ title: "بساطِ عشق بچھاتا ہوں بے سبب مَیں بھی"
 slug: "basati-ishq-bachhata-hun-be-sabab-main-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 570
 ---

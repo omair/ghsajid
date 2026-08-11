@@ -3,6 +3,7 @@ title: "نہیں کسی کو یہاں اختیارِ بیش و کم"
 slug: "nahin-kisi-ko-yahan-akhtiari-bish-w-kam"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 306
 ---

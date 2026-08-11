@@ -3,6 +3,7 @@ title: "روشنی سہمی ہوئی، آئنہ پتھّرایا ہُوا"
 slug: "roshni-sahmi-hoii-aainah-patahraia-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 100
 ---

@@ -3,6 +3,7 @@ title: "کئی دن سے بلاتے ہیں ستارے بھی ہَوا کو"
 slug: "kii-dan-se-balate-hain-satare-bhi-haoa-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 226
 ---

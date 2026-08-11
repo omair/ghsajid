@@ -3,6 +3,7 @@ title: "قرض ہے شمشیر پر میری کسی محراب کا"
 slug: "qaraz-hai-shamshir-par-meri-kisi-mahrab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 322
 ---

@@ -3,6 +3,7 @@ title: "طلب نہیں ہے متاعِ خورشید کی ہَوا کو"
 slug: "talab-nahin-hai-matai-khorshid-ki-haoa-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 214
 ---

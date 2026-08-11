@@ -3,6 +3,7 @@ title: "شرابِ صبحِ نشاط شب کے ایاغ میں ہے"
 slug: "sharabi-sabhi-nashat-shab-ke-aiagh-mein-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 130
 ---

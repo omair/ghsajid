@@ -3,6 +3,7 @@ title: "بابل و رَے سے تعلق ہے نہ کچھ لبنان سے"
 slug: "babal-w-rae-se-talaq-hai-na-kuch-labnan-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 400
 ---

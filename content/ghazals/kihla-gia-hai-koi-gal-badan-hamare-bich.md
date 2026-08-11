@@ -3,6 +3,7 @@ title: "کِھلا گیا ہے کوئی گل بدن ہمارے بیچ"
 slug: "kihla-gia-hai-koi-gal-badan-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 466
 ---

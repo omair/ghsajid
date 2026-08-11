@@ -3,6 +3,7 @@ title: "اِک روز مجھے مل جائیں گے اُس بستی کے آثا�
 slug: "aik-roz-majhe-mal-jaiin-ge-us-basti-ke-aasar-kahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 57
 ---

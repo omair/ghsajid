@@ -3,6 +3,7 @@ title: "خود اپنے سایے سے بھی ڈر رہا ہوں"
 slug: "khod-apne-saie-se-bhi-dar-raha-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 558
 ---

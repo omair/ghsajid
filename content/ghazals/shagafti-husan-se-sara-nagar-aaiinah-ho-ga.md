@@ -3,6 +3,7 @@ title: "شگفتِ حُسن سے سارا نگر آئینہ ہو گا"
 slug: "shagafti-husan-se-sara-nagar-aaiinah-ho-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 441
 ---

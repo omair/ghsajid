@@ -3,6 +3,7 @@ title: "مَیں جب بھی صدا سنتا ہوں اِک دُور کی بست�
 slug: "main-jab-bhi-sada-santa-hun-aik-duor-ki-basti-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 71
 ---

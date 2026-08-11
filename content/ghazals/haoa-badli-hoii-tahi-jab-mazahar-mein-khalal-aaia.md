@@ -3,6 +3,7 @@ title: "ہَوا بدلی ہوئی تھی جب مظاہر میں خلل آیا"
 slug: "haoa-badli-hoii-tahi-jab-mazahar-mein-khalal-aaia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 68
 ---

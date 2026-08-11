@@ -3,6 +3,7 @@ title: "گرفت رکھ پائوں گا نہ خاکِ رواں پہ شاید"
 slug: "garafat-rakah-paion-ga-na-khaki-roan-pah-shaid"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 378
 ---

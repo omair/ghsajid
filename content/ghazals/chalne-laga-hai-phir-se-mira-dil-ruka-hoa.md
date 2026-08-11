@@ -3,6 +3,7 @@ title: "چلنے لگا ہے پھر سے مرا دل رُکا ہوا"
 slug: "chalne-laga-hai-phir-se-mira-dil-ruka-hoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

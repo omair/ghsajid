@@ -3,6 +3,7 @@ title: "کبھی اُس سے، کبھی خود سے خفا ہوں"
 slug: "kabhi-us-se-kabhi-khod-se-khafa-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 520
 ---

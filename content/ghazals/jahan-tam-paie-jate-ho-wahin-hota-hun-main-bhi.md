@@ -3,6 +3,7 @@ title: "جہاں تم پائے جاتے ہو وہیں ہوتا ہوں مَیں �
 slug: "jahan-tam-paie-jate-ho-wahin-hota-hun-main-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 72
 ---

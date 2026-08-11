@@ -3,6 +3,7 @@ title: "موجِ وحشت نے عجب آگ لگائی ہوئی ہے"
 slug: "moji-wahashat-ne-jab-aag-lagaii-hoii-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 78
 ---

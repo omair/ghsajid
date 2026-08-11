@@ -3,6 +3,7 @@ title: "سفر کروں گا تو کچھ تازہ دم رہوں گا مَیں"
 slug: "safar-karon-ga-to-kuch-tazah-dam-rahon-ga-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 445
 ---

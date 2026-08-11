@@ -3,6 +3,7 @@ title: "سزا ملی ہے اگرچہ زیادہ سخت نہیں"
 slug: "saza-mali-hai-agarachah-ziadah-sakhat-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 574
 ---

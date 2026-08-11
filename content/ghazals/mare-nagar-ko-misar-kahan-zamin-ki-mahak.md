@@ -3,6 +3,7 @@ title: "مرے نگر کو میّسر کہاں زمیں کی مہک"
 slug: "mare-nagar-ko-misar-kahan-zamin-ki-mahak"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 424
 ---

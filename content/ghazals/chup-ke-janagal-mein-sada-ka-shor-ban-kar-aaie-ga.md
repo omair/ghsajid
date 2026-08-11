@@ -3,6 +3,7 @@ title: "چُپ کے جنگل میں صدا کا شور بن کر آئے گا"
 slug: "chup-ke-janagal-mein-sada-ka-shor-ban-kar-aaie-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 69
 ---

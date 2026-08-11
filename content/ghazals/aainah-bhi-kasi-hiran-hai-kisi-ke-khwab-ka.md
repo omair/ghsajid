@@ -3,6 +3,7 @@ title: "آئنہ بھی عکسِ حیراں ہے کسی کے خواب کا"
 slug: "aainah-bhi-kasi-hiran-hai-kisi-ke-khwab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 227
 ---

@@ -3,6 +3,7 @@ title: "آنکھ لگتے ہی عجب رنگ بدلتا ہوں مَیں"
 slug: "aanakah-lagte-hi-jab-ranag-badalta-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 580
 ---

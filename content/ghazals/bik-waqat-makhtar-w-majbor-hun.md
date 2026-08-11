@@ -3,6 +3,7 @@ title: "بیک وقت مختار و مجبور ہوں"
 slug: "bik-waqat-makhtar-w-majbor-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 565
 ---

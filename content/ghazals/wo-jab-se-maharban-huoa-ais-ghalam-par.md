@@ -3,6 +3,7 @@ title: "وہ جب سے مہربان ہُوا اِس غلام پر"
 slug: "wo-jab-se-maharban-huoa-ais-ghalam-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 69
 ---

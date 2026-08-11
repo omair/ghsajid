@@ -3,6 +3,7 @@ title: "کہاں وہ شہر میں آیا ہُوا تھا یاد نہیں"
 slug: "kahan-wo-shahar-mein-aaia-huoa-taha-yad-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 70
 ---

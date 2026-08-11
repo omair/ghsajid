@@ -3,6 +3,7 @@ title: "رنج و غم کے استعارے ہیں، مری آنکھیں نہیں
 slug: "ranaj-w-gham-ke-astare-hin-mari-aanakhin-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 387
 ---

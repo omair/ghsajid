@@ -3,6 +3,7 @@ title: "اوٹ میں آ گیا اُس کا ہم رقص تو مَیں دِکھا
 slug: "aot-mein-aa-gia-us-ka-ham-raqas-to-main-dikhaii-dia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 13
 ---

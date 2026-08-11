@@ -3,6 +3,7 @@ title: "کسی کو زہر دوں گا اور کسی کو جام دوں گا"
 slug: "kisi-ko-zahar-don-ga-aur-kisi-ko-jam-don-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 249
 ---

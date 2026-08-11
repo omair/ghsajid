@@ -3,6 +3,7 @@ title: "میرے قابو میں نہ آئیں گے مرے جذبات کیا"
 slug: "mere-qabo-mein-na-aaiin-ge-mare-jazbat-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 482
 ---

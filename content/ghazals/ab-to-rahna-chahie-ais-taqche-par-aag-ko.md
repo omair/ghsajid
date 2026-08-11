@@ -3,6 +3,7 @@ title: "اب تو رہنا چاہیے اِس طاقچے پر آگ کو"
 slug: "ab-to-rahna-chahie-ais-taqche-par-aag-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 190
 ---

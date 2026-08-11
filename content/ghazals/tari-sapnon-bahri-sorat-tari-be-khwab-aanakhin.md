@@ -3,6 +3,7 @@ title: "تری سپنوں بھری صورت، تری بے خواب آنکھیں"
 slug: "tari-sapnon-bahri-sorat-tari-be-khwab-aanakhin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 68
 ---

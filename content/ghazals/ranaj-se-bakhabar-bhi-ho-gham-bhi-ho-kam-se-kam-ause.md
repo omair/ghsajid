@@ -3,6 +3,7 @@ title: "رنج سے باخبر بھی ہو، غم بھی ہو کم سے کم ا�
 slug: "ranaj-se-bakhabar-bhi-ho-gham-bhi-ho-kam-se-kam-ause"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 23
 ---

@@ -3,6 +3,7 @@ title: "رایگاں اُس کی حقیقت، رایگاں میرا گماں"
 slug: "raigan-us-ki-haqiqat-raigan-mera-gaman"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 58
 ---

@@ -3,6 +3,7 @@ title: "ستارے رنگ لیتے ہیں برابر میرے پانی سے"
 slug: "satare-ranag-lite-hain-barabar-mere-pani-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 184
 ---

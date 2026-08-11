@@ -3,6 +3,7 @@ title: "آج دشتِ جنوں سے گزرتے ہوئے یاد آئی ہے پھ�
 slug: "aaj-dashti-janon-se-gazarte-hoie-yad-aaii-hai-phir-wo-kahani-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 324
 ---

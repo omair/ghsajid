@@ -3,6 +3,7 @@ title: "چراغ ڈوب گئے، روشنی سفر میں ہے"
 slug: "chiragh-dob-gie-roshni-safar-mein-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 65
 ---

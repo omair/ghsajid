@@ -3,6 +3,7 @@ title: "عرش پر مہرِ درخشاں، خاک پر آئینہ ہے"
 slug: "rash-par-mahri-darakhshan-khak-par-aaiinah-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 359
 ---

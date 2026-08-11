@@ -3,6 +3,7 @@ title: "وہی رُتیں ہیں، وہی ہے زنجیر بھی گھروں کی
 slug: "wahi-rutin-hin-wahi-hai-zanjir-bhi-gahron-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 126
 ---

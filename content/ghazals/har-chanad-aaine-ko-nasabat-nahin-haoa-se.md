@@ -3,6 +3,7 @@ title: "ہر چند آئنے کو نسبت نہیں ہَوا سے"
 slug: "har-chanad-aaine-ko-nasabat-nahin-haoa-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 225
 ---

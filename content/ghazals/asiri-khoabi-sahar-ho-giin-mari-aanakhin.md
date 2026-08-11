@@ -3,6 +3,7 @@ title: "اسیرِ خوابِ سحر ہو گئیں مری آنکھیں"
 slug: "asiri-khoabi-sahar-ho-giin-mari-aanakhin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 504
 ---

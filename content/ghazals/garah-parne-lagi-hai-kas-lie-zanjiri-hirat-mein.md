@@ -3,6 +3,7 @@ title: "گرہ پڑنے لگی ہے کس لیے زنجیرِ حیرت میں"
 slug: "garah-parne-lagi-hai-kas-lie-zanjiri-hirat-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 450
 ---

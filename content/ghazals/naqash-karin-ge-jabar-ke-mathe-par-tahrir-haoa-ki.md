@@ -3,6 +3,7 @@ title: "نقش کریں گے جبر کے ماتھے پر تحریر ہَوا ک�
 slug: "naqash-karin-ge-jabar-ke-mathe-par-tahrir-haoa-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 222
 ---

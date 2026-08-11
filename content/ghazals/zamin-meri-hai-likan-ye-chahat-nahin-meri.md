@@ -3,6 +3,7 @@ title: "زمین میری ہے لیکن یہ چھت نہیں میری"
 slug: "zamin-meri-hai-likan-ye-chahat-nahin-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 422
 ---

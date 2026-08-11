@@ -3,6 +3,7 @@ title: "دلبری کا رنگ کیا ہے، روپ کا جادو ہے کیا"
 slug: "dalabri-ka-ranag-kya-he-rop-ka-jado-hai-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 26
 ---

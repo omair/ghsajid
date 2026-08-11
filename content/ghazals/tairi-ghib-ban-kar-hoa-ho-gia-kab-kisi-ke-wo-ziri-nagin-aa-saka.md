@@ -3,6 +3,7 @@ title: "طائرِ غیب بن کر ہوا ہو گیا، کب کسی کے وہ �
 slug: "tairi-ghib-ban-kar-hoa-ho-gia-kab-kisi-ke-wo-ziri-nagin-aa-saka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 449
 ---

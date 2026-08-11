@@ -3,6 +3,7 @@ title: "رات ڈھلتی ہی نہ تھی، دن کی تمنا بھی نہ تھ
 slug: "raat-dahalti-hi-na-tahi-dan-ki-tamna-bhi-na-tahi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 66
 ---

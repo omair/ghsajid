@@ -3,6 +3,7 @@ title: "وہ ایک مدّت سے قریۂ خواب پر نگیں ہے"
 slug: "wo-ek-madat-se-qarih-khwab-par-nagin-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 10
 ---

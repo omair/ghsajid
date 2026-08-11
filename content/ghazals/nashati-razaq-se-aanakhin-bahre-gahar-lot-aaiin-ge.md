@@ -3,6 +3,7 @@ title: "نشاطِ رزق سے آنکھیں بھرے گھر لوٹ آئیں گے
 slug: "nashati-razaq-se-aanakhin-bahre-gahar-lot-aaiin-ge"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 95
 ---

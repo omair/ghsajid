@@ -3,6 +3,7 @@ title: "حدودِ قریۂ وہم و گماں میں کوئی نہیں"
 slug: "hadodi-qarih-waham-w-gaman-mein-koi-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 272
 ---

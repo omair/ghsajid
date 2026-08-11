@@ -3,6 +3,7 @@ title: "شگفتِ وصل کا لمحہ علَم نہادہ نہ ہو"
 slug: "shagafti-wasal-ka-lamahah-lam-nahadah-na-ho"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 555
 ---

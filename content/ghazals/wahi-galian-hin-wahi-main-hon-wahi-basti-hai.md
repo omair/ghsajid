@@ -3,6 +3,7 @@ title: "وہی گلیاں ہیں، وہی مَیں ہوں، وہی بستی ہے
 slug: "wahi-galian-hin-wahi-main-hon-wahi-basti-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 71
 ---

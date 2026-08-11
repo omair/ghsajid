@@ -3,6 +3,7 @@ title: "کیا مِلے گا ایک گُم صُم یاد کا کوئی نشاں"
 slug: "kya-mile-ga-ek-gum-sum-yad-ka-koi-nashan"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 43
 ---

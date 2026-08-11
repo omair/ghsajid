@@ -3,6 +3,7 @@ title: "شگفتِ حُسن سے جب فصلِ شب گلاب ہوئی"
 slug: "shagafti-husan-se-jab-fasli-shab-galab-hoii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 507
 ---

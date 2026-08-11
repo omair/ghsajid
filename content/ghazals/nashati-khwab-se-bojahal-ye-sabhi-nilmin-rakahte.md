@@ -3,6 +3,7 @@ title: "نشاطِ خواب سے بوجھل یہ صبحِ نیلمیں رکھت�
 slug: "nashati-khwab-se-bojahal-ye-sabhi-nilmin-rakahte"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 11
 ---

@@ -3,6 +3,7 @@ title: "Punjabi Poetry"
 slug: "punjabi-poetry"
 language: "punjabi"
 script: "shahmukhi"
+origin: "tool"
 published: 2020-05-09
 source: "youtube"
 url: "https://www.youtube.com/watch?v=c61RnXAQ_mQ"

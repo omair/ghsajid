@@ -3,6 +3,7 @@ title: "نگاہ کرتا ہوں آبِ آئینہ سے اُدھر بھی"
 slug: "nigah-karta-hun-aabi-aaiinah-se-audahar-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 362
 ---

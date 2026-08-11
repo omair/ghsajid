@@ -3,6 +3,7 @@ title: "پھر اِک رات انوکھے پن کی، پھر اِک شام سف�
 slug: "phir-aik-raat-anokhe-pan-ki-phir-aik-sham-safar-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 85
 ---

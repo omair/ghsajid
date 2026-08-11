@@ -3,6 +3,7 @@ title: "نہیں دیکھیں جہاں بھر میں اُن آنکھوں سی ک
 slug: "nahin-dikhin-jahan-bhar-mein-aun-aanakhon-si-kahin-aanakhin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 594
 ---

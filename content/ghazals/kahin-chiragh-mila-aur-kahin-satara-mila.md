@@ -3,6 +3,7 @@ title: "کہیں چراغ مِلا اور کہیں ستارا مِلا"
 slug: "kahin-chiragh-mila-aur-kahin-satara-mila"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 5
 ---

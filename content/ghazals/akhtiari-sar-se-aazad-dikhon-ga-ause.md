@@ -3,6 +3,7 @@ title: "اختیارِ عصر سے آزاد دیکھوں گا اُسے"
 slug: "akhtiari-sar-se-aazad-dikhon-ga-ause"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 508
 ---

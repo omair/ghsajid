@@ -3,6 +3,7 @@ title: "مدح کرتے ہیں گلی کوچوں میں شاعر خواب کی"
 slug: "madah-karte-hain-gali-kochon-mein-shar-khwab-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 246
 ---

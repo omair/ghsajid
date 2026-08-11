@@ -3,6 +3,7 @@ title: "وہ ختم کر نہ سکے گا مجھے مٹا کر بھی"
 slug: "wo-khatam-kar-na-sake-ga-majhe-mata-kar-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 503
 ---

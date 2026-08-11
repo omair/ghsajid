@@ -3,6 +3,7 @@ title: "ہاتھ اُٹھاتا ہوں تو کرتا ہوں دُعا اپنے ل
 slug: "hatah-authata-hun-to-karta-hun-dua-apne-lie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 53
 ---

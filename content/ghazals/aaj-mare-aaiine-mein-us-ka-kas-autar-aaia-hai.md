@@ -3,6 +3,7 @@ title: "آج مرے آئینے میں اُس کا عکس اُتر آیا ہے"
 slug: "aaj-mare-aaiine-mein-us-ka-kas-autar-aaia-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 277
 ---

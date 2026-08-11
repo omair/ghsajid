@@ -3,6 +3,7 @@ title: "Interview - Subrang TV USA"
 slug: "interview-subrang-tv-usa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 source: "facebook"
 url: "https://www.facebook.com/Subrangtv/videos/331860427647346/"

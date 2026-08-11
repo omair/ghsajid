@@ -3,6 +3,7 @@ title: "مطمئن اپنی مسافت سے کہیں مَیں بھی نہ تھا
 slug: "matmin-apni-masafat-se-kahin-main-bhi-na-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 87
 ---

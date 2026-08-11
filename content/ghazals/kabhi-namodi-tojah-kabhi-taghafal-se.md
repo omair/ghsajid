@@ -3,6 +3,7 @@ title: "کبھی نمودِ توجّہ، کبھی تغافل سے"
 slug: "kabhi-namodi-tojah-kabhi-taghafal-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 530
 ---

@@ -3,6 +3,7 @@ title: "اِک ستارے سے کچھ گفتگو کی"
 slug: "aik-satare-se-kuch-gafatgo-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 49
 ---

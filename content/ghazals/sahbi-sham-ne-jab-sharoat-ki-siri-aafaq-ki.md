@@ -3,6 +3,7 @@ title: "صاحبِ شام نے جب شروعات کی سیرِ آفاق کی"
 slug: "sahbi-sham-ne-jab-sharoat-ki-siri-aafaq-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 23
 ---

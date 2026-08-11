@@ -3,6 +3,7 @@ title: "سفیرِ سحر، نور کی بیکراں، شوخ ندی کے دھا
 slug: "safiri-sahar-nor-ki-bikran-shokh-nadi-ke-dahare-mari-bat-sun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 132
 ---

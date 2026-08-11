@@ -3,6 +3,7 @@ title: "جبیں سے ہوتے ہوئے نقشِ پا تک آیا ہوں"
 slug: "jabin-se-hote-hoie-naqshi-pa-tak-aaia-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 15
 ---

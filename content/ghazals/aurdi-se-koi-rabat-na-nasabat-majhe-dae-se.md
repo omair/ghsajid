@@ -3,6 +3,7 @@ title: "اُردی سے کوئی ربط نہ نسبت مجھے دَے سے"
 slug: "aurdi-se-koi-rabat-na-nasabat-majhe-dae-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 304
 ---

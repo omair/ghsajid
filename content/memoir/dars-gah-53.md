@@ -3,6 +3,7 @@ title: "درس گاہ-  53"
 slug: "dars-gah-53"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-08-26
 part: 53
 ---

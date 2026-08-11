@@ -3,6 +3,7 @@ title: "طلسمی شہر پر اُڑنے کو طائر آگ کا ہے"
 slug: "talasmi-shahar-par-aurne-ko-tair-aag-ka-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 194
 ---

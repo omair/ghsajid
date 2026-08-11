@@ -3,6 +3,7 @@ title: "شباہتِ گلِ فردا کا طے نہیں کچھ بھی"
 slug: "shabahti-gali-farda-ka-te-nahin-kuch-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 312
 ---

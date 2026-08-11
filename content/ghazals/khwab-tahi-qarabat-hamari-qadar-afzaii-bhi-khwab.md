@@ -3,6 +3,7 @@ title: "خواب تھی قربت ہماری، قدر افزائی بھی خوا�
 slug: "khwab-tahi-qarabat-hamari-qadar-afzaii-bhi-khwab"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 85
 ---

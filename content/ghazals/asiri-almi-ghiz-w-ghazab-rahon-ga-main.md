@@ -3,6 +3,7 @@ title: "اسیرِ عالمِ غیظ و غضب رہوں گا مَیں!"
 slug: "asiri-almi-ghiz-w-ghazab-rahon-ga-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 581
 ---

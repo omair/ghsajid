@@ -3,6 +3,7 @@ title: "وجودِ آدمِ خاکی میں ایسی آگ جلتی ہے"
 slug: "wajodi-aadmi-khaki-mein-aisi-aag-jalti-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 187
 ---

@@ -3,6 +3,7 @@ title: "خواب کی دھوپ کہاں ، نیند کی بستی ہے کہاں"
 slug: "khwab-ki-dahop-kahan-ninad-ki-basti-hai-kahan"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 92
 ---

@@ -3,6 +3,7 @@ title: "چھائوں پڑتی ہے روایت کی گلِ موجود پر"
 slug: "chahaion-parti-hai-roait-ki-gali-mojod-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 294
 ---

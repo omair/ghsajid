@@ -3,6 +3,7 @@ title: "مرے نگر کی زمیں میرے ساتھ چل تو پڑی"
 slug: "mare-nagar-ki-zamin-mere-satah-chal-to-pari"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 418
 ---

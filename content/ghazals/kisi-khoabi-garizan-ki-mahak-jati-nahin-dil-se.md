@@ -3,6 +3,7 @@ title: "کسی خوابِ گریزاں کی مہک جاتی نہیں دل سے"
 slug: "kisi-khoabi-garizan-ki-mahak-jati-nahin-dil-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 564
 ---

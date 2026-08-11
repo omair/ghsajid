@@ -3,6 +3,7 @@ title: "بھرے پُرے ہوئے سب باغ و راغ تھے اُس دن"
 slug: "bahre-pure-hoie-sab-bagh-w-ragh-tahe-us-dan"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 585
 ---

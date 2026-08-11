@@ -3,6 +3,7 @@ title: "مشیّت رنگ دیتی ہے سبھی پھولوں کو پانی سے
 slug: "mashit-ranag-diti-hai-sabhi-paholon-ko-pani-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 182
 ---

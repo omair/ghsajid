@@ -3,6 +3,7 @@ title: "شمعِ لعلِ یمن کے ہو بھی چکے"
 slug: "shami-lali-yaman-ke-ho-bhi-chake"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 551
 ---

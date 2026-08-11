@@ -3,6 +3,7 @@ title: "سجائی ہے اب بھی زمیں خواب سے"
 slug: "sajaii-hai-ab-bhi-zamin-khwab-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 230
 ---

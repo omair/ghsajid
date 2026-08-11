@@ -3,6 +3,7 @@ title: "اُسے مَیں یاد تو کروں کوئی عجب قیاس تھا"
 slug: "ause-main-yad-to-karon-koi-jab-qias-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 83
 ---

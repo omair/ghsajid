@@ -3,6 +3,7 @@ title: "میسّر وہ گُلِ راحت نہیں کیا"
 slug: "misar-wo-guli-rahat-nahin-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 94
 ---

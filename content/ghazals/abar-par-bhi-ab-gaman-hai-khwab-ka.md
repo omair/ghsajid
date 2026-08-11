@@ -3,6 +3,7 @@ title: "ابر پر بھی اب گماں ہے خواب کا"
 slug: "abar-par-bhi-ab-gaman-hai-khwab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 235
 ---

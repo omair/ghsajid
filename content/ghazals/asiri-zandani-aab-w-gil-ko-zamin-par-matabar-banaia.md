@@ -3,6 +3,7 @@ title: "اسیرِ زندانِ آب و گِل کو زمین پر معتبر ب�
 slug: "asiri-zandani-aab-w-gil-ko-zamin-par-matabar-banaia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 111
 ---

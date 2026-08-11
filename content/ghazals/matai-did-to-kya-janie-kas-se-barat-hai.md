@@ -3,6 +3,7 @@ title: "متاعِ دید تو کیا جانیے، کس سے عبارت ہے"
 slug: "matai-did-to-kya-janie-kas-se-barat-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 86
 ---

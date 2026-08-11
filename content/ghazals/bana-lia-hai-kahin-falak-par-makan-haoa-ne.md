@@ -3,6 +3,7 @@ title: "بنا لیا ہے کہیں فلک پر مکاں ہَوا نے"
 slug: "bana-lia-hai-kahin-falak-par-makan-haoa-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 219
 ---

@@ -3,6 +3,7 @@ title: "یقیں ہے نجمِ سحر کی ضو پر نہ اب مجھے اعتب
 slug: "yaqin-hai-najmi-sahar-ki-zo-par-na-ab-majhe-atbari-shab-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 505
 ---

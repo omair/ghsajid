@@ -3,6 +3,7 @@ title: "اِس خواب کے روشن دریا کے اُس پار جہاں ہے 
 slug: "ais-khwab-ke-roshan-daria-ke-us-par-jahan-hai-mati-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 150
 ---

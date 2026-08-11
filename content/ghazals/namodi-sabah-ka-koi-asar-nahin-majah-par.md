@@ -3,6 +3,7 @@ title: "نمودِ صبح کا کوئی اثر نہیں مجھ پر"
 slug: "namodi-sabah-ka-koi-asar-nahin-majah-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 396
 ---

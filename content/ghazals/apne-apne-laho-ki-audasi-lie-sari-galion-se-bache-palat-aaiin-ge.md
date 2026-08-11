@@ -3,6 +3,7 @@ title: "اپنے اپنے لہو کی اُداسی لیے ساری گلیوں س
 slug: "apne-apne-laho-ki-audasi-lie-sari-galion-se-bache-palat-aaiin-ge"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 55
 ---

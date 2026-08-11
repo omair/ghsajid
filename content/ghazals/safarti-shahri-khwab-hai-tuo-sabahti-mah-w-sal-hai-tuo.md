@@ -3,6 +3,7 @@ title: "سفارتِ شہرِ خواب ہے تُو، صباحتِ ماہ و سا
 slug: "safarti-shahri-khwab-hai-tuo-sabahti-mah-w-sal-hai-tuo"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 48
 ---

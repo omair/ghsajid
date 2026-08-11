@@ -3,6 +3,7 @@ title: "گریز کرتے ہوئے، اُس سے دُور ہوتے ہوئے"
 slug: "gariz-karte-hoie-us-se-duor-hote-hoie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 20
 ---

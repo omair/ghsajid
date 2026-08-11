@@ -3,6 +3,7 @@ title: "آئنے میں عکسِ حیرت کو سمانا ہی نہیں"
 slug: "aaine-mein-kasi-hirat-ko-samana-hi-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 73
 ---

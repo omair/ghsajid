@@ -3,6 +3,7 @@ title: "خوف شامل اِک وجودِ زر میں رہنا چاہیے"
 slug: "khof-shamal-aik-wajodi-zar-mein-rahna-chahie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 415
 ---

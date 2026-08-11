@@ -3,6 +3,7 @@ title: "حرف حرف خوابوں کے روپ میں سنورتی ہیں"
 slug: "haraf-haraf-khwabon-ke-rop-mein-sanorti-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 62
 ---

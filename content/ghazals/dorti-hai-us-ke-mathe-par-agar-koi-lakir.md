@@ -3,6 +3,7 @@ title: "دوڑتی ہے اُس کے ماتھے پر اگر کوئی لکیر"
 slug: "dorti-hai-us-ke-mathe-par-agar-koi-lakir"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 101
 ---

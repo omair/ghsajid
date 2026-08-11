@@ -3,6 +3,7 @@ title: "مجھے بھلا کے کبھی خود کو بھول جانے سے"
 slug: "majhe-bahla-ke-kabhi-khod-ko-bahol-jane-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 529
 ---

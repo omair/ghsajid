@@ -3,6 +3,7 @@ title: "جب بھور بھئے ہم گھر سے چلے، آنکھوں میں ن�
 slug: "jab-bahor-bahie-ham-gahar-se-chale-aanakhon-mein-ninad-ka-pahra-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 137
 ---

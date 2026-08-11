@@ -3,6 +3,7 @@ title: "راس آتی ہے نظمِ جہاں کو اگر اُس دیے کی ہَ
 slug: "ras-aati-hai-nazmi-jahan-ko-agar-us-die-ki-haoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 216
 ---

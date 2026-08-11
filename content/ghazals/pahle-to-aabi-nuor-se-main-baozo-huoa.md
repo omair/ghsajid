@@ -3,6 +3,7 @@ title: "پہلے تو آبِ نُور سے مَیں باوضو ہُوا"
 slug: "pahle-to-aabi-nuor-se-main-baozo-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 81
 ---

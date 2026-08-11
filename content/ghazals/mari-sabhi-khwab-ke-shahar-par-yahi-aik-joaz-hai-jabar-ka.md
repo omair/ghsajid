@@ -3,6 +3,7 @@ title: "مری صبحِ خواب کے شہر پر یہی اِک جواز ہے ج
 slug: "mari-sabhi-khwab-ke-shahar-par-yahi-aik-joaz-hai-jabar-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 16
 ---

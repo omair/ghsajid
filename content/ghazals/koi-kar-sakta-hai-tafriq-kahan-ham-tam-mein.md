@@ -3,6 +3,7 @@ title: "کوئی کر سکتا ہے تفریق کہاں ہم تم میں"
 slug: "koi-kar-sakta-hai-tafriq-kahan-ham-tam-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 12
 ---

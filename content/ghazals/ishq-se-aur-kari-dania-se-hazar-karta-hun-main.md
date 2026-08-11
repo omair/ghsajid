@@ -3,6 +3,7 @@ title: "عشق سے اور کارِ دنیا سے حذر کرتا ہوں مَی�
 slug: "ishq-se-aur-kari-dania-se-hazar-karta-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 360
 ---

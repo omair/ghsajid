@@ -3,6 +3,7 @@ title: "رات اِک لہر رُکی پانی میں"
 slug: "raat-aik-lehar-ruki-pani-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 136
 ---

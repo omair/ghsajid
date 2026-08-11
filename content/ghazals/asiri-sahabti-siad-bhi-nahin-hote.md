@@ -3,6 +3,7 @@ title: "اسیرِ صحبتِ صیّاد بھی نہیں ہوتے"
 slug: "asiri-sahabti-siad-bhi-nahin-hote"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 533
 ---

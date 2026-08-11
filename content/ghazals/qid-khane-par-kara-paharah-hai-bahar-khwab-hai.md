@@ -3,6 +3,7 @@ title: "قید خانے پر کڑا پہرہ ہے باہر خواب ہے"
 slug: "qid-khane-par-kara-paharah-hai-bahar-khwab-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 228
 ---

@@ -3,6 +3,7 @@ title: "درس گاہ - 20"
 slug: "dars-gah-20"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 part: 20
 ---

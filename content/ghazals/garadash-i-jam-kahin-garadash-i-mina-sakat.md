@@ -3,6 +3,7 @@ title: "گردش ِ جام کہیں گردش ِ مینا ساکت"
 slug: "garadash-i-jam-kahin-garadash-i-mina-sakat"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

@@ -3,6 +3,7 @@ title: "کہانی - بانگے وچ ڈنگر"
 slug: "kahani-bange-wach-danagar"
 language: "punjabi"
 script: "shahmukhi"
+origin: "tool"
 published: 2020-05-09
 tags: ["کہانی"]
 source: "youtube"

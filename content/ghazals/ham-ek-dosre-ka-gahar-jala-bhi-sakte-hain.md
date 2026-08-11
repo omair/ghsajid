@@ -3,6 +3,7 @@ title: "ہم ایک دوسرے کا گھر جلا بھی سکتے ہیں"
 slug: "ham-ek-dosre-ka-gahar-jala-bhi-sakte-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 544
 ---

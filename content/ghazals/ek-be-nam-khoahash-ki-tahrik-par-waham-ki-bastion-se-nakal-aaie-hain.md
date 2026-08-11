@@ -3,6 +3,7 @@ title: "ایک بے نام خواہش کی تحریک پر وہم کی بستی�
 slug: "ek-be-nam-khoahash-ki-tahrik-par-waham-ki-bastion-se-nakal-aaie-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 59
 ---

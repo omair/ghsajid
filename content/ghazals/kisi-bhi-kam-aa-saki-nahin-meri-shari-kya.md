@@ -3,6 +3,7 @@ title: "کسی بھی کام آ سکی نہیں میری شاعری کیا"
 slug: "kisi-bhi-kam-aa-saki-nahin-meri-shari-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 15
 ---

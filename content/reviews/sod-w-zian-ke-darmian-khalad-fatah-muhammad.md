@@ -3,6 +3,7 @@ title: "سود و زیاں کے درمیاں / خالد فتح محمد"
 slug: "sod-w-zian-ke-darmian-khalad-fatah-muhammad"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "سود و زیاں کے درمیاں"
 reviewed_author: "خالد فتح محمد"

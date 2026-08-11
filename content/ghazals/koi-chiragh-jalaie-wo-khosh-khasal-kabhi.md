@@ -3,6 +3,7 @@ title: "کوئی چراغ جلائے وہ خوش خصال کبھی"
 slug: "koi-chiragh-jalaie-wo-khosh-khasal-kabhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 438
 ---

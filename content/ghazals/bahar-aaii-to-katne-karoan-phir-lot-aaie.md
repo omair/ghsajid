@@ -3,6 +3,7 @@ title: "بہار آئی تو کتنے کارواں پھر لوٹ آئے"
 slug: "bahar-aaii-to-katne-karoan-phir-lot-aaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 390
 ---

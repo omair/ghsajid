@@ -3,6 +3,7 @@ title: "کروں بھید کیسے عیاں خواب کا"
 slug: "karon-bahid-kise-yan-khwab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 229
 ---

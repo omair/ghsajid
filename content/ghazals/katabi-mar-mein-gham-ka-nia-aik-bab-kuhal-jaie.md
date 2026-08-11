@@ -3,6 +3,7 @@ title: "کتابِ عمر میں غم کا نیا اِک باب کُھل جائ�
 slug: "katabi-mar-mein-gham-ka-nia-aik-bab-kuhal-jaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 76
 ---

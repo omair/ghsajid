@@ -3,6 +3,7 @@ title: "کُھل گئے سمٹی ہوئی خاک کے پر اُس کے بغیر"
 slug: "kuhal-gie-samti-hoii-khak-ke-par-us-ke-baghir"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 511
 ---

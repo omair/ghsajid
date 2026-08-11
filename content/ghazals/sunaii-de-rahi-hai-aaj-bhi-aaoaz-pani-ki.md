@@ -3,6 +3,7 @@ title: "سُنائی دے رہی ہے آج بھی آواز پانی کی"
 slug: "sunaii-de-rahi-hai-aaj-bhi-aaoaz-pani-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 167
 ---

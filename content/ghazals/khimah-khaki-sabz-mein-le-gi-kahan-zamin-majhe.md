@@ -3,6 +3,7 @@ title: "خیمۂ خاکِ سبز میں لے گی کہاں زمیں مجھے"
 slug: "khimah-khaki-sabz-mein-le-gi-kahan-zamin-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 30
 ---

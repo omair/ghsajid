@@ -3,6 +3,7 @@ title: "زمیں اور آسماں جب رقص کو تیّار ہوں گے"
 slug: "zamin-aur-aasman-jab-raqas-ko-tiar-hun-ge"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 251
 ---

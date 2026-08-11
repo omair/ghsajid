@@ -3,6 +3,7 @@ title: "عشق کے خواب کی تعبیر نہیں کر سکتا"
 slug: "ishq-ke-khwab-ki-tabir-nahin-kar-sakta"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 538
 ---

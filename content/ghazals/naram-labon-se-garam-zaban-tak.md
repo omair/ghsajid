@@ -3,6 +3,7 @@ title: "نرم لبوں سے گرم زباں تک"
 slug: "naram-labon-se-garam-zaban-tak"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 87
 ---

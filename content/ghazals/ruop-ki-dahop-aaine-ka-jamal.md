@@ -3,6 +3,7 @@ title: "رُوپ کی دھوپ، آئنے کا جمال"
 slug: "ruop-ki-dahop-aaine-ka-jamal"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 61
 ---

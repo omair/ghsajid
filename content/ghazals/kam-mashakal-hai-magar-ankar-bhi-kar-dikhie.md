@@ -3,6 +3,7 @@ title: "کام مشکل ہے مگر انکار بھی کر دیکھیے"
 slug: "kam-mashakal-hai-magar-ankar-bhi-kar-dikhie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 79
 ---

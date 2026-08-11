@@ -3,6 +3,7 @@ title: "جو کوئے یار سے نکلے، نکلنے ہی نہیں پائے"
 slug: "jo-koie-yar-se-nakle-nakalne-hi-nahin-paie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 591
 ---

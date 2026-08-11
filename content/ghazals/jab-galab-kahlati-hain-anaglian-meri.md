@@ -3,6 +3,7 @@ title: "عجب گلاب کھلاتی ہیں انگلیاں میری"
 slug: "jab-galab-kahlati-hain-anaglian-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 412
 ---

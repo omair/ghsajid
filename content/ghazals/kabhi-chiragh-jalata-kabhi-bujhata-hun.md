@@ -3,6 +3,7 @@ title: "کبھی چراغ جلاتا، کبھی بُجھاتا ہوں"
 slug: "kabhi-chiragh-jalata-kabhi-bujhata-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 90
 ---

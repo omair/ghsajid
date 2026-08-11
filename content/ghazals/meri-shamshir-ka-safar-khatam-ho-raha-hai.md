@@ -3,6 +3,7 @@ title: "میری شمشیر کا سفر ختم ہو رہا ہے"
 slug: "meri-shamshir-ka-safar-khatam-ho-raha-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 316
 ---

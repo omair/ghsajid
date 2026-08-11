@@ -3,6 +3,7 @@ title: "وفورِ شوق سے بھرنے لگی ہیں آنکھیں بھی"
 slug: "wafori-shoq-se-baharne-lagi-hain-aanakhin-bhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 501
 ---

@@ -3,6 +3,7 @@ title: "جہاں بھر میں مرے دل سا کوئی گھر ہو نہیں س
 slug: "jahan-bhar-mein-mare-dil-sa-koi-gahar-ho-nahin-sakta"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

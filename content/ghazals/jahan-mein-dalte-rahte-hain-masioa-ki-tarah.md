@@ -3,6 +3,7 @@ title: "جہاں میں ڈالتے رہتے ہیں ماسِوا کی طرح"
 slug: "jahan-mein-dalte-rahte-hain-masioa-ki-tarah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

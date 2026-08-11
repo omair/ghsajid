@@ -3,6 +3,7 @@ title: "فشارِ حُسن سے ہو گا شگفتہ تر وہ چاند"
 slug: "fashari-husan-se-ho-ga-shagafatah-tar-wo-chanad"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 550
 ---

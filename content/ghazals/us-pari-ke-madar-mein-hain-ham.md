@@ -3,6 +3,7 @@ title: "اُس پری کے مدار میں ہیں ہم"
 slug: "us-pari-ke-madar-mein-hain-ham"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 55
 ---

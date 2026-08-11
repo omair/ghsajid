@@ -3,6 +3,7 @@ title: "چراغ اور آئنے سے منہ موڑ کر ہَوا نے"
 slug: "chiragh-aur-aaine-se-manah-mor-kar-haoa-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 220
 ---

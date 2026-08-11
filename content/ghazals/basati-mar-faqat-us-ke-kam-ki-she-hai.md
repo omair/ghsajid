@@ -3,6 +3,7 @@ title: "بساطِ عمر فقط اُس کے کام کی شے ہے"
 slug: "basati-mar-faqat-us-ke-kam-ki-she-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 297
 ---

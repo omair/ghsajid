@@ -3,6 +3,7 @@ title: "ہر شے مجھے نصیب ہے، پھر بھی سُکوں نہیں"
 slug: "har-she-majhe-nasib-he-phir-bhi-sukon-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 8
 ---

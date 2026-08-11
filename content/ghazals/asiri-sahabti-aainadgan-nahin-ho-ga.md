@@ -3,6 +3,7 @@ title: "اسیرِ صحبتِ آیندگاں نہیں ہو گا"
 slug: "asiri-sahabti-aainadgan-nahin-ho-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 426
 ---

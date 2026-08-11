@@ -3,6 +3,7 @@ title: "تعلّق اہلِ دنیا سے برائے نام ہے میرا"
 slug: "talaq-ahli-dania-se-baraie-nam-hai-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 32
 ---

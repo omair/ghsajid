@@ -3,6 +3,7 @@ title: "بھڑکتا ہے مرے دل میں چراغِ شر ہَوا کا"
 slug: "baharakta-hai-mare-dil-mein-charaghi-shar-haoa-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 207
 ---

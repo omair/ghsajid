@@ -3,6 +3,7 @@ title: "بچھڑ کے اُس سے کوئی رابطہ نہیں تو کیا"
 slug: "bachahar-ke-us-se-koi-rabatah-nahin-to-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 101
 ---

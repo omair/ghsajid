@@ -3,6 +3,7 @@ title: "ہک پرانی تھا ویں"
 slug: "hak-parani-taha-win"
 language: "punjabi"
 script: "shahmukhi"
+origin: "tool"
 published: 2020-05-10
 ---
 

@@ -3,6 +3,7 @@ title: "خبر نہیں ہے، وہ چیز کیا ہے، مگر یہ طے ہے"
 slug: "khabar-nahin-he-wo-chiz-kya-he-magar-ye-te-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 120
 ---

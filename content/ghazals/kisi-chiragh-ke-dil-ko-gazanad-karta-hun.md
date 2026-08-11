@@ -3,6 +3,7 @@ title: "کسی چراغ کے دل کو گزند کرتا ہوں"
 slug: "kisi-chiragh-ke-dil-ko-gazanad-karta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 586
 ---

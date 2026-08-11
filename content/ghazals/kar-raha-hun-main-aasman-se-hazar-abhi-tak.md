@@ -3,6 +3,7 @@ title: "کر رہا ہوں مَیں آسماں سے حذر ابھی تک"
 slug: "kar-raha-hun-main-aasman-se-hazar-abhi-tak"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 375
 ---

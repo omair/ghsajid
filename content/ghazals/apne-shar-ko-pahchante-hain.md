@@ -3,6 +3,7 @@ title: "اپنے شاعر کو پہچانتے ہیں"
 slug: "apne-shar-ko-pahchante-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 122
 ---

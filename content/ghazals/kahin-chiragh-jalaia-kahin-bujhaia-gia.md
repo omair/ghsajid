@@ -3,6 +3,7 @@ title: "کہیں چراغ جلایا، کہیں بُجھایا گیا"
 slug: "kahin-chiragh-jalaia-kahin-bujhaia-gia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 37
 ---

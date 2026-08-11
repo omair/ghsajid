@@ -3,6 +3,7 @@ title: "ہنس رہا ہے جو مری حالت پہ ، جانے کون ہے"
 slug: "hanas-raha-hai-jo-mari-halat-pah-jane-kaun-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 ---
 

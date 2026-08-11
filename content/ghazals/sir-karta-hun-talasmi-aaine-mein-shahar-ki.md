@@ -3,6 +3,7 @@ title: "سیر کرتا ہوں طلسمی آئنے میں شہر کی!"
 slug: "sir-karta-hun-talasmi-aaine-mein-shahar-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 260
 ---

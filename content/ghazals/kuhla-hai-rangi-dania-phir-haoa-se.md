@@ -3,6 +3,7 @@ title: "کُھلا ہے رنگِ دنیا پھر ہَوا سے"
 slug: "kuhla-hai-rangi-dania-phir-haoa-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 209
 ---

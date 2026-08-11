@@ -3,6 +3,7 @@ title: "جو اِس اندھیرے کی سلطنت سے فرار کر راستہ
 slug: "jo-ais-anadhire-ki-salatanat-se-farar-kar-rasatah-male-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 21
 ---

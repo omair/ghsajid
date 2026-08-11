@@ -3,6 +3,7 @@ title: "شہر بھر کو آج بھی ملتی ہے راحت آگ سے"
 slug: "shahar-bhar-ko-aaj-bhi-malti-hai-rahat-aag-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 189
 ---

@@ -3,6 +3,7 @@ title: "سیرِ آیندہ نہ دشتِ خواب سر کرنے میں ہے"
 slug: "siri-aainadah-na-dashti-khwab-sar-karne-mein-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 528
 ---

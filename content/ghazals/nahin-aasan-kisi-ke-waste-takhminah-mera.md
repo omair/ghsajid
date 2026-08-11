@@ -3,6 +3,7 @@ title: "نہیں آساں کسی کے واسطے تخمینہ میرا"
 slug: "nahin-aasan-kisi-ke-waste-takhminah-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 391
 ---

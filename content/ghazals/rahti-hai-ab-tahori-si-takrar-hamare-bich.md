@@ -3,6 +3,7 @@ title: "رہتی ہے اب تھوڑی سی تکرار ہمارے بیچ"
 slug: "rahti-hai-ab-tahori-si-takrar-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 463
 ---

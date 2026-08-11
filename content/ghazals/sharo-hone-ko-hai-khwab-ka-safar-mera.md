@@ -3,6 +3,7 @@ title: "شروع ہونے کو ہے خواب کا سفر میرا"
 slug: "sharo-hone-ko-hai-khwab-ka-safar-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 444
 ---

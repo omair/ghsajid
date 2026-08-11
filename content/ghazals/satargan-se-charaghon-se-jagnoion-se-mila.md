@@ -3,6 +3,7 @@ title: "ستارگاں سے، چراغوں سے، جگنوئوں سے مِلا"
 slug: "satargan-se-charaghon-se-jagnoion-se-mila"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 72
 ---

@@ -3,6 +3,7 @@ title: "بادِ سحر کہ بادِ صبا مجھ پہ قرض ہے"
 slug: "badi-sahar-keh-badi-saba-majah-pah-qaraz-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 62
 ---

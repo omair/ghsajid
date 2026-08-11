@@ -3,6 +3,7 @@ title: "کوئی جب چھین لیتا ہے متاعِ صبر مٹّی سے"
 slug: "koi-jab-chahin-lita-hai-matai-sabar-mati-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 148
 ---

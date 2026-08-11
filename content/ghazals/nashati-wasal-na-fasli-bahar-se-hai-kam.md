@@ -3,6 +3,7 @@ title: "نشاطِ وصل نہ فصلِ بہار سے ہے کام"
 slug: "nashati-wasal-na-fasli-bahar-se-hai-kam"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 326
 ---

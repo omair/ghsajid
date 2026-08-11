@@ -147,8 +147,7 @@ def main() -> int:
             print(f"  {err}", file=sys.stderr)
         return 1
 
-    for piece in survivors:
-        write_piece(piece, CONTENT)
+    kept_by_hand = [p for p in survivors if write_piece(p, CONTENT) is None]
     write_container([p for p in survivors if p.kind == "memoir"], CONTENT)
 
     # Every post redirects, not only the merged ones.
@@ -159,7 +158,15 @@ def main() -> int:
     }
     write_postmap(full_map, POSTMAP)
 
-    print(f"wrote {len(survivors)} pieces, {len(full_map)} redirects")
+    print(
+        f"wrote {len(survivors) - len(kept_by_hand)} pieces, "
+        f"{len(full_map)} redirects"
+    )
+
+    if kept_by_hand:
+        print("\nLEFT UNTOUCHED (origin: human) — regeneration skipped these:")
+        for piece in kept_by_hand:
+            print(f"  {piece.kind}/{piece.slug}")
 
     if redirects:
         print("\nMERGED DUPLICATES — confirm the survivor is the right one:")

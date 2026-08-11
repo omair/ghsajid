@@ -3,6 +3,7 @@ title: "اپنی آنکھوں کو بنا کر گلِ حیراں مَیں نے"
 slug: "apni-aanakhon-ko-bana-kar-gali-hiran-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 545
 ---

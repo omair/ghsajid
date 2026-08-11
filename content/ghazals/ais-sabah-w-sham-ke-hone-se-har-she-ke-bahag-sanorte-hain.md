@@ -3,6 +3,7 @@ title: "اِس صبح و شام کے ہونے سے ہر شے کے بھاگ سن�
 slug: "ais-sabah-w-sham-ke-hone-se-har-she-ke-bahag-sanorte-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 50
 ---

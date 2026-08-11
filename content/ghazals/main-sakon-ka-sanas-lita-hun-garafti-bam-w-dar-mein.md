@@ -3,6 +3,7 @@ title: "مَیں سکوں کا سانس لیتا ہوں گرفتِ بام و د�
 slug: "main-sakon-ka-sanas-lita-hun-garafti-bam-w-dar-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 389
 ---

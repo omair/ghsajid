@@ -3,6 +3,7 @@ title: "حصارِ خواب سے باہر مِرا دھواں پہنچا"
 slug: "hasari-khwab-se-bahar-mira-dahoan-pahancha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 6
 ---

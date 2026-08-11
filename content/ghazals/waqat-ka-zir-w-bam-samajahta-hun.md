@@ -3,6 +3,7 @@ title: "وقت کا زیر و بم سمجھتا ہوں"
 slug: "waqat-ka-zir-w-bam-samajahta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 89
 ---

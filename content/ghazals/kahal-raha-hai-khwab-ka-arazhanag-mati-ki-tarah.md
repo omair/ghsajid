@@ -3,6 +3,7 @@ title: "کھل رہا ہے خواب کا ارژنگ مٹّی کی طرح"
 slug: "kahal-raha-hai-khwab-ka-arazhanag-mati-ki-tarah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 166
 ---

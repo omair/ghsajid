@@ -3,6 +3,7 @@ title: "دیکھتے رہتے ہیں دن رات تماشا اُن کا!"
 slug: "dikahte-rahte-hain-dan-raat-tamasha-aun-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 588
 ---

@@ -3,6 +3,7 @@ title: "گلی میں خاک اُڑی، آئنے پہ گرد پڑی"
 slug: "gali-mein-khak-auri-aaine-pah-garad-pari"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 41
 ---

@@ -3,6 +3,7 @@ title: "نہ ڈھایا ہو کسی نے آئنے پر قہر مٹّی سے"
 slug: "na-dahaia-ho-kisi-ne-aaine-par-qahar-mati-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 152
 ---

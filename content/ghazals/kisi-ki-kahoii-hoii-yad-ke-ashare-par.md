@@ -3,6 +3,7 @@ title: "کسی کی کھوئی ہوئی یاد کے اشارے پر"
 slug: "kisi-ki-kahoii-hoii-yad-ke-ashare-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 575
 ---

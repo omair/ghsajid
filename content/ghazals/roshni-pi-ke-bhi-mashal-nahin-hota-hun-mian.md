@@ -3,6 +3,7 @@ title: "روشنی پی کے بھی مشعل نہیں ہوتا ہوں میاں"
 slug: "roshni-pi-ke-bhi-mashal-nahin-hota-hun-mian"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 82
 ---

@@ -3,6 +3,7 @@ title: "ماتھے پر ہے مُہرِ غلامی، دل میں داغ اسیر
 slug: "mathe-par-hai-muhri-ghalami-dil-mein-dagh-asiri-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 56
 ---

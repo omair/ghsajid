@@ -3,6 +3,7 @@ title: "فصل بڑھنے لگی گُلِ نَے کی"
 slug: "fasal-barahne-lagi-guli-nae-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 47
 ---

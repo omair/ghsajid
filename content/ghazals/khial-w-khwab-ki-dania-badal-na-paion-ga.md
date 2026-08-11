@@ -3,6 +3,7 @@ title: "خیال و خواب کی دنیا بدل نہ پائوں گا"
 slug: "khial-w-khwab-ki-dania-badal-na-paion-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 436
 ---

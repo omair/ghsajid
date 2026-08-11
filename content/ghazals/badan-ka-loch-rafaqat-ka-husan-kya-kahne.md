@@ -3,6 +3,7 @@ title: "بدن کا لوچ، رفاقت کا حُسن کیا کہنے!"
 slug: "badan-ka-loch-rafaqat-ka-husan-kya-kahne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 16
 ---

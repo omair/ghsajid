@@ -3,6 +3,7 @@ title: "نکل آئے تھے اپنے دھیان میں کچھ دُور مٹّی
 slug: "nakal-aaie-tahe-apne-dahian-mein-kuch-duor-mati-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 158
 ---

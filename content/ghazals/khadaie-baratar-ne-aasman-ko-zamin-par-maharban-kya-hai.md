@@ -3,6 +3,7 @@ title: "خدائے برتر نے آسماں کو زمین پر مہرباں کی
 slug: "khadaie-baratar-ne-aasman-ko-zamin-par-maharban-kya-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 19
 ---

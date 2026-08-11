@@ -3,6 +3,7 @@ title: "لہو کی آگ اگر جلتی رہے گی"
 slug: "laho-ki-aag-agar-jalti-rahe-gi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 498
 ---

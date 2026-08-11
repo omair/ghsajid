@@ -3,6 +3,7 @@ title: "منوّر ہے چراغِ اوّلیں آئینہ خانہ میں"
 slug: "manor-hai-charaghi-aolin-aaiinah-khanah-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 567
 ---

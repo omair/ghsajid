@@ -3,6 +3,7 @@ title: "فکر مجھ کو ہے گھرکے در و بست کی اور نہ زر 
 slug: "fakar-majah-ko-hai-gaharke-dar-w-basat-ki-aur-na-zar-chahie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 31
 ---

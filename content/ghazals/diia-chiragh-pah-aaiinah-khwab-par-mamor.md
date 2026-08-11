@@ -3,6 +3,7 @@ title: "دِیا چراغ پہ، آئینہ خواب پر مامور"
 slug: "diia-chiragh-pah-aaiinah-khwab-par-mamor"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 35
 ---

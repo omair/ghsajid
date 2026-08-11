@@ -3,6 +3,7 @@ title: "بہت دن تک میّسر تھی مجھے بھی روشنی اُس ک�
 slug: "bahat-dan-tak-misar-tahi-majhe-bhi-roshni-us-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 502
 ---

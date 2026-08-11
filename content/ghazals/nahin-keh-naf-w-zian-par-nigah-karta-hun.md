@@ -3,6 +3,7 @@ title: "نہیں کہ نفع و زیاں پر نگاہ کرتا ہوں"
 slug: "nahin-keh-naf-w-zian-par-nigah-karta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 384
 ---

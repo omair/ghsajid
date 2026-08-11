@@ -3,6 +3,7 @@ title: "کیوں نہیں میرے جلو میں لشکرِ جرار میرا"
 slug: "kion-nahin-mere-jalo-mein-lashakri-jarar-mera"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 333
 ---

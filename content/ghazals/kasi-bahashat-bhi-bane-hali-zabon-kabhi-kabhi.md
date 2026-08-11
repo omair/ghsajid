@@ -3,6 +3,7 @@ title: "عکسِ بہشت بھی بَنے حالِ زبوں کبھی کبھی"
 slug: "kasi-bahashat-bhi-bane-hali-zabon-kabhi-kabhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 79
 ---

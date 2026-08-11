@@ -3,6 +3,7 @@ title: "آئنہ داری بِنائے آب و آتش ہی نہیں"
 slug: "aainah-dari-binaie-aab-w-aatash-hi-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 78
 ---

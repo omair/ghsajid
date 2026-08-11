@@ -3,6 +3,7 @@ title: "کام نہ آ سکی مرے شمع کسی دماغ کی"
 slug: "kam-na-aa-saki-mare-sham-kisi-damagh-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 411
 ---

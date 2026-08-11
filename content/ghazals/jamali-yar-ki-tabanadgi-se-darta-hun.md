@@ -3,6 +3,7 @@ title: "جمالِ یار کی تابندگی سے ڈرتا ہوں"
 slug: "jamali-yar-ki-tabanadgi-se-darta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 34
 ---

@@ -3,6 +3,7 @@ title: "حصارِ ہجر کی جانب گلِ آتش لپکتا ہے"
 slug: "hasari-hajar-ki-janab-gali-aatash-lapakta-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 35
 ---

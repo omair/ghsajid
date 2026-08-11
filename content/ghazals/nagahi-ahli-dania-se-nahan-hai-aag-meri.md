@@ -3,6 +3,7 @@ title: "نگاہِ اہلِ دنیا سے نہاں ہے آگ میری"
 slug: "nagahi-ahli-dania-se-nahan-hai-aag-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 204
 ---

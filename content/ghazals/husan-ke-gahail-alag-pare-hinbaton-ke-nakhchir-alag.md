@@ -3,6 +3,7 @@ title: "حُسن کے گھایل الگ پڑے ہیں،باتوں کے نخچی�
 slug: "husan-ke-gahail-alag-pare-hinbaton-ke-nakhchir-alag"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 28
 ---

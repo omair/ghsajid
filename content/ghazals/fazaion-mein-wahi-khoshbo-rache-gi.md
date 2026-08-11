@@ -3,6 +3,7 @@ title: "فضائوں میں وہی خوشبو رچے گی"
 slug: "fazaion-mein-wahi-khoshbo-rache-gi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 140
 ---

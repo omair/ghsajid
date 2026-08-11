@@ -3,6 +3,7 @@ title: "آپ سے کیا نہ ہو سکا، آپ نے کیا نہیں کِیا"
 slug: "aap-se-kya-na-ho-saka-aap-ne-kya-nahin-kiia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 41
 ---

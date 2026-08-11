@@ -3,6 +3,7 @@ title: "پیروں تلے ہے خاک مگر چاک پر نہیں"
 slug: "piron-tale-hai-khak-magar-chak-par-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 313
 ---

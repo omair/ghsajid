@@ -3,6 +3,7 @@ title: "ایک اِک کر کے سبھی ہو گئے رخصت مجھ سے"
 slug: "ek-aik-kar-ke-sabhi-ho-gie-rakhasat-majah-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 433
 ---

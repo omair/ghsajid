@@ -3,6 +3,7 @@ title: "گھروں میں نور کا ہالہ کہاں سے آتا ہے"
 slug: "gahron-mein-nor-ka-halah-kahan-se-aata-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 81
 ---

@@ -3,6 +3,7 @@ title: "مرے لہو کی تیغ پر ہے زنگ میرے خواب کا"
 slug: "mare-laho-ki-tigh-par-hai-zanag-mere-khwab-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 241
 ---

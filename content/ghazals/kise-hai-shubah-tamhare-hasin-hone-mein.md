@@ -3,6 +3,7 @@ title: "کسے ہے شُبہ تمہارے حَسین ہونے میں"
 slug: "kise-hai-shubah-tamhare-hasin-hone-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 63
 ---

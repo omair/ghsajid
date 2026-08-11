@@ -3,6 +3,7 @@ title: "مرے قبضے میں جتنا اسلحہ ہے، سب اضافی ہے"
 slug: "mare-qabze-mein-jatna-asalahah-he-sab-azafi-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 336
 ---

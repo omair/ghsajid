@@ -3,6 +3,7 @@ title: "نظر آئے ہیں دو غیبی ستارے اُس کے سینے پر"
 slug: "nazar-aaie-hain-do-ghibi-satare-us-ke-sine-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 487
 ---

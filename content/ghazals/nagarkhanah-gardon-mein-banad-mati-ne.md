@@ -3,6 +3,7 @@ title: "نگارخانۂ گردوں میں بند مٹّی نے"
 slug: "nagarkhanah-gardon-mein-banad-mati-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 165
 ---

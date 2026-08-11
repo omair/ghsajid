@@ -3,6 +3,7 @@ title: "تمام عمر میں کرنے کا ایک کام کیا"
 slug: "tamam-mar-mein-karne-ka-ek-kam-kya"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 280
 ---

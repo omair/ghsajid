@@ -3,6 +3,7 @@ title: "کسی کی پھول سی آنکھوں میں گھر کیا مَیں ن�
 slug: "kisi-ki-pahol-si-aanakhon-mein-gahar-kya-main-ne"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 305
 ---

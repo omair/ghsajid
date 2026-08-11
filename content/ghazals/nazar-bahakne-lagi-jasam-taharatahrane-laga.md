@@ -3,6 +3,7 @@ title: "نظر بہکنے لگی، جسم تھرتھرانے لگا"
 slug: "nazar-bahakne-lagi-jasam-taharatahrane-laga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 14
 ---

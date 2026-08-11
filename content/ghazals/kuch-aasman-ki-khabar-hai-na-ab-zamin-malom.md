@@ -3,6 +3,7 @@ title: "کچھ آسماں کی خبر ہے نہ اب زمیں معلوم"
 slug: "kuch-aasman-ki-khabar-hai-na-ab-zamin-malom"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 7
 ---

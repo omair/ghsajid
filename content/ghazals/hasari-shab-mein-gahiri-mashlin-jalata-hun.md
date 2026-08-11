@@ -3,6 +3,7 @@ title: "حصارِ شب میں گھِری مشعلیں جلاتا ہوں"
 slug: "hasari-shab-mein-gahiri-mashlin-jalata-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 325
 ---

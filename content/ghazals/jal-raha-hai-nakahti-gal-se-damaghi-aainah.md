@@ -3,6 +3,7 @@ title: "جل رہا ہے نکہتِ گل سے دماغِ آئنہ"
 slug: "jal-raha-hai-nakahti-gal-se-damaghi-aainah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 440
 ---

@@ -3,6 +3,7 @@ title: "دیے جلانے لگا ہے لہو ہمارے بیچ"
 slug: "die-jalane-laga-hai-laho-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 464
 ---

@@ -3,6 +3,7 @@ title: "وہ دُور چلا جائے گا سوچا ہی نہیں تھا"
 slug: "wo-duor-chala-jaie-ga-socha-hi-nahin-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 54
 ---

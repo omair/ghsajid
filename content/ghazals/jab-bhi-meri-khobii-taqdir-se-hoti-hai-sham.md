@@ -3,6 +3,7 @@ title: "جب بھی میری خوبیِ تقدیر سے ہوتی ہے شام"
 slug: "jab-bhi-meri-khobii-taqdir-se-hoti-hai-sham"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 568
 ---

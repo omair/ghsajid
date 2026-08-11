@@ -3,6 +3,7 @@ title: "دیوار پہ چاک سے لکھا ہوں/صابر ظفر"
 slug: "deewar-pah-chak-se-lakha-hun-sabar-zafar"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-10
 reviewed_book: "دیوار پہ چاک سے لکھا ہوں"
 reviewed_author: "صابر ظفر"

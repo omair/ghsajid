@@ -3,6 +3,7 @@ title: "کسی کی یاد کے جنگل میں کھو چکا ہوں مَیں!"
 slug: "kisi-ki-yad-ke-janagal-mein-kaho-chaka-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 510
 ---

@@ -3,6 +3,7 @@ title: "بدن کی سیر نہ گردن کا مَس ضروری ہے"
 slug: "badan-ki-sir-na-garadan-ka-mas-zarori-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 11
 ---

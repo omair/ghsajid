@@ -3,6 +3,7 @@ title: "بھٹک رہا ہے مرے ساتھ ساتھ میرا چراغ"
 slug: "bahatak-raha-hai-mare-satah-satah-mera-chiragh"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 296
 ---

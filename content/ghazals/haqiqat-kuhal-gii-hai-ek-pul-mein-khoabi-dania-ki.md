@@ -3,6 +3,7 @@ title: "حقیقت کُھل گئی ہے ایک پل میں خوابِ دنیا �
 slug: "haqiqat-kuhal-gii-hai-ek-pul-mein-khoabi-dania-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 474
 ---

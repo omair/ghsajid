@@ -3,6 +3,7 @@ title: "ہو رہا ہے سرِ افلاک تماشا کوئی"
 slug: "ho-raha-hai-sari-aflak-tamasha-koi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 84
 ---

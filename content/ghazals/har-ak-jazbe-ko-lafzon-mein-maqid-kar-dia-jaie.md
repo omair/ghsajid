@@ -3,6 +3,7 @@ title: "ہر اک جذبے کو لفظوں میں مقیّد کر دیا جائ�
 slug: "har-ak-jazbe-ko-lafzon-mein-maqid-kar-dia-jaie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 315
 ---

@@ -3,6 +3,7 @@ title: "تھکن سے گھومتا رہتا ہے سر میری ہَوا کا"
 slug: "tahakan-se-gahomta-rahta-hai-sar-meri-haoa-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 221
 ---

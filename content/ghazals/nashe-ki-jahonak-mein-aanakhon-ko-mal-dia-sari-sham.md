@@ -3,6 +3,7 @@ title: "نشے کی جھونک میں آنکھوں کو مَل دیا سرِ ش�
 slug: "nashe-ki-jahonak-mein-aanakhon-ko-mal-dia-sari-sham"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 19
 ---

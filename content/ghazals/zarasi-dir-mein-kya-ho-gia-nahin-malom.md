@@ -3,6 +3,7 @@ title: "ذراسی دیر میں کیا ہو گیا نہیں معلوم"
 slug: "zarasi-dir-mein-kya-ho-gia-nahin-malom"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 32
 ---

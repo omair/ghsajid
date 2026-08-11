@@ -3,6 +3,7 @@ title: "جہاں سے عکس مِلا، آئنہ وہیں سے مِلا"
 slug: "jahan-se-kas-mila-aainah-wahin-se-mila"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 18
 ---

@@ -3,6 +3,7 @@ title: "نہیں کہ اُس سے فقط رابطہ بڑھانا ہے"
 slug: "nahin-keh-us-se-faqat-rabatah-barhana-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 61
 ---

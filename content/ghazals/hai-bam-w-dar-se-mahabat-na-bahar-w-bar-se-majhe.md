@@ -3,6 +3,7 @@ title: "ہے بام و در سے محبت نہ بحر و بر سے مجھے"
 slug: "hai-bam-w-dar-se-mahabat-na-bahar-w-bar-se-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 443
 ---

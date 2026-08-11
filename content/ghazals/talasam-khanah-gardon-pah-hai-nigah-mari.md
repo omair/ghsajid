@@ -3,6 +3,7 @@ title: "طلسم خانۂ گردوں پہ ہے نگاہ مری"
 slug: "talasam-khanah-gardon-pah-hai-nigah-mari"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 308
 ---

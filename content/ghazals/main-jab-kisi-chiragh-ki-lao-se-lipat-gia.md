@@ -3,6 +3,7 @@ title: "مَیں جب کسی چراغ کی لَو سے لِپٹ گیا"
 slug: "main-jab-kisi-chiragh-ki-lao-se-lipat-gia"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 49
 ---

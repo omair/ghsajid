@@ -3,6 +3,7 @@ title: "طلسمِ کُن سے مِرا سلسلہ وہی ہے ابھی"
 slug: "talasmi-kun-se-mira-salasalah-wahi-hai-abhi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 30
 ---

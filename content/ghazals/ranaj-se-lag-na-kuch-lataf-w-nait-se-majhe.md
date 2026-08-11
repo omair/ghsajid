@@ -3,6 +3,7 @@ title: "رنج سے لاگ نہ کچھ لطف و عنایت سے مجھے"
 slug: "ranaj-se-lag-na-kuch-lataf-w-nait-se-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 86
 ---

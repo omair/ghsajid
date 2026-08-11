@@ -3,7 +3,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.migrate.emit import frontmatter, write_container, write_piece, write_postmap
+from tools.migrate.emit import (
+    existing_origin,
+    frontmatter,
+    write_container,
+    write_piece,
+    write_postmap,
+)
 from tools.migrate.models import Piece
 
 
@@ -24,6 +30,12 @@ class TestFrontmatter(unittest.TestCase):
         self.assertIn('language: "urdu"', fm)
         self.assertIn('script: "nastaliq"', fm)
         self.assertIn("published: 2020-03-25", fm)
+
+    def test_origin_defaults_to_tool(self):
+        self.assertIn('origin: "tool"', frontmatter(piece()))
+
+    def test_origin_human_is_rendered(self):
+        self.assertIn('origin: "human"', frontmatter(piece(origin="human")))
 
     def test_omits_empty_optional_fields(self):
         fm = frontmatter(piece())
@@ -62,6 +74,32 @@ class TestWrite(unittest.TestCase):
         text = path.read_text(encoding="utf-8")
         self.assertTrue(text.startswith("---\n"))
         self.assertTrue(text.rstrip().endswith("مصرع"))
+
+    def test_write_piece_stamps_tool_origin_by_default(self):
+        path = write_piece(piece(), self.root)
+        self.assertEqual(existing_origin(path), "tool")
+
+    def test_write_piece_never_overwrites_a_human_file(self):
+        # A person's own piece sits where the generator would write. It must be
+        # left byte-for-byte untouched, and the write reports the skip as None.
+        path = self.root / "ghazals" / "abc.md"
+        path.parent.mkdir(parents=True)
+        human = '---\ntitle: "دستی"\norigin: "human"\n---\n\nمصرعِ آدمی\n'
+        path.write_text(human, encoding="utf-8")
+
+        result = write_piece(piece(body="regenerated"), self.root)
+
+        self.assertIsNone(result)
+        self.assertEqual(path.read_text(encoding="utf-8"), human)
+
+    def test_write_piece_overwrites_a_tool_file(self):
+        write_piece(piece(body="first"), self.root)
+        result = write_piece(piece(body="second"), self.root)
+        self.assertIsNotNone(result)
+        self.assertIn("second", result.read_text(encoding="utf-8"))
+
+    def test_existing_origin_is_none_when_absent(self):
+        self.assertIsNone(existing_origin(self.root / "nope.md"))
 
     def test_write_container_lists_parts_in_order(self):
         parts = [

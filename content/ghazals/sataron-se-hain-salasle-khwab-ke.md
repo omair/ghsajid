@@ -3,6 +3,7 @@ title: "ستاروں سے ہیں سلسلے خواب کے"
 slug: "sataron-se-hain-salasle-khwab-ke"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 232
 ---

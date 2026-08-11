@@ -3,6 +3,7 @@ title: "اِک نئے شہر کی جستجو میں پڑائو بدلنا پڑے
 slug: "aik-nie-shahar-ki-jasatjo-mein-paraio-badalna-pare"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 78
 ---

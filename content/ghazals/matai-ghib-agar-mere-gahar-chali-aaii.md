@@ -3,6 +3,7 @@ title: "متاعِ غیب اگر میرے گھر چلی آئی"
 slug: "matai-ghib-agar-mere-gahar-chali-aaii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 425
 ---

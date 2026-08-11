@@ -3,6 +3,7 @@ title: "نیند سے باہر نکلوں گا اور خواب کے اندر د�
 slug: "ninad-se-bahar-naklon-ga-aur-khwab-ke-anadar-dikhon-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 53
 ---

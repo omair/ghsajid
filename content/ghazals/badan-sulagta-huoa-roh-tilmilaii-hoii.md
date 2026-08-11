@@ -3,6 +3,7 @@ title: "بدن سُلگتا ہُوا، روح تِلمِلائی ہوئی"
 slug: "badan-sulagta-huoa-roh-tilmilaii-hoii"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 38
 ---

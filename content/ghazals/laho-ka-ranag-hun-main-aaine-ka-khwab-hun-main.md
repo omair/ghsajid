@@ -3,6 +3,7 @@ title: "لہو کا رنگ ہوں مَیں، آئنے کا خواب ہوں مَ�
 slug: "laho-ka-ranag-hun-main-aaine-ka-khwab-hun-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 20
 ---

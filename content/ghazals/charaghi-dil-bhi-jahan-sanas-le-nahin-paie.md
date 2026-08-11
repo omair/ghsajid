@@ -3,6 +3,7 @@ title: "چراغِ دل بھی جہاں سانس لے نہیں پائے"
 slug: "charaghi-dil-bhi-jahan-sanas-le-nahin-paie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 45
 ---

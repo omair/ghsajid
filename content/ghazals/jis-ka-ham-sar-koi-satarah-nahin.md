@@ -3,6 +3,7 @@ title: "جس کا ہم سر کوئ ستارہ نہیں"
 slug: "jis-ka-ham-sar-koi-satarah-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 published: 2020-05-09
 published_in: ["caarwan.com"]
 ---

@@ -3,6 +3,7 @@ title: "آبِ آئینہ الگ ہے، آنکھ کا پانی الگ"
 slug: "aabi-aaiinah-alag-he-aanakah-ka-pani-alag"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 5
 ---

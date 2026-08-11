@@ -3,6 +3,7 @@ title: "تختِ شاہی پر قدم رکھنا تو کچھ مشکل نہیں"
 slug: "takhti-shahi-par-qadam-rakahna-to-kuch-mashakal-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 330
 ---

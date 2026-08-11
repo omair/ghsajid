@@ -3,6 +3,7 @@ title: "طلسمی آئنے جس وقت مِل کے رو رہے تھے"
 slug: "talasmi-aaine-jis-waqat-mil-ke-ro-rahe-tahe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 250
 ---

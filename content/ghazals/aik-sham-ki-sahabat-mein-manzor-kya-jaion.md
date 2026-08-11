@@ -3,6 +3,7 @@ title: "اِک شمع کی صحبت میں منظور کیا جائوں"
 slug: "aik-sham-ki-sahabat-mein-manzor-kya-jaion"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 51
 ---

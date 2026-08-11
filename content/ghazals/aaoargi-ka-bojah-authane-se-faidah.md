@@ -3,6 +3,7 @@ title: "آوارگی کا بوجھ اُٹھانے سے فائدہ"
 slug: "aaoargi-ka-bojah-authane-se-faidah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 33
 ---

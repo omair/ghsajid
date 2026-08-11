@@ -3,6 +3,7 @@ title: "بہار کی دھوپ وادیوں کے ایاغ مانگے"
 slug: "bahar-ki-dahop-wadion-ke-aiagh-mange"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 138
 ---

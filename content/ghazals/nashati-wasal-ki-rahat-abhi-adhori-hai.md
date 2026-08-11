@@ -3,6 +3,7 @@ title: "نشاطِ وصل کی راحت ابھی ادھوری ہے"
 slug: "nashati-wasal-ki-rahat-abhi-adhori-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 532
 ---

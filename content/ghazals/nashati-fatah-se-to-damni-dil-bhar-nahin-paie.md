@@ -3,6 +3,7 @@ title: "نشاطِ فتح سے تو دامنِ دل بھر نہیں پائے"
 slug: "nashati-fatah-se-to-damni-dil-bhar-nahin-paie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 34
 ---

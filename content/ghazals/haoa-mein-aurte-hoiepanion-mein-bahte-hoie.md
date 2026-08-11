@@ -3,6 +3,7 @@ title: "ہَوا میں اُڑتے ہوئے،پانیوں میں بہتے ہوئ
 slug: "haoa-mein-aurte-hoiepanion-mein-bahte-hoie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 31
 ---

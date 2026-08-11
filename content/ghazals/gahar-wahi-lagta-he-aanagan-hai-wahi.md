@@ -3,6 +3,7 @@ title: "گھر وہی لگتا ہے، آنگن ہے وہی"
 slug: "gahar-wahi-lagta-he-aanagan-hai-wahi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 127
 ---

@@ -3,6 +3,7 @@ title: "پھر بلاتے ہیں مجھے تیغ و سِپر اپنی طرف"
 slug: "phir-balate-hain-majhe-tigh-w-sipar-apni-taraf"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 380
 ---

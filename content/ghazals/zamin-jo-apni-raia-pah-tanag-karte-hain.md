@@ -3,6 +3,7 @@ title: "زمیں جو اپنی رعایا پہ تنگ کرتے ہیں"
 slug: "zamin-jo-apni-raia-pah-tanag-karte-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 267
 ---

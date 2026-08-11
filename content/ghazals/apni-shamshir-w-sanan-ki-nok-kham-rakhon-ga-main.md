@@ -3,6 +3,7 @@ title: "اپنی شمشیر و سناں کی نوک خم رکھّوں گا مَ�
 slug: "apni-shamshir-w-sanan-ki-nok-kham-rakhon-ga-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 292
 ---

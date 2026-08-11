@@ -3,6 +3,7 @@ title: "کوئی چراغ تو ہو کم سے کم ہمارے ساتھ"
 slug: "koi-chiragh-to-ho-kam-se-kam-hamare-satah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 56
 ---

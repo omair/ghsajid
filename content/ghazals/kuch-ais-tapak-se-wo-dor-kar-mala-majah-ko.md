@@ -3,6 +3,7 @@ title: "کچھ اِس تپاک سے وہ دوڑ کر ملا مجھ کو"
 slug: "kuch-ais-tapak-se-wo-dor-kar-mala-majah-ko"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 486
 ---

@@ -3,6 +3,7 @@ title: "لبوں سے پھول جھڑے، آنکھ سے ستارے جھڑے"
 slug: "labon-se-pahol-jahre-aanakah-se-satare-jahre"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 54
 ---

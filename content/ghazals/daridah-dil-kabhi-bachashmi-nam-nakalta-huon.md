@@ -3,6 +3,7 @@ title: "دریدہ دل کبھی باچشمِ نم نکلتا ہُوں"
 slug: "daridah-dil-kabhi-bachashmi-nam-nakalta-huon"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 11
 ---

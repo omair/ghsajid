@@ -3,6 +3,7 @@ title: "محبّت میں عجب اِک معرکہ سر کر کے آیا ہوں"
 slug: "mahabat-mein-jab-aik-marakah-sar-kar-ke-aaia-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 404
 ---

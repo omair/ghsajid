@@ -3,6 +3,7 @@ title: "انہیں عالِم نہ خود کو بے خبر گردانتا ہوں
 slug: "anhin-alim-na-khod-ko-be-khabar-gardanta-hun"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 526
 ---

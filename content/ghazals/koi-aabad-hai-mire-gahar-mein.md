@@ -3,6 +3,7 @@ title: "کوئی آباد ہے مِرے گھر میں"
 slug: "koi-aabad-hai-mire-gahar-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 39
 ---

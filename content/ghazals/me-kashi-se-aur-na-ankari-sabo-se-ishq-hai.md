@@ -3,6 +3,7 @@ title: "مے کشی سے اور نہ انکارِ سبو سے عشق ہے"
 slug: "me-kashi-se-aur-na-ankari-sabo-se-ishq-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 377
 ---

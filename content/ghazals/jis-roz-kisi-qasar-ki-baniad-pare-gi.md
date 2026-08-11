@@ -3,6 +3,7 @@ title: "جس روز کسی قصر کی بنیاد پڑے گی"
 slug: "jis-roz-kisi-qasar-ki-baniad-pare-gi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 38
 ---

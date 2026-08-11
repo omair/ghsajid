@@ -3,6 +3,7 @@ title: "ظہور کرنے لگی پھر زمیں ہمارے بیچ"
 slug: "zahor-karne-lagi-phir-zamin-hamare-bich"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 456
 ---

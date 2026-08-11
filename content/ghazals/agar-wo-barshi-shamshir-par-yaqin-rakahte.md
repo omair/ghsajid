@@ -3,6 +3,7 @@ title: "اگر وہ برّشِ شمشیر پر یقیں رکھتے"
 slug: "agar-wo-barshi-shamshir-par-yaqin-rakahte"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 265
 ---

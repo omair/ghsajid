@@ -3,6 +3,7 @@ title: "مَیں نے اپنا غم نہیں بانٹا کسی ہم راز سے"
 slug: "main-ne-apna-gham-nahin-banta-kisi-ham-raz-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 50
 ---

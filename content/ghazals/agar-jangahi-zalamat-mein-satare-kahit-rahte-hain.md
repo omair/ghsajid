@@ -3,6 +3,7 @@ title: "اگر جنگاہِ ظلمت میں ستارے کھیت رہتے ہیں"
 slug: "agar-jangahi-zalamat-mein-satare-kahit-rahte-hain"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 39
 ---

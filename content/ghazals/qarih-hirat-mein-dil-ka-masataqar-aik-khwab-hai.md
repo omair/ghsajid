@@ -3,6 +3,7 @@ title: "قریۂ حیرت میں دل کا مستقر اِک خواب ہے"
 slug: "qarih-hirat-mein-dil-ka-masataqar-aik-khwab-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 13
 ---

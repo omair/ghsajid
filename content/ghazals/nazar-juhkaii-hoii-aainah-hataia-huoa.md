@@ -3,6 +3,7 @@ title: "نظر جُھکائی ہوئی، آئنہ ہٹایا ہُوا"
 slug: "nazar-juhkaii-hoii-aainah-hataia-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 34
 ---

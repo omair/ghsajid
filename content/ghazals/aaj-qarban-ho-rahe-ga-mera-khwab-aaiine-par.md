@@ -3,6 +3,7 @@ title: "آج قرباں ہو رہے گا میرا خواب آئینے پر"
 slug: "aaj-qarban-ho-rahe-ga-mera-khwab-aaiine-par"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 405
 ---

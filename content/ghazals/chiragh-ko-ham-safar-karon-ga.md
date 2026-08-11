@@ -3,6 +3,7 @@ title: "چراغ کو ہم سفر کروں گا"
 slug: "chiragh-ko-ham-safar-karon-ga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 116
 ---

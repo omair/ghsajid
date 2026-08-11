@@ -3,6 +3,7 @@ title: "ہوا ہے نازل اِک آئنے پر غضب ہَوا کا"
 slug: "hoa-hai-nazal-aik-aaine-par-ghazab-haoa-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 213
 ---

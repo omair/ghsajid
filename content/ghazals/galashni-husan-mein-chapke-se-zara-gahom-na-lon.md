@@ -3,6 +3,7 @@ title: "گلشنِ حُسن میں چپکے سے ذرا گھوم نہ لوں"
 slug: "galashni-husan-mein-chapke-se-zara-gahom-na-lon"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 539
 ---

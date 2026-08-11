@@ -3,6 +3,7 @@ title: "اجنبی لگ رہا ہے ہر اِک راستہ تم سے مِل کر
 slug: "ajanbi-lag-raha-hai-har-aik-rasatah-tam-se-mil-kar-majhe"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 71
 ---

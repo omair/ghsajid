@@ -3,6 +3,7 @@ title: "یادگارِ اخناتوں سے اور نہ قال و قیل سے"
 slug: "yadgari-akhnaton-se-aur-na-qal-w-qil-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 320
 ---

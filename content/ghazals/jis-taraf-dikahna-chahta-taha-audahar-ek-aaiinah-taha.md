@@ -3,6 +3,7 @@ title: "جس طرف دیکھنا چاہتا تھا اُدھر ایک آئینہ 
 slug: "jis-taraf-dikahna-chahta-taha-audahar-ek-aaiinah-taha"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 271
 ---

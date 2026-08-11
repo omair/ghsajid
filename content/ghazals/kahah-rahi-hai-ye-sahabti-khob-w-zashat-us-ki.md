@@ -3,6 +3,7 @@ title: "کہہ رہی ہے یہ صحبتِ خوب و زشت اُس کی"
 slug: "kahah-rahi-hai-ye-sahabti-khob-w-zashat-us-ki"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 356
 ---

@@ -3,6 +3,7 @@ title: "کہاں محصور کرتی ہے مناظر کو ہَوا میری"
 slug: "kahan-mahsor-karti-hai-manazar-ko-haoa-meri"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 218
 ---

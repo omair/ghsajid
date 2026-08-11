@@ -3,6 +3,7 @@ title: "آسماں ہے اپنی وحشت میں کسی گھر کی طرح"
 slug: "aasman-hai-apni-wahashat-mein-kisi-gahar-ki-tarah"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 81
 ---

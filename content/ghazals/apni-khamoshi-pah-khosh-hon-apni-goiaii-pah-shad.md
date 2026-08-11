@@ -3,6 +3,7 @@ title: "اپنی خاموشی پہ خوش ہوں، اپنی گویائی پہ ش
 slug: "apni-khamoshi-pah-khosh-hon-apni-goiaii-pah-shad"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 87
 ---

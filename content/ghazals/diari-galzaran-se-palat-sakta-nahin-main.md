@@ -3,6 +3,7 @@ title: "دیارِ گلعذاراں سے پلٹ سکتا نہیں مَیں"
 slug: "diari-galzaran-se-palat-sakta-nahin-main"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 392
 ---

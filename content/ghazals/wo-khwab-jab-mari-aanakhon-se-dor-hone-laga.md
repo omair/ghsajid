@@ -3,6 +3,7 @@ title: "وہ خواب جب مری آنکھوں سے دور ہونے لگا"
 slug: "wo-khwab-jab-mari-aanakhon-se-dor-hone-laga"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 483
 ---

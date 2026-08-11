@@ -3,6 +3,7 @@ title: "ہے عشق نام اگر بارِ صبر ڈھونے کا"
 slug: "hai-ishq-nam-agar-bari-sabar-dahone-ka"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 553
 ---

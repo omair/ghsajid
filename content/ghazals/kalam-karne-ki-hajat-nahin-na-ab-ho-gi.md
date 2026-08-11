@@ -3,6 +3,7 @@ title: "کلام کرنے کی حاجت نہیں نہ اب ہو گی"
 slug: "kalam-karne-ki-hajat-nahin-na-ab-ho-gi"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 51
 ---

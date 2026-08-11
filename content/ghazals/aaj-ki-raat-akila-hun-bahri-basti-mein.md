@@ -3,6 +3,7 @@ title: "آج کی رات اکیلا ہوں بھری بستی میں"
 slug: "aaj-ki-raat-akila-hun-bahri-basti-mein"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 51
 ---

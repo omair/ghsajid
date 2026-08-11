@@ -3,6 +3,7 @@ title: "اِس اندھیرے میں سفر کرنا کسے منظور ہے"
 slug: "ais-anadhire-mein-safar-karna-kise-manzor-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 77
 ---

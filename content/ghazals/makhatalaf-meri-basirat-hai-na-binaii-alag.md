@@ -3,6 +3,7 @@ title: "مختلف میری بصیرت ہے نہ بینائی الگ"
 slug: "makhatalaf-meri-basirat-hai-na-binaii-alag"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 4
 ---

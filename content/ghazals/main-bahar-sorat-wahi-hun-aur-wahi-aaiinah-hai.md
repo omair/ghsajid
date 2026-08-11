@@ -3,6 +3,7 @@ title: "مَیں بہر صورت وہی ہوں اور وہی آئینہ ہے"
 slug: "main-bahar-sorat-wahi-hun-aur-wahi-aaiinah-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 16
 ---

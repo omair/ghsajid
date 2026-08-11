@@ -3,6 +3,7 @@ title: "کیمیا میں ہے عناصر کی جُنوں رکھّا ہُوا"
 slug: "kimia-mein-hai-nasar-ki-junon-rakha-huoa"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "bagh-e-nishat-ki-taraf"
 book_order: 36
 ---

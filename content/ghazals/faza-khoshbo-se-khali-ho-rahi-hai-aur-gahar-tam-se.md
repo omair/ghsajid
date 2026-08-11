@@ -3,6 +3,7 @@ title: "فضا خوشبو سے خالی ہو رہی ہے اور گھر تم سے
 slug: "faza-khoshbo-se-khali-ho-rahi-hai-aur-gahar-tam-se"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 84
 ---

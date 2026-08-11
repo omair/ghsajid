@@ -3,6 +3,7 @@ title: "جو سمندر پر ہنسے ہیں شادمانی کے لیے"
 slug: "jo-samanadar-par-hanse-hain-shadmani-ke-lie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 103
 ---

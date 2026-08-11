@@ -3,6 +3,7 @@ title: "آنکھوں میں عکسِ حیراں اِک تازہ خواب کا ہ
 slug: "aanakhon-mein-kasi-hiran-aik-tazah-khwab-ka-hai"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 240
 ---

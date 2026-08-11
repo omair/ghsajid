@@ -3,6 +3,7 @@ title: "صاحبِ بزمِ طریقت ہے، کوئی راز ہے وہ"
 slug: "sahbi-bazmi-tariqat-he-koi-raz-hai-wo"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 49
 ---

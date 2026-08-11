@@ -3,6 +3,7 @@ title: "مَیں دماغِ مدحتِ خیرالبشر رکھتا نہیں"
 slug: "main-damaghi-madahti-khiralabashar-rakahta-nahin"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 471
 ---

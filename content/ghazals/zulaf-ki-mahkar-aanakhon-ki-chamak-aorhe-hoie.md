@@ -3,6 +3,7 @@ title: "زُلف کی مہکار آنکھوں کی چمک اوڑھے ہوئے"
 slug: "zulaf-ki-mahkar-aanakhon-ki-chamak-aorhe-hoie"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "tajawuz"
 book_order: 17
 ---

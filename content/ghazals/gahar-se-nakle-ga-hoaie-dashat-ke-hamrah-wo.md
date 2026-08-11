@@ -3,6 +3,7 @@ title: "گھر سے نکلے گا ہوائے دشت کے ہمراہ وہ"
 slug: "gahar-se-nakle-ga-hoaie-dashat-ke-hamrah-wo"
 language: "urdu"
 script: "nastaliq"
+origin: "tool"
 source_book: "kulliyat-jild-1"
 book_order: 302
 ---
