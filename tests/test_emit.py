@@ -101,6 +101,31 @@ class TestWrite(unittest.TestCase):
     def test_existing_origin_is_none_when_absent(self):
         self.assertIsNone(existing_origin(self.root / "nope.md"))
 
+    def test_existing_origin_ignores_a_body_without_frontmatter(self):
+        # A file that does not open with a `---` fence but whose body contains
+        # `---`-delimited text with an origin-like line must not be mistaken
+        # for a protected human piece.
+        path = self.root / "loose.md"
+        path.write_text(
+            "just prose\n\n---\norigin: human\n---\nmore\n", encoding="utf-8"
+        )
+        self.assertIsNone(existing_origin(path))
+
+    def test_container_keeps_a_human_added_chapter(self):
+        # A human memoir chapter on disk must survive regeneration of the
+        # container from the export's (tool) survivors.
+        (self.root / "memoir").mkdir(parents=True)
+        (self.root / "memoir" / "dars-gah-2.md").write_text(
+            '---\ntitle: "نیا باب"\nslug: "dars-gah-2"\norigin: "human"\npart: 2\n---\n\nمتن\n',
+            encoding="utf-8",
+        )
+        tool_part = piece(kind="memoir", slug="dars-gah-1", extra={"part": 1})
+        path = write_container([tool_part], self.root)
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("dars-gah-1", text)
+        self.assertIn("dars-gah-2", text)
+        self.assertLess(text.index("dars-gah-1"), text.index("dars-gah-2"))
+
     def test_write_container_lists_parts_in_order(self):
         parts = [
             piece(kind="memoir", slug="dars-gah-2", extra={"part": 2}),
