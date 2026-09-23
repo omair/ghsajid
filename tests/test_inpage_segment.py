@@ -1389,3 +1389,41 @@ class TestGhazalsAfterANazm(unittest.TestCase):
         nazms = [p for p in pieces if p.kind == "nazms"]
         self.assertEqual(len(nazms), 1)
         self.assertIn("دوسرا مصرع نمبر 1 یہاں پڑا دوم", nazms[0].body)
+
+
+class TestCreditedQuotation(unittest.TestCase):
+    """گُلِ سیمیا's باڑ ghazal answers a line of مجید امجد's, and prints it
+    under the poem with his name: پھول لوہے کی باڑ پر بھی کِھلا (مجیدامجد).
+
+    Read as verse, the quotation paired with the maqtaa's closing misra,
+    left its opening misra stranded — a half sher — and went out as a
+    one-sher ghazal of its own, one of گُلِ سیمیا's two poems too many.
+    """
+
+    GHAZAL = [
+        para("کِھنچی ہوئی ہے مِرے سامنے انوکھی باڑ", 73),
+        para("کہ میرے ساتھ کھڑی ہے مِری صدا کی باڑ", 1),
+        para("یہ بات کون بتائے مجید امجد کو", 81),
+        para("کہ جس میں پھول نہ آئیں وہی ہے اچھّی باڑ", 1),
+        para("چراغِ صبح سے نسبت ہے اب اُسے ساجدؔ", 75),
+        para("کبھی تھی آبِ رُخِ آئنہ کی پیاسی باڑ", 53),
+    ]
+    QUOTE = "پھول لوہے کی باڑ پر بھی کِھلا    (مجیدامجد)"
+
+    def test_the_quotation_goes_under_the_poem_it_answers(self):
+        # Clean shers before it, as in the book, where the باڑ ghazal sits in
+        # a long run of ghazals — enough that the maqtaa's unmarked closing
+        # misra leaves the run clearly ghazal-shaped (GHAZAL_SHAPE_THRESHOLD).
+        pieces = segment(FRONT + _clean_shers(1, 20) + self.GHAZAL + [para(self.QUOTE, 1)])
+        barh = next(p for p in pieces if p.title == "کِھنچی ہوئی ہے مِرے سامنے انوکھی باڑ")
+        self.assertEqual(barh.dedication, self.QUOTE.strip())
+        self.assertNotIn("پھول لوہے کی باڑ", barh.body)
+        self.assertIn("کبھی تھی آبِ رُخِ آئنہ کی پیاسی باڑ", barh.body)
+        self.assertNotIn("half-sher", barh.flags)
+        self.assertFalse([p for p in pieces if "پھول لوہے کی باڑ" in p.title])
+
+    def test_an_aside_inside_a_line_is_still_verse(self):
+        # ¶1502, a line of a نظم: the bracket sits one space away and holds
+        # words, not a name. It stays a line of its poem.
+        from tools.inpage.classify import CREDITED_QUOTE
+        self.assertIsNone(CREDITED_QUOTE.match("بہت نیک نیّتی سے (مگر کسی بھول پن میں)"))

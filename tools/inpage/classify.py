@@ -80,6 +80,16 @@ WHOLLY_BRACKETED = re.compile(r"\(.*\)")
 # `segment`, which lifts it out of the poem's body and onto the piece.
 DEDICATION = re.compile(r"^\(\s*نذرِ?\s+.+\)$")
 
+# A line the poet quotes from another poet, printed under the poem that
+# answers it with the other poet's name: گُلِ سیمیا's باڑ ghazal closes on
+# `پھول لوہے کی باڑ پر بھی کِھلا    (مجیدامجد)`. Told from a bracketed aside
+# inside a line of verse — جلد ۲ ¶1502 `بہت نیک نیّتی سے (مگر کسی بھول پن
+# میں)` — by its setting: the credit is pushed off the line by a wide gap, and
+# holds a short name, no digits. Measured across all four books, it matches
+# that one line and nothing else. Treated as a dedication is: never verse,
+# never bridged into a run, given back to the poem above it.
+CREDITED_QUOTE = re.compile(r"^\S.*\S\s{2,}\(\s*[^()۰-۹0-9\s]{2,20}\s*\)$")
+
 SECTION_HEADINGS = frozenset({
     # سلام belongs with نعت and حمد: the same devotional forms, printed the
     # same way. Without it the word fell inside the نعت run as a line of
@@ -340,6 +350,8 @@ def _kind(
         return HEADING
     if _is_colophon(text):
         return COLOPHON
+    if in_body and CREDITED_QUOTE.match(text):
+        return UNKNOWN
     if len(text) >= PROSE_MIN:
         return PROSE
     if in_body and _is_verse_length(text):
@@ -416,7 +428,7 @@ def _enclosable_group(kind: str, text: str) -> str | None:
     Left unbridged it ends the run cleanly and `segment` gives it back to the
     poem it belongs to.
     """
-    if DEDICATION.match(text):
+    if DEDICATION.match(text) or CREDITED_QUOTE.match(text):
         return None
     if kind == PROSE and text.startswith(OPENING_BRACKET):
         return ASIDE_GROUP

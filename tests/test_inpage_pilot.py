@@ -457,7 +457,9 @@ JILD_2_COLLECTIONS = {
     # at بعد, heard baad but spelled with ع (now segment.AIN_AS_ALIF).
     "اِعادہ": 100,
     "حقیقت": 84,
-    "گُلِ سیمیا": 127,
+    # 126: مجید امجد's line under the باڑ ghazal is a credited quotation,
+    # no longer a one-sher ghazal of its own (classify.CREDITED_QUOTE).
+    "گُلِ سیمیا": 126,
 }
 
 

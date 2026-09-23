@@ -741,7 +741,10 @@ def segment(
             # with the maqtaa's closing misra and tore اِعادہ's
             # باغِ سبز مرا ghazal in two — so it arrives here instead, right
             # after the piece it was set under.
-            if pieces and DEDICATION.match(para.text.strip()):
+            # A credited quotation (see classify.CREDITED_QUOTE) goes the
+            # same way: printed under the poem that answers it.
+            if pieces and (DEDICATION.match(para.text.strip())
+                           or CREDITED_QUOTE.match(para.text.strip())):
                 pieces[-1].dedication = para.text.strip()
                 consumed.add(index)
                 index += 1
@@ -1168,7 +1171,7 @@ def _attribution(line: str) -> tuple[str, str] | None:
     return match.group("who").strip(), match.group("book").strip()
 
 
-from .classify import DEDICATION  # noqa: E402  (kept beside its use)
+from .classify import CREDITED_QUOTE, DEDICATION  # noqa: E402  (kept beside its use)
 
 
 def _lift_dedication(
