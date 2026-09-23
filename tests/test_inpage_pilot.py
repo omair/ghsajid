@@ -451,11 +451,11 @@ JILD_2_COLLECTIONS = {
     "نیند میں چلتے ہوئے": 74,
     "چہار دریا": 50,
     "ہست و بُود": 96,
-    # 101 against the 100 its own 2017 edition declares — see
-    # DECLARED_COLLECTION_COUNTS. One known cause remains, recorded in the
-    # report: a ghazal on the radif اد is split in two. The other, the
-    # book's dedication page counting as a poem, is gone.
-    "اِعادہ": 101,
+    # Exactly the 100 its own 2017 edition declares — see
+    # DECLARED_COLLECTION_COUNTS. It read 102: the book's dedication page
+    # counted as a poem (now a flagged title page), and the آزاد ghazal split
+    # at بعد, heard baad but spelled with ع (now segment.AIN_AS_ALIF).
+    "اِعادہ": 100,
     "حقیقت": 84,
     "گُلِ سیمیا": 127,
 }

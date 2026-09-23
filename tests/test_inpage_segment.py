@@ -7,7 +7,7 @@ from tools.inpage.flags import TITLE_PAGE_FLAG
 from tools.inpage.models import Paragraph, Segment
 from tools.inpage.segment import (
     KULLIYAT_JILD_1_COLLECTIONS, MAX_TITLE_LENGTH, _is_ghazal_shaped,
-    _position_collection,
+    _position_collection, _rhyme_key,
     attribute_gathered_collections, collection_boundary_dedication, is_matla,
     merge_orphan_shers, pair_shers, run_rhyme, segment, split_ghazals,
 )
@@ -201,6 +201,30 @@ class TestRadifAwareMatla(unittest.TestCase):
             ("عیاں ہے حالِ دلِ زار کے بتانے سے", "کسی کو دیکھنے والا کہاں سے آتا ہے"),
         ]
         self.assertTrue(is_matla(shers[0][0], shers[0][1], run_rhyme(shers, 0)))
+
+
+class TestAinHeardAsAlif(unittest.TestCase):
+    """اِعادہ's آزاد ghazal came out as two pieces, against the standalone
+    edition that prints it as one: آزاد, یاد, بغداد, داد, then بعد — heard
+    baad, spelled with ع — and the shared rhyme fell from اد to د."""
+
+    SHERS = [
+        ("فکرِ سُود و زَیاں سے ہُوں آزاد", "ہے گلِ نغمہ پر مری بُنیاد"),
+        ("آگ بہنے لگی رَگ و پَے میں", "رنگ لانے لگی کِسی کی یاد"),
+        ("نِیند جب ساتھ دے نہیں پاتی", "یاد آتی ہے راحتِ بغداد"),
+        ("گفتگو سے غرض نہیں مُجھ کو", "مانگتا ہُوں مَیں اپنی چُپ کی داد"),
+        ("مُنتظر کِس کے ہیں زمان و مکاں", "کون آئے گا اب ہمارے بعد"),
+        ("رنگ بھرنے کو باغِ دُنیا میں", "گُھومتا ہے وہی بُتِ شمشاد"),
+        ("آ گیا پِھر کِسی پہ دِل ساجدؔ", "آ پڑی سر پہ اک نئی اُفتاد"),
+    ]
+
+    def test_the_ghazal_stays_whole(self):
+        self.assertEqual(len(split_ghazals(self.SHERS)), 1)
+
+    def test_an_ain_inside_a_word_is_left_alone(self):
+        # شعر is not شار: ع folds only where it closes a syllable at the
+        # end of the word, as in بعد, شمع, جمع.
+        self.assertNotEqual(_rhyme_key("شعر"), _rhyme_key("شار"))
 
 
 class TestSplitGhazalsOnRealText(unittest.TestCase):

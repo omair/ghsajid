@@ -52,6 +52,13 @@ RHYME_FOLD = str.maketrans(
     {"آ": "ا", "ۂ": "ہ", "ۃ": "ہ", "ؤ": "و", "ۓ": "ے", "ق": "ک"}
 )
 FINAL_HE = re.compile(r"ہ(?=\s|$)")
+# ع closing a syllable after a consonant is heard as the long vowel ا:
+# بعد is baad, and rhymes with آزاد, یاد, فریاد, داد. اِعادہ's آزاد ghazal
+# came out as two pieces for want of it, against the standalone edition that
+# prints it as one. Kept to what was measured — word-final (شمع, جمع) and
+# before a final د (بعد) — because the spelling alone cannot tell بعد from
+# شعر, she'r, whose ع is no ا at all.
+AIN_AS_ALIF = re.compile(r"(?<=[^\sا])ع(?=د?(?:\s|$))")
 
 # A rhyme is compared as characters, not words: the qafia is a *partial* word
 # (نگ سے across سنگ/رنگ/ترنگ, یں تھا across زمیں/مبیں/یقیں), and it is exactly
@@ -1415,7 +1422,8 @@ def merge_orphan_shers(
 
 def _rhyme_key(text: str) -> str:
     """The form a rhyme is compared in: letters only, sound-folded."""
-    return FINAL_HE.sub("ا", skeleton(text).translate(RHYME_FOLD))
+    folded = skeleton(text).translate(RHYME_FOLD)
+    return AIN_AS_ALIF.sub("ا", FINAL_HE.sub("ا", folded))
 
 
 def _common_suffix(left: str, right: str) -> str:
