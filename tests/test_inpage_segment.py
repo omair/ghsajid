@@ -282,6 +282,51 @@ class TestSegmentBook(unittest.TestCase):
         self.assertEqual(len(nazms), 1)
         self.assertEqual(nazms[0].title, "یاد")
 
+    def test_short_opening_lines_after_the_title_are_the_poems_own(self):
+        # کلیات جلد ۲ ¶368-372: a colophon, then the title صُبح ہونے لگی,
+        # then the نظم opening on its own title and a second short line —
+        # صُبح ہونے لگی / نیند آنے لگی — before the first line long enough
+        # to read as verse. Every candidate but the last used to be dropped,
+        # so the poem lost its first two lines and was titled by its second.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۸ ، مئی ۲۰۱۰ئ۔ لاہور", 1), para("صُبح ہونے لگی", 1),
+               para("صُبح ہونے لگی", 25), para("نیند آنے لگی", 65)]
+            + self.NAZM
+        )
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertEqual(nazms[0].title, "صُبح ہونے لگی")
+        self.assertEqual(
+            nazms[0].body.split("\n")[:3],
+            ["صُبح ہونے لگی", "نیند آنے لگی", "مَیں چل رہا تھا"],
+        )
+
+    def test_a_second_line_set_like_a_title_is_the_title(self):
+        # ¶7807-7809: منظومات, the section's label, then مناجات, the نظم's
+        # title — both set flush (geometry 1), which an opening line never
+        # is. The later one is the title; the label stays out of the poem.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۰۰۰", 1), para("منظومات", 1), para("مناجات", 1)]
+            + self.NAZM
+        )
+        nazm = [p for p in pieces if p.kind == "nazms"][0]
+        self.assertEqual(nazm.title, "مناجات")
+        self.assertEqual(nazm.body.split("\n")[0], "مَیں چل رہا تھا")
+
+    def test_a_line_with_no_letters_is_neither_title_nor_verse(self):
+        # ¶1465-1467: مُلتان میں, then `(` — the part number (۱) with its
+        # digit stripped — then the نظم. The bracket is no line of the poem.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("، دسمبر ئ۔ ملتان", 1), para("مُلتان میں", 1), para("(", 49)]
+            + self.NAZM
+        )
+        nazm = [p for p in pieces if p.kind == "nazms"][0]
+        self.assertEqual(nazm.title, "مُلتان میں")
+        self.assertEqual(nazm.body.split("\n")[0], "مَیں چل رہا تھا")
+
     def test_a_short_line_enclosed_by_verse_joins_the_poem(self):
         # The cost of that rule, stated rather than left to be discovered: a
         # title printed with verse on BOTH sides is indistinguishable from a

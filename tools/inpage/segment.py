@@ -525,6 +525,11 @@ def segment(
     pieces_before_first_heading: int | None = None
     title_candidate = ""
     title_candidate_index = -1
+    # Short lines straight after a pending title, before any verse: the
+    # نظم opening on lines too short to read as verse — see the UNKNOWN
+    # branch. Indices, so they can be consumed or reported like the title.
+    opening: list[int] = []
+    chain_end = -1
     # Every paragraph index whose text reached a piece — body, title or
     # written_note. What is left over is reported through `unreached`.
     consumed: set[int] = set()
@@ -630,12 +635,40 @@ def segment(
                 consumed.add(index)
                 index += 1
                 continue
+            # The line right after a pending title, before any verse, is the
+            # poem beginning, not a newer title: کلیات جلد ۲ prints a نظم's
+            # title and then opens the نظم on short lines — صُبح ہونے لگی /
+            # نیند آنے لگی — that fall under the verse length. Replacing the
+            # title with each of them titled the poem by its second line and
+            # dropped the first. So the FIRST of a contiguous run is the
+            # title and the rest open the body.
+            #
+            # Two things are NOT an opening line. A line with no letters —
+            # the `(` left of a part number (۱) whose digit InPage stripped —
+            # is neither title nor verse: reported, skipped, and the run goes
+            # on past it. And a line set flush like a title (geometry 1) is a
+            # new title — منظومات, a section's label, then مناجات, the
+            # poem's — where every measured opening line has another setting.
+            contiguous = title_candidate and index == chain_end + 1
+            if contiguous and not any(ch.isalpha() for ch in para.text):
+                pending_drops.append((index, para.text))
+                chain_end = index
+                index += 1
+                continue
+            if contiguous and para.geometry != SECOND_MISRA_GEOMETRY:
+                opening.append(index)
+                chain_end = index
+                index += 1
+                continue
             # A candidate still pending when a new one arrives never reached
             # a piece — see the docstring's note on dropped_unknowns.
             if title_candidate:
                 pending_drops.append((title_candidate_index, title_candidate))
+            pending_drops.extend((i, paragraphs[i].text) for i in opening)
+            opening = []
             title_candidate = para.text
             title_candidate_index = index
+            chain_end = index
             index += 1
             continue
 
@@ -664,6 +697,8 @@ def segment(
             )
             if title_candidate:
                 pending_drops.append((title_candidate_index, title_candidate))
+            pending_drops.extend((i, paragraphs[i].text) for i in opening)
+            opening = []
             title_candidate = ""
             title_candidate_index = -1
             emitted_end = end
@@ -723,6 +758,7 @@ def segment(
                     pending_drops.append(
                         (title_candidate_index, title_candidate)
                     )
+                pending_drops.extend((i, paragraphs[i].text) for i in opening)
                 cursor = 0
                 # Orphans are rejoined BEFORE the run is split into ghazals,
                 # so a maqtaa whose second misra lost its geometry marker is
@@ -766,6 +802,8 @@ def segment(
                 title = title_candidate or run[0].text
                 if title_candidate:
                     consumed.add(title_candidate_index)
+                consumed.update(opening)
+                run = [paragraphs[i] for i in opening] + run
                 piece_collection, attributed = _position_collection(
                     run_collections[0], run_indices[-1],
                     first_header_index, first_header_name,
@@ -779,6 +817,7 @@ def segment(
             consumed.update(range(start, index))
             title_candidate = ""
             title_candidate_index = -1
+            opening = []
             emitted_end = index
             continue
 
@@ -790,6 +829,7 @@ def segment(
     # after the last UNKNOWN) never reached a piece either.
     if title_candidate:
         pending_drops.append((title_candidate_index, title_candidate))
+    pending_drops.extend((i, paragraphs[i].text) for i in opening)
 
     if pieces_before_first_heading is not None:
         for piece in pieces[:pieces_before_first_heading]:
