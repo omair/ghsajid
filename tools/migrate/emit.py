@@ -98,11 +98,16 @@ def existing_origin(path: Path) -> str | None:
     names no `origin` — anything the generator is free to write. A returned
     "human" is the one value that makes a file off-limits to regeneration.
     """
+    return existing_field(path, "origin")
+
+
+def existing_field(path: Path, key: str) -> str | None:
+    """Return one frontmatter value of a file on disk, unquoted, or None."""
     fields = _frontmatter_fields(path)
     if fields is None:
         return None
-    origin = fields.get("origin")
-    return origin.strip().strip('"') if origin is not None else None
+    value = fields.get(key)
+    return value.strip().strip('"') if value is not None else None
 
 
 def _human_memoir_chapters(root: Path) -> list[tuple[int, str]]:

@@ -365,10 +365,10 @@ JILD_1_COLLECTIONS = (
 #     collection            was    now      نظمیں was/now   غزلیں was/now
 #     نیند میں چلتے ہوئے     92     21         91 → 20          1 → 1
 #     چہار دریا              51     51          1 →  1         50 → 50
-#     ہست و  ُبود           100     98         95 → 93          5 → 5
+#     ہست و بُود            100     98         95 → 93          5 → 5
 #     اِعادہ                102    101          2 →  1        100 → 100
 #     حقیقت                  76     70          9 →  3         67 → 67
-#     ُگلِ سیمیا            141    127         16 →  2        125 → 125
+#     گُلِ سیمیا            141    127         16 →  2        125 → 125
 #
 # The GHAZAL count of every collection is unchanged, to the poem. That is the
 # control on the whole change: a ghazal's misras run 28-42 characters and
@@ -435,14 +435,14 @@ JILD_1_COLLECTIONS = (
 JILD_2_COLLECTIONS = {
     "نیند میں چلتے ہوئے": 72,
     "چہار دریا": 51,
-    "ہست و  ُبود": 98,
+    "ہست و بُود": 98,
     # 102 against the 100 its own 2017 edition declares — see
     # DECLARED_COLLECTION_COUNTS. Two known causes remain, both recorded in
     # the report: the book's dedication page counts as a poem, and one ghazal
     # on the radif اد is split in two.
     "اِعادہ": 102,
     "حقیقت": 73,
-    "ُگلِ سیمیا": 128,
+    "گُلِ سیمیا": 128,
 }
 
 

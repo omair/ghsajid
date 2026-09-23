@@ -21,6 +21,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .checks import (
+    floating_mark_errors,
     COLLECTION_INDEX_BASELINE,
     DECLARED_COLLECTION_COUNTS,
     KULLIYAT_VOLUMES,
@@ -140,7 +141,8 @@ def cmd_decode(book_slug: str) -> None:
 
 def cmd_segment(book_slug: str) -> None:
     data = _load(book_slug)
-    paragraphs = decode(data)
+    dropped_marks: list[str] = []
+    paragraphs = decode(data, dropped_marks=dropped_marks)
     dropped_unknowns: list[str] = []
     unreached: list[tuple[str, object]] = []
     position_attributed: list[Segment] = []
@@ -196,7 +198,9 @@ def cmd_segment(book_slug: str) -> None:
             f"{isolated_pairs} isolated pairs excluded as layout records, "
             f"{isolated_mapped} of which decoded to a character"
         ]
+        + [f"floating mark: {problem}" for problem in dropped_marks]
         + verse_errors(segments)
+        + floating_mark_errors(segments)
         # Runs before anything is written: it erases a section label the
         # source cannot support, and write_book/report both read `section`.
         # The count gate is unaffected by the erasure by construction — it

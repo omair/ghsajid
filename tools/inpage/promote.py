@@ -4,13 +4,23 @@ This is the only module that writes to content/. It refuses to act on an
 unapproved or stale report, and it never overwrites a piece that is already
 in the archive — an existing poem keeps its slug, URL, date and published_in,
 and any textual difference is reported for a human to judge.
+
+With one exception, and a narrow one: a piece this same book published,
+still `origin: tool`, whose letters are identical and only its marks differ.
+That is the decoder's own earlier output being corrected — `marks.reattach`
+came after جلد ۱ went live — not a disagreement between book and site, so
+its title and body are refreshed in place and everything else, its slug
+above all, is kept. A piece is found by its letters, not its slug, because
+moving a mark changes the slug: matching by slug would publish the corrected
+poem a second time under a new URL.
 """
 
 import json
+import re
 import shutil
 from pathlib import Path
 
-from tools.migrate.emit import existing_origin
+from tools.migrate.emit import existing_field, existing_origin
 
 from .emit import resolve_book_records, resolve_slugs
 from .flags import UNPUBLISHABLE
@@ -42,6 +52,46 @@ def _existing_body(path: Path) -> str:
     if len(parts) < 3:
         raise _MalformedFrontmatter(f"malformed frontmatter, cannot compare: {path}")
     return parts[2]
+
+
+def _letters(text: str) -> str:
+    """The letters of `text` and nothing else — no marks, no spacing.
+
+    Spacing is dropped as well as marks because putting a mark back can
+    rejoin a word the typist split to float it: `ا ّکٹھی` is اکٹھّی. Same
+    letters, one space fewer; compared with the space, it was a new poem.
+    """
+    return skeleton(text).replace(" ", "")
+
+
+def _archive_by_letters(content: Path, kind: str) -> dict[str, Path]:
+    """Every published piece of `kind`, keyed by the letters of its body."""
+    index: dict[str, Path] = {}
+    for path in sorted((content / kind).glob("*.md")):
+        try:
+            index.setdefault(_letters(_existing_body(path)), path)
+        except _MalformedFrontmatter:
+            continue
+    return index
+
+
+TITLE_LINE = re.compile(r"^title: .*$", re.MULTILINE)
+
+
+def _refresh(target: Path, source: Path) -> None:
+    """Give `target` the body, and the title, of `source`; keep the rest.
+
+    The title follows only if its letters are unchanged, like the body's.
+    Everything else in the frontmatter — slug, dates, published_in, origin —
+    is the archive's and stays exactly as it is.
+    """
+    _, target_front, _ = target.read_text(encoding="utf-8").split("---", 2)
+    _, source_front, source_body = source.read_text(encoding="utf-8").split("---", 2)
+    old_title = TITLE_LINE.search(target_front)
+    new_title = TITLE_LINE.search(source_front)
+    if old_title and new_title and _letters(old_title.group(0)) == _letters(new_title.group(0)):
+        target_front = TITLE_LINE.sub(lambda _: new_title.group(0), target_front, count=1)
+    target.write_text("---" + target_front + "---" + source_body, encoding="utf-8")
 
 
 def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], list[str]]:
@@ -80,6 +130,8 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
 
     written: list[Path] = []
     problems: list[str] = []
+    # Published pieces by their letters, per kind, built on first need.
+    archive: dict[str, dict[str, Path]] = {}
     for segment, slug in zip(segments, slugs):
         # What a piece can be that is neither a poem nor criticism — see
         # `flags.UNPUBLISHABLE`. Each was confirmed by hand against the
@@ -105,7 +157,16 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
                 f"named in segments.json but missing from staging: {source}"
             )
             continue
+        try:
+            staged_body = _existing_body(source)
+        except _MalformedFrontmatter as exc:
+            problems.append(str(exc))
+            continue
         target = content / segment.kind / f"{slug}.md"
+        if not target.exists():
+            if segment.kind not in archive:
+                archive[segment.kind] = _archive_by_letters(content, segment.kind)
+            target = archive[segment.kind].get(_letters(staged_body), target)
         if existing_origin(target) == "human":
             problems.append(
                 f"human-authored, left untouched: {target.relative_to(content)}"
@@ -114,14 +175,20 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
         if target.exists():
             try:
                 existing_body = _existing_body(target)
-                staged_body = _existing_body(source)
             except _MalformedFrontmatter as exc:
                 problems.append(str(exc))
                 continue
-            if skeleton(existing_body) != skeleton(staged_body):
+            if _letters(existing_body) != _letters(staged_body):
                 problems.append(
                     f"text differs from the archive: {target.relative_to(content)} "
                     "— book and site disagree, decide by hand"
+                )
+            elif (existing_body != staged_body
+                  and existing_field(target, "source_book") == book_slug):
+                _refresh(target, source)
+                written.append(target)
+                problems.append(
+                    f"refreshed, marks corrected in place: {target.relative_to(content)}"
                 )
             else:
                 problems.append(f"already in the archive, skipped: {target.relative_to(content)}")

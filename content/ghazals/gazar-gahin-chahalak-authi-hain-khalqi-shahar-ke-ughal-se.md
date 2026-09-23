@@ -1,5 +1,5 @@
 ---
-title: "گزر گاہیں چھلک اُٹھی ہیں خلقِ شہر کے ُغل سے"
+title: "گزر گاہیں چھلک اُٹھی ہیں خلقِ شہر کے غُل سے"
 slug: "gazar-gahin-chahalak-authi-hain-khalqi-shahar-ke-ughal-se"
 language: "urdu"
 script: "nastaliq"
@@ -8,7 +8,7 @@ source_book: "kulliyat-jild-1"
 book_order: 403
 ---
 
-گزر گاہیں چھلک اُٹھی ہیں خلقِ شہر کے ُغل سے
+گزر گاہیں چھلک اُٹھی ہیں خلقِ شہر کے غُل سے
 کنارہ کر رہی ہیں بستیاں کیا شہرِ کابل سے
 
 نہیں ہے کوئی امکاں اب مرے آزاد ہونے کا
