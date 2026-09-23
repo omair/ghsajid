@@ -468,10 +468,18 @@ DECLARED_COLLECTION_COUNTS: dict[str, dict[str, int]] = {
     # decode and numbers its poems 1 to 100 with no gaps. No photograph
     # needed: the count came out of the file.
     #
-    # The volume's other five collections declare nothing anywhere, in the
-    # کلیات or in the standalone books that exist for two of them (both
-    # InPage 1, digits stripped). Nothing is asserted for those.
-    "kulliyat-jild-2": {"اِعادہ": 100},
+    # CORRECTION, 2026-09-23: this said the other five collections declare
+    # nothing anywhere. Two do, in the volume's own فہرست (¶98-208): the
+    # entry titles are lost, but their NUMBERS survive, gapless and without a
+    # duplicate — حقیقت 1-83, گُلِ سیمیا 1-124. حقیقت's 1-13 precede its
+    # غزلیں sub-heading (منظومات, its نظمیں) and 14-82 follow it; entry 83
+    # is the only one in the فہرست still fused to a name, ۸۳۔غافر شہزاد —
+    # the flap by غافر شہزاد, criticism, not a poem. So 82 and 124.
+    #
+    # نیند میں چلتے ہوئے، چہار دریا and ہست و بُود have their numbers
+    # stripped in the کلیات, and their standalone editions are InPage 1 too.
+    # Nothing is asserted for those three.
+    "kulliyat-jild-2": {"اِعادہ": 100, "حقیقت": 82, "گُلِ سیمیا": 124},
 }
 
 
