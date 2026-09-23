@@ -432,17 +432,22 @@ JILD_1_COLLECTIONS = (
 # these six. What IS checked for this volume is the segmentation ground
 # truth: its share of the 11 WordPress ghazals must still be one piece each
 # (TestKulliyatGroundTruth), and that holds.
+#
+# Each collection then lost its dedication page, which had been counted as a
+# poem: segment._dedication_pages reads it as a flagged title page. ہست و بُود
+# and حقیقت lost two, their dedication — or a foreword's title — having been
+# split across two pieces.
 JILD_2_COLLECTIONS = {
     "نیند میں چلتے ہوئے": 72,
-    "چہار دریا": 51,
-    "ہست و بُود": 98,
-    # 102 against the 100 its own 2017 edition declares — see
-    # DECLARED_COLLECTION_COUNTS. Two known causes remain, both recorded in
-    # the report: the book's dedication page counts as a poem, and one ghazal
-    # on the radif اد is split in two.
-    "اِعادہ": 102,
-    "حقیقت": 73,
-    "گُلِ سیمیا": 128,
+    "چہار دریا": 50,
+    "ہست و بُود": 96,
+    # 101 against the 100 its own 2017 edition declares — see
+    # DECLARED_COLLECTION_COUNTS. One known cause remains, recorded in the
+    # report: a ghazal on the radif اد is split in two. The other, the
+    # book's dedication page counting as a poem, is gone.
+    "اِعادہ": 101,
+    "حقیقت": 71,
+    "گُلِ سیمیا": 127,
 }
 
 
@@ -527,7 +532,11 @@ class TestKulliyatJild1Collections(unittest.TestCase):
         paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
         header_only = _distribution(segment(paragraphs))
         self.assertEqual(header_only["موسم"], 0)
-        self.assertEqual(header_only["عناصر"], 243)
+        # 242, not 243: without the table, a collection's dedication page is
+        # read as its own flagged title page (segment._dedication_pages), so
+        # عناصر's محمدخالد کے لیے no longer counts among its poems. The
+        # pipeline passes the table and never takes this path.
+        self.assertEqual(header_only["عناصر"], 242)
 
     def test_every_title_page_is_found_and_named(self):
         self.assertEqual(

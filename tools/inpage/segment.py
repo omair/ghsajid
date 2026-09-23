@@ -489,6 +489,14 @@ def segment(
     pending_drops: list[tuple[int, str]] = []
     headings = heading_map(sections)
     kinds = classify(paragraphs, sections)
+    # A volume with a gathered-collections table already has its title pages
+    # found for it — جلد ۱'s, from its photographed فہرست — and was
+    # published that way; these two readings are for a volume without one.
+    dedication_pages: dict[int, int] = {}
+    essay_heads: set[int] = set()
+    if not gathered_collections:
+        dedication_pages = _dedication_pages(paragraphs, kinds)
+        essay_heads = _essay_heads(paragraphs, kinds, dedication_pages)
     collections = collections_at(paragraphs, kinds)
     # The book's very first running header, if it has one at all — see
     # `_position_collection`. تجاوز, باغِ نشاط and کلیات جلد ۱ have none, so
@@ -578,6 +586,32 @@ def segment(
     while index < len(paragraphs):
         kind = kinds[index]
         para = paragraphs[index]
+
+        if index in dedication_pages:
+            # A gathered collection's dedication page: its own piece, flagged
+            # like جلد ۱'s title pages so it stays in staging and the report
+            # but is never published as a poem.
+            end = dedication_pages[index]
+            lines = [
+                paragraphs[i].text for i in range(index, end)
+                if kinds[i] != RUNNING_HEADER
+            ]
+            if title_candidate:
+                pending_drops.append((title_candidate_index, title_candidate))
+            pending_drops.extend((i, paragraphs[i].text) for i in opening)
+            title_candidate, title_candidate_index, opening = "", -1, []
+            add("nazms", lines[0][:MAX_TITLE_LENGTH], "\n".join(lines),
+                [TITLE_PAGE_FLAG], collections[index])
+            consumed.update(range(index, end))
+            boundary = emitted_end = end
+            index = end
+            continue
+
+        if index in essay_heads:
+            # The title or byline of the essay just below; its region, which
+            # starts at the boundary, takes it in. Not a title, not verse.
+            index += 1
+            continue
 
         if kind == RUNNING_HEADER:
             # Page furniture: it names the collection (already captured for
@@ -885,6 +919,99 @@ def segment_book(book_slug: str, paragraphs: list[Paragraph], **kwargs):
         prose_titles=PROSE_TITLES_BY_BOOK.get(book_slug, ()),
         **kwargs,
     )
+
+
+# A collection's dedication page closes on "… کے نام" (to …) or
+# "… کے لیے" (for …): زُبیر ساجد کے لیے, اپنے پوتے / محمّد عیسیٰ شہیر / کے نام.
+DEDICATION_CLOSE = re.compile(r"(?:^|\s)کے (?:نام|لیے)\s*$")
+# The longest dedication page in کلیات جلد ۲ runs six lines — (دیوان) /
+# ثروت حُسین / محمّد اظہار الحق / اور / خالد اقبال یاسر / کے نام.
+DEDICATION_MAX_LINES = 8
+
+
+def _dedication_pages(paragraphs: list[Paragraph], kinds: list[str]) -> dict[int, int]:
+    """`{start: end}` of each gathered collection's dedication page.
+
+    Anchored on a collection starting — a running header naming a different
+    collection from the one before it — so a poem that merely ends "… کے نام"
+    is never read as one. The page is the short lines from there to the
+    first that closes a dedication, page headers skipped; anything that is
+    plainly not a dedication (prose, a separator, a colophon, a heading)
+    first means there is none. Only a book with running headers has any:
+    تجاوز, باغِ نشاط and کلیات جلد ۱ have none, so this never fires for them.
+    """
+    pages: dict[int, int] = {}
+    previous = None
+    for header, kind in enumerate(kinds):
+        if kind != RUNNING_HEADER:
+            continue
+        name = skeleton(paragraphs[header].text)
+        if name == previous:
+            continue
+        previous = name
+        lines = 0
+        index = header + 1
+        while index < len(kinds) and lines < DEDICATION_MAX_LINES:
+            if kinds[index] == RUNNING_HEADER:
+                index += 1
+                continue
+            if kinds[index] in (PROSE, SEPARATOR, COLOPHON, TOC, HEADING):
+                break
+            lines += 1
+            if DEDICATION_CLOSE.search(paragraphs[index].text.strip()):
+                pages[header + 1] = index + 1
+                break
+            index += 1
+    return pages
+
+
+# An essay's heading is its title and, sometimes, its author's name — at most
+# three short lines between a boundary and the prose. A poem is never that
+# short and never sits directly against prose with nothing between them, so
+# the rule cannot take one: the lines must reach back to a boundary.
+ESSAY_HEAD_MAX_LINES = 3
+ESSAY_HEAD_MAX_CHARS = 60
+
+
+def _essay_heads(
+    paragraphs: list[Paragraph], kinds: list[str], dedication_pages: dict[int, int],
+) -> set[int]:
+    """Indices of the short heading lines that open an essay.
+
+    کلیات جلد ۲ sets a foreword's title as a short line — دیباچہ, حقیقت اور
+    تلاش کا سفر, جدید اُسلوب کا شاعر… — that classify reads as verse or as
+    unknown. Left so, it became a نظم of its own, or the title of the next
+    one, and the essay went out titled by its first sentence. These lines are
+    kept out of any poem so the essay's region, which starts at the boundary,
+    takes them in.
+    """
+    after_dedication = set(dedication_pages.values())
+    heads: set[int] = set()
+    for prose, kind in enumerate(kinds):
+        if kind != PROSE:
+            continue
+        found: list[int] = []
+        index = prose - 1
+        while index >= 0:
+            if kinds[index] == RUNNING_HEADER:
+                index -= 1
+                continue
+            if kinds[index] in (SEPARATOR, HEADING) or index + 1 in after_dedication:
+                heads.update(found)
+                break
+            # A verse line set off the right edge is a first misra: the lines
+            # are a couplet — جلد ۱ sets an epigraph above its forewords —
+            # and a couplet is a poem, however short. Every title or byline
+            # classify reads as verse is set flush (geometry 1).
+            first_misra = (kinds[index] == VERSE
+                           and paragraphs[index].geometry != SECOND_MISRA_GEOMETRY)
+            if (kinds[index] not in (VERSE, UNKNOWN) or first_misra
+                    or len(paragraphs[index].text.strip()) > ESSAY_HEAD_MAX_CHARS
+                    or len(found) == ESSAY_HEAD_MAX_LINES):
+                break
+            found.append(index)
+            index -= 1
+    return heads
 
 
 def _essay_region(

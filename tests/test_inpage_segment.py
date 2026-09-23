@@ -1185,3 +1185,96 @@ class TestTitlePageSplitFromItsForeword(unittest.TestCase):
             frozenset({"دیباچہ"}),
         )
         self.assertEqual(len(made), 1)
+
+
+class TestCollectionOpening(unittest.TestCase):
+    """کلیات جلد ۲ opens each gathered collection on a dedication page, then
+    the foreword's title and byline, then the foreword.
+
+    The dedication came through as a small نظم that swallowed the title and
+    byline too — ہست و بُود's `کے نام` piece held دیباچہ and ڈاکٹر ناصر عبّاس
+    نیّر — and would have been published as a poem, while the essay it
+    belonged to went out titled by its first sentence.
+    """
+
+    HEADER = "ہست و بُود"
+    PROSE = "ا" * 300
+
+    def _book(self, opening):
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        trailer = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        return FRONT + GHAZAL + [para(self.HEADER, 1)] + opening + trailer
+
+    def _text_of(self, piece):
+        return piece.title + "\n" + piece.body
+
+    def test_the_dedication_is_its_own_unpublishable_page(self):
+        # ¶3984-3991, verbatim but for the prose.
+        pieces = segment(self._book([
+            para("اپنے پوتے", 43), para("محمّد عیسیٰ شہیر", 13), para("کے نام", 1),
+            para("دیباچہ", 23), para(self.HEADER, 43),
+            para("ڈاکٹر ناصر عبّاس نیّر", 1), para(self.PROSE, 3653),
+        ]))
+        pages = [p for p in pieces if TITLE_PAGE_FLAG in p.flags]
+        self.assertEqual(len(pages), 1)
+        self.assertIn("محمّد عیسیٰ شہیر", self._text_of(pages[0]))
+        self.assertIn("کے نام", self._text_of(pages[0]))
+
+    def test_the_forewords_title_and_byline_go_to_the_foreword(self):
+        pieces = segment(self._book([
+            para("اپنے پوتے", 43), para("محمّد عیسیٰ شہیر", 13), para("کے نام", 1),
+            para("دیباچہ", 23), para(self.HEADER, 43),
+            para("ڈاکٹر ناصر عبّاس نیّر", 1), para(self.PROSE, 3653),
+        ]))
+        review = next(p for p in pieces if p.kind == "reviews")
+        self.assertIn("دیباچہ", self._text_of(review))
+        self.assertIn("ڈاکٹر ناصر عبّاس نیّر", self._text_of(review))
+        self.assertFalse(
+            [p for p in pieces if p.kind == "nazms" and TITLE_PAGE_FLAG not in p.flags]
+        )
+
+    def test_a_title_set_like_a_misra_is_still_the_forewords(self):
+        # ¶7741-7747: حقیقت's dedication, then its foreword's title set flush
+        # (geometry 1), which classify reads as verse.
+        pieces = segment(self._book([
+            para("مریم شہیر", 7), para("اور", 19), para("ارحا شہیر", 13),
+            para("کے نام", 1), para("حقیقت اور تلاش کا سفر", 1),
+            para(self.PROSE, 1577),
+        ]))
+        review = next(p for p in pieces if p.kind == "reviews")
+        self.assertIn("حقیقت اور تلاش کا سفر", self._text_of(review))
+
+    def test_a_title_after_a_separator_goes_to_its_essay(self):
+        # ¶9167-9169: a separator, the essay's title, the essay.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۰۰۰", 1), para("جدید اُسلوب کا شاعرغلام حُسین ساجدؔ", 1),
+               para(self.PROSE, 483)]
+        )
+        self.assertEqual([p.kind for p in pieces], ["ghazals", "reviews"])
+        self.assertIn("جدید اُسلوب کا شاعرغلام حُسین ساجدؔ", self._text_of(pieces[1]))
+
+    def test_a_poem_that_merely_ends_on_a_dedication_is_left_alone(self):
+        # No collection starts here, so a closing کے نام is the poem's own.
+        nazm = [
+            para("مَیں چل رہا تھا", 47), para("سنہرے تانبے کی طشتری پر", 97),
+            para("کوئی نہیں تھا یہاں", 53), para("سب دوستوں کے نام", 51),
+        ]
+        pieces = segment(
+            FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("یاد", 1)] + nazm
+        )
+        self.assertFalse([p for p in pieces if TITLE_PAGE_FLAG in p.flags])
+
+    def test_an_epigraph_couplet_before_an_essay_stays_a_poem(self):
+        # کلیات جلد ۱ ¶143: a couplet set above the foreword — two short
+        # lines, as short as a title and byline, but paired as misra (the
+        # first set off the right edge, the second flush), which a title
+        # never is. It is verse, and must not be read into the essay.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۰۰۰", 1), para("کبھی باد و آتشِ تیز میں ہے مری نمو", 75),
+               para("کبھی خاک میں، کبھی آب میں، کبھی خواب میں", 1),
+               para(self.PROSE, 900)]
+        )
+        review = next(p for p in pieces if p.kind == "reviews")
+        self.assertNotIn("کبھی باد و آتشِ تیز میں ہے مری نمو", self._text_of(review))
