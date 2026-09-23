@@ -64,6 +64,17 @@ def _letters(text: str) -> str:
     return skeleton(text).replace(" ", "")
 
 
+def _line_letters(text: str) -> list[str]:
+    """`_letters` of each line, blank lines kept — the poem's shape.
+
+    Two bodies with the same letters can still be two different poems on the
+    page: a misra re-paired across a sher boundary moves a line break and no
+    letter. That is the book and the site disagreeing, which only a human may
+    settle, so a refresh demands the same lines, not merely the same letters.
+    """
+    return [_letters(line) for line in text.strip().split("\n")]
+
+
 def _archive_by_letters(content: Path, kind: str) -> dict[str, Path]:
     """Every published piece of `kind`, keyed by the letters of its body."""
     index: dict[str, Path] = {}
@@ -178,7 +189,7 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
             except _MalformedFrontmatter as exc:
                 problems.append(str(exc))
                 continue
-            if _letters(existing_body) != _letters(staged_body):
+            if _line_letters(existing_body) != _line_letters(staged_body):
                 problems.append(
                     f"text differs from the archive: {target.relative_to(content)} "
                     "— book and site disagree, decide by hand"

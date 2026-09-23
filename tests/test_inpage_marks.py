@@ -128,14 +128,21 @@ class TestPublishedArchive(unittest.TestCase):
     """
 
     def test_no_floating_marks_in_inpage_pieces(self):
+        # Frontmatter too: a piece's title is its first misra, and its
+        # dedication is verse of the same book.
         offenders = []
         for path in sorted(glob.glob("content/**/*.md", recursive=True)):
             text = open(path, encoding="utf-8").read()
-            if "\nsource_book:" not in text:
-                continue
-            body = text.split("---", 2)[2]
-            if FLOATING_MARK.search(body):
+            if "\nsource_book:" in text and FLOATING_MARK.search(text):
                 offenders.append(path)
+        self.assertEqual(offenders, [])
+
+    def test_no_floating_marks_in_book_records(self):
+        # A book record's title is a collection's name — ُگلِ سیمیا was one.
+        offenders = [
+            path for path in sorted(glob.glob("content/books/*.yaml"))
+            if FLOATING_MARK.search(open(path, encoding="utf-8").read())
+        ]
         self.assertEqual(offenders, [])
 
 

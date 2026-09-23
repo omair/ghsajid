@@ -290,6 +290,22 @@ class TestPromote(unittest.TestCase):
         self.assertIn("اکٹھّی ہو چکی\nدوم", existing.read_text(encoding="utf-8"))
         self.assertEqual(len(list((self.content / "ghazals").iterdir())), 1)
 
+    def test_a_moved_line_break_is_a_disagreement_not_a_refresh(self):
+        # Same letters, different lines: a misra re-paired across a sher.
+        # That is the book and the site disagreeing about the poem's shape,
+        # which only a human may settle — never a silent refresh.
+        archived = Segment(kind="ghazals", title="اول دوم", body="اول دوم\nسوم\nچہارم", order=1)
+        staged = Segment(kind="ghazals", title="اول دوم", body="اول\nدوم سوم\nچہارم", order=1)
+        self._stage_approved("tajawuz", [staged])
+        existing = write_segment(archived, "tajawuz", self.content)
+        before = existing.read_bytes()
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [])
+        self.assertTrue(any("text differs from the archive" in p for p in problems))
+        self.assertEqual(existing.read_bytes(), before)
+
     def test_never_refreshes_a_piece_another_source_published(self):
         self._stage_approved("tajawuz", [self.PLACED])
         existing = write_segment(self.FLOATING, "bagh-e-nishat-ki-taraf", self.content)
