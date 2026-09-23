@@ -488,10 +488,10 @@ def segment(
     # alarm. Reconciled against `consumed` at the end.
     pending_drops: list[tuple[int, str]] = []
     headings = heading_map(sections)
-    kinds = classify(paragraphs, sections)
+    kinds = reading(paragraphs, sections, gathered_collections)
     # A volume with a gathered-collections table already has its title pages
     # found for it — جلد ۱'s, from its photographed فہرست — and was
-    # published that way; these two readings are for a volume without one.
+    # published that way; these readings are for a volume without one.
     dedication_pages: dict[int, int] = {}
     essay_heads: set[int] = set()
     if not gathered_collections:
@@ -963,6 +963,62 @@ def _dedication_pages(paragraphs: list[Paragraph], kinds: list[str]) -> dict[int
                 break
             index += 1
     return pages
+
+
+# A نظم's title between two نظمیں that no colophon separates. Measured in
+# کلیات جلد ۲: every such title is set flush (geometry 1) straight after
+# another flush line — the last line of the poem before — and runs 10-20
+# characters. Two second misras never follow one another, and a misra runs
+# 28-42 characters, so neither a ghazal nor a sher is ever read this way.
+NAZM_TITLE_MAX_CHARS = 30
+
+
+def _titles_between_nazms(paragraphs: list[Paragraph], kinds: list[str]) -> list[int]:
+    """Indices of titles classify read as a line of the poem before them.
+
+    حقیقت's thirteen نظمیں ran into one 234-line piece because nothing
+    closed each one: ریٹائرمنٹ sat between رات کی بات تو رات کی بات تھی!
+    and the next poem's first line, verse on both sides. Two flush-set lines
+    are excluded as what they are in this book: a bracketed line is a part
+    number (۲) or a dedication (عمیر ساجد کے لیے) inside one poem, and a line
+    closing "… کے نام" or "… کے لیے" is a dedication.
+    """
+    titles = []
+    for index, para in enumerate(paragraphs):
+        text = para.text.strip()
+        if (kinds[index] != VERSE or para.geometry != SECOND_MISRA_GEOMETRY
+                or len(text) > NAZM_TITLE_MAX_CHARS
+                or text.startswith("(") or DEDICATION_CLOSE.search(text)):
+            continue
+        previous = index - 1
+        while previous >= 0 and kinds[previous] == RUNNING_HEADER:
+            previous -= 1
+        if (previous >= 0 and kinds[previous] == VERSE
+                and paragraphs[previous].geometry == SECOND_MISRA_GEOMETRY):
+            titles.append(index)
+    return titles
+
+
+def reading(
+    paragraphs: list[Paragraph],
+    sections: Iterable[str] = (),
+    gathered_collections: dict | None = None,
+) -> list[str]:
+    """One kind per paragraph, exactly as segmentation reads the book.
+
+    `classify`, plus the one correction segmentation makes on top of it: a
+    title between two نظمیں is read as unknown, not verse, so it ends the
+    poem above it and titles the next (see `_titles_between_nazms`). Only
+    for a volume without a gathered-collections table: جلد ۱ has one and
+    was published without this correction. The conservation gate must count verse by THIS
+    reading, not classify's: otherwise a line segmentation rightly made a
+    title is reported as verse it lost.
+    """
+    kinds = classify(paragraphs, sections)
+    if not gathered_collections:
+        for index in _titles_between_nazms(paragraphs, kinds):
+            kinds[index] = UNKNOWN
+    return kinds
 
 
 # An essay's heading is its title and, sometimes, its author's name — at most

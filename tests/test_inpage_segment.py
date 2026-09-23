@@ -329,17 +329,28 @@ class TestSegmentBook(unittest.TestCase):
 
     def test_a_short_line_enclosed_by_verse_joins_the_poem(self):
         # The cost of that rule, stated rather than left to be discovered: a
-        # title printed with verse on BOTH sides is indistinguishable from a
-        # line of free verse — کلیات جلد ۲ prints سٹَیٹَس کُو (11 chars, ¶802)
-        # and دِیمک (5, ¶846) exactly like it prints سُکڑ کر (7, ¶883), which
-        # is a line of the نظم around it. classify() reads the enclosed
-        # position as verse, so the run is not broken here and the two poems
-        # become one piece carrying the title as a line. Nothing is lost —
-        # conservation holds and the text still reaches a reviewer — but the
-        # boundary is not found, and this locks which way the trade was made.
+        # title printed with verse on BOTH sides is mostly indistinguishable
+        # from a line of free verse — کلیات جلد ۲ prints دِیمک (5 chars,
+        # ¶846, after مبارک ہو! at geometry 36) much as it prints سُکڑ کر
+        # (7, ¶883), a line of the نظم around it. classify() reads the
+        # enclosed position as verse, so the run is not broken here and the
+        # two poems become one piece carrying the title as a line. Nothing is
+        # lost — conservation holds and the text still reaches a reviewer —
+        # but the boundary is not found, and this locks which way the trade
+        # was made. (The one setting that DOES give a title away — flush,
+        # straight after a flush line — is TestTitleBetweenNazms.)
+        before = [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("خواب", 1)]
+        pieces = segment(FRONT + GHAZAL + before + self.NAZM + [para("یاد", 1)] + self.NAZM)
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertIn("یاد", nazms[0].body.split("\n"))
+
+    def test_a_title_after_a_flush_misra_is_found(self):
+        # The same fixture's old shape: a ghazal's closing misra is set flush,
+        # and a short flush line straight after it cannot be another misra.
         pieces = segment(FRONT + GHAZAL + [para("یاد", 1)] + self.NAZM)
-        self.assertEqual(len(pieces), 1)
-        self.assertIn("یاد", pieces[0].body.split("\n"))
+        self.assertEqual([p.kind for p in pieces], ["ghazals", "nazms"])
+        self.assertEqual(pieces[1].title, "یاد")
 
     def test_prose_becomes_a_review(self):
         pieces = segment(FRONT + GHAZAL + [para("ا" * 300, 67)])
@@ -1278,3 +1289,41 @@ class TestCollectionOpening(unittest.TestCase):
         )
         review = next(p for p in pieces if p.kind == "reviews")
         self.assertNotIn("کبھی باد و آتشِ تیز میں ہے مری نمو", self._text_of(review))
+
+
+class TestTitleBetweenNazms(unittest.TestCase):
+    """حقیقت's thirteen نظمیں ran into one 234-line piece.
+
+    No colophon closes them, so each title sits with verse on both sides and
+    was read as a line of the poem before it. What gives a title away is its
+    setting: flush (geometry 1) straight after another flush line — ¶8019
+    رات کی بات تو رات کی بات تھی! then ¶8020 ریٹائرمنٹ — where two second
+    misras can never follow one another, and too short to be a misra at all.
+    """
+
+    FIRST = [
+        para("نیند کا ڈوریا اب لپٹنے کو ہے", 35), para("خواب چَھٹنے کو ہے", 29),
+        para("رات کی بات ہے", 59), para("رات کی بات تو رات کی بات تھی!", 1),
+    ]
+    SECOND = [
+        para("بہت دیر تک کاغذوں میں رہا ہُوں", 95),
+        para("بہت دیر تک مجھ کو لفظوں کے مِسطر سے ناپا گیا ہے", 65),
+        para("تعفن زدہ کائی کے رنگ جیسے، کسیلے", 87),
+    ]
+
+    def test_a_short_flush_line_after_a_flush_line_is_a_title(self):
+        pieces = segment(
+            FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("رات کی بات ہے", 1)]
+            + self.FIRST + [para("ریٹائرمنٹ", 1)] + self.SECOND
+        )
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual([n.title for n in nazms], ["رات کی بات ہے", "ریٹائرمنٹ"])
+        self.assertEqual(nazms[1].body.split("\n")[0], "بہت دیر تک کاغذوں میں رہا ہُوں")
+
+    def test_a_part_number_does_not_split_its_poem(self):
+        # ¶2222: (۲) — the second part of one نظم, not a poem of its own.
+        pieces = segment(
+            FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("رات کی بات ہے", 1)]
+            + self.FIRST + [para("(۲)", 1)] + self.SECOND
+        )
+        self.assertEqual(len([p for p in pieces if p.kind == "nazms"]), 1)

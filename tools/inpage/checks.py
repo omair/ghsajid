@@ -33,6 +33,7 @@ from .groundtruth import (
 )
 from .models import VERSE_KINDS, Paragraph, Segment
 from .printed_index import DECLARED_POEMS
+from .segment import reading
 
 WORD = re.compile(r"[^\s]+")
 
@@ -571,6 +572,7 @@ def conservation_errors(
     paragraphs: list[Paragraph],
     segments: list[Segment],
     sections: Iterable[str] = (),
+    gathered_collections: dict | None = None,
 ) -> list[str]:
     """No verse text is missing or duplicated corpus-wide.
 
@@ -597,11 +599,13 @@ def conservation_errors(
     that line twice, so emitting it twice is conservation, not duplication.
     Emitting it more often than the source prints it still fails.
     """
-    # Classified with the SAME section names the segmentation used. Without
-    # them موسم's سعیر / حمدِ سعیر classify as verse here and as headings
-    # there, so sixteen paragraphs that correctly reach no body would be
-    # reported as verse this pipeline had lost.
-    kinds = classify(paragraphs, sections)
+    # Read EXACTLY as the segmentation read it — same section names, same
+    # gathered-collections table. Without the section names موسم's سعیر /
+    # حمدِ سعیر classify as verse here and as headings there, so sixteen
+    # paragraphs that correctly reach no body would be reported as verse this
+    # pipeline had lost; without the table, a title segmentation found
+    # between two نظمیں — ریٹائرمنٹ — is reported the same way.
+    kinds = reading(paragraphs, sections, gathered_collections)
     expected = collections.Counter(
         para.text.strip()
         for para, kind in zip(paragraphs, kinds)

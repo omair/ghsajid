@@ -193,6 +193,7 @@ class TestKulliyatGroundTruth(unittest.TestCase):
                     conservation_errors(
                         paragraphs, segments,
                         SECTION_NAMES_BY_BOOK.get(slug, ()),
+                        GATHERED_COLLECTIONS.get(slug, {}),
                     ),
                     [],
                 )
@@ -437,8 +438,13 @@ JILD_1_COLLECTIONS = (
 # poem: segment._dedication_pages reads it as a flagged title page. ہست و بُود
 # and حقیقت lost two, their dedication — or a foreword's title — having been
 # split across two pieces.
+#
+# Then a title set flush straight after a flush line began to end the poem
+# above it (segment._titles_between_nazms): حقیقت's مناجات had run on through
+# five more نظمیں (71 -> 76), and نیند میں چلتے ہوئے gave up خواب کے درمیاں
+# and مَیں دور نکل آیا ہوں from the poems they had been read into (72 -> 74).
 JILD_2_COLLECTIONS = {
-    "نیند میں چلتے ہوئے": 72,
+    "نیند میں چلتے ہوئے": 74,
     "چہار دریا": 50,
     "ہست و بُود": 96,
     # 101 against the 100 its own 2017 edition declares — see
@@ -446,7 +452,7 @@ JILD_2_COLLECTIONS = {
     # report: a ghazal on the radif اد is split in two. The other, the
     # book's dedication page counting as a poem, is gone.
     "اِعادہ": 101,
-    "حقیقت": 71,
+    "حقیقت": 76,
     "گُلِ سیمیا": 127,
 }
 
@@ -532,11 +538,12 @@ class TestKulliyatJild1Collections(unittest.TestCase):
         paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
         header_only = _distribution(segment(paragraphs))
         self.assertEqual(header_only["موسم"], 0)
-        # 242, not 243: without the table, a collection's dedication page is
-        # read as its own flagged title page (segment._dedication_pages), so
-        # عناصر's محمدخالد کے لیے no longer counts among its poems. The
-        # pipeline passes the table and never takes this path.
-        self.assertEqual(header_only["عناصر"], 242)
+        # عناصر's own فہرست declares 100; read by headers alone it swallows
+        # موسم's 130 as well. The exact figure (243 when this was written)
+        # moves with every reading a table-less volume gets — a dedication
+        # page, a title between نظمیں — none of which the pipeline applies
+        # here, since it passes the table. What must hold is the swallowing.
+        self.assertGreater(header_only["عناصر"], 200)
 
     def test_every_title_page_is_found_and_named(self):
         self.assertEqual(

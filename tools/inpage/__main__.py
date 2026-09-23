@@ -220,7 +220,8 @@ def cmd_segment(book_slug: str) -> None:
         + apply_printed_titles(segments, book_slug, UNPUBLISHABLE)
         + toc_count_errors(paragraphs, segments)
         + conservation_errors(
-            paragraphs, segments, SECTION_NAMES_BY_BOOK.get(book_slug, ())
+            paragraphs, segments, SECTION_NAMES_BY_BOOK.get(book_slug, ()),
+            GATHERED_COLLECTIONS.get(book_slug, {}),
         )
         # A title page the volume prints that this table cannot name, and the
         # two counts کلیات جلد ۱'s own فہرست declares. Both are no-ops for a
