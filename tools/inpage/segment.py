@@ -141,6 +141,33 @@ def _is_ghazal_shaped(run: list[Paragraph]) -> bool:
     return clean / len(shers) >= GHAZAL_SHAPE_THRESHOLD
 
 
+# The fewest shers a نظم's tail must hold, every one pairing cleanly, before it
+# is read as ghazals of their own. A نظم may close on a couplet or two; the
+# shortest ghazal-form poem after حقیقت's مناجات runs six.
+GHAZAL_TAIL_MIN_SHERS = 4
+
+
+def _ghazal_tail(run: list[Paragraph]) -> int | None:
+    """Where a نظم-shaped run turns into ghazals, or None.
+
+    حقیقت's منظومات open on مناجات — sixteen lines that never pair — and run
+    straight on into eight ghazal-form poems, with no title or colophon
+    between them. `_is_ghazal_shaped` judges the run once, as a whole, so
+    the نظم's lines made it all one نظم and the shers after them were never
+    split by rhyme. This finds the earliest line, after a flush-set close,
+    from which every line to the end pairs into a sher, at least
+    GHAZAL_TAIL_MIN_SHERS of them.
+    """
+    for start in range(1, len(run) - 2 * GHAZAL_TAIL_MIN_SHERS + 1):
+        if (run[start - 1].geometry != SECOND_MISRA_GEOMETRY
+                or run[start].geometry == SECOND_MISRA_GEOMETRY):
+            continue
+        shers = pair_shers(run[start:])
+        if len(shers) >= GHAZAL_TAIL_MIN_SHERS and all(second for _, second in shers):
+            return start
+    return None
+
+
 def _ghazal_body(shers: list[tuple[str, str]]) -> str:
     return "\n\n".join(
         "\n".join(line for line in sher if line) for sher in shers
@@ -582,6 +609,49 @@ def segment(
         pieces.append(piece)
         return piece
 
+    def emit_ghazals(
+        run: list[Paragraph], run_collections: list[str], run_indices: list[int],
+    ) -> None:
+        cursor = 0
+        # Orphans are rejoined BEFORE the run is split into ghazals,
+        # so a maqtaa whose second misra lost its geometry marker is
+        # one sher everywhere downstream: `split_ghazals` no longer
+        # has to read that bare second misra as a candidate matlaa,
+        # the ghazal's rhyme is measured with it included, and the
+        # line-count cursor below counts it as the two lines it is.
+        # Where the source states its own boundaries there is nothing
+        # for rhyme to find: اِعادہ's ornament already says where each
+        # of its hundred poems ends, and splitting again on rhyme took
+        # it to 204.
+        shers = merge_orphan_shers(pair_shers(run))
+        groups = [shers] if explicit_pieces else split_ghazals(shers)
+        for group in groups:
+            # `group_end` counts the lines the SOURCE holds, so it is
+            # taken before the dedication is lifted out of the body —
+            # the cursor walks the run's own lines and must not skip
+            # one just because it stopped being verse.
+            group_end = cursor + sum(
+                2 if second else 1 for _, second in group
+            )
+            group, dedication = _lift_dedication(group)
+            flags = ["half-sher"] if any(not s[1] for s in group) else []
+            # Backfilled from the book's first header only when
+            # THIS group's own last line still precedes it — a
+            # group whose text runs past the header keeps its
+            # natural collection (see `_position_collection`).
+            piece_collection, attributed = _position_collection(
+                run_collections[cursor], run_indices[group_end - 1],
+                first_header_index, first_header_name,
+            )
+            cursor = group_end
+            piece = add(
+                "ghazals", group[0][0], _ghazal_body(group), flags,
+                piece_collection,
+            )
+            piece.dedication = dedication
+            if attributed and position_attributed is not None:
+                position_attributed.append(piece)
+
     index = 0
     while index < len(paragraphs):
         kind = kinds[index]
@@ -793,61 +863,33 @@ def segment(
                         (title_candidate_index, title_candidate)
                     )
                 pending_drops.extend((i, paragraphs[i].text) for i in opening)
-                cursor = 0
-                # Orphans are rejoined BEFORE the run is split into ghazals,
-                # so a maqtaa whose second misra lost its geometry marker is
-                # one sher everywhere downstream: `split_ghazals` no longer
-                # has to read that bare second misra as a candidate matlaa,
-                # the ghazal's rhyme is measured with it included, and the
-                # line-count cursor below counts it as the two lines it is.
-                # Where the source states its own boundaries there is nothing
-                # for rhyme to find: اِعادہ's ornament already says where each
-                # of its hundred poems ends, and splitting again on rhyme took
-                # it to 204.
-                shers = merge_orphan_shers(pair_shers(run))
-                groups = [shers] if explicit_pieces else split_ghazals(shers)
-                for group in groups:
-                    # `group_end` counts the lines the SOURCE holds, so it is
-                    # taken before the dedication is lifted out of the body —
-                    # the cursor walks the run's own lines and must not skip
-                    # one just because it stopped being verse.
-                    group_end = cursor + sum(
-                        2 if second else 1 for _, second in group
-                    )
-                    group, dedication = _lift_dedication(group)
-                    flags = ["half-sher"] if any(not s[1] for s in group) else []
-                    # Backfilled from the book's first header only when
-                    # THIS group's own last line still precedes it — a
-                    # group whose text runs past the header keeps its
-                    # natural collection (see `_position_collection`).
-                    piece_collection, attributed = _position_collection(
-                        run_collections[cursor], run_indices[group_end - 1],
-                        first_header_index, first_header_name,
-                    )
-                    cursor = group_end
-                    piece = add(
-                        "ghazals", group[0][0], _ghazal_body(group), flags,
-                        piece_collection,
-                    )
-                    piece.dedication = dedication
-                    if attributed and position_attributed is not None:
-                        position_attributed.append(piece)
+                emit_ghazals(run, run_collections, run_indices)
             else:
+                # Ghazals the نظم runs straight on into — see `_ghazal_tail`.
+                # Only for a volume without a gathered-collections table, like
+                # this file's other readings, and never where the source marks
+                # its own boundaries.
+                tail = None
+                if not gathered_collections and not explicit_pieces:
+                    tail = _ghazal_tail(run)
+                end = tail if tail is not None else len(run)
                 title = title_candidate or run[0].text
                 if title_candidate:
                     consumed.add(title_candidate_index)
                 consumed.update(opening)
-                run = [paragraphs[i] for i in opening] + run
+                nazm = [paragraphs[i] for i in opening] + run[:end]
                 piece_collection, attributed = _position_collection(
-                    run_collections[0], run_indices[-1],
+                    run_collections[0], run_indices[end - 1],
                     first_header_index, first_header_name,
                 )
                 piece = add(
-                    "nazms", title, "\n".join(p.text for p in run), [],
+                    "nazms", title, "\n".join(p.text for p in nazm), [],
                     piece_collection,
                 )
                 if attributed and position_attributed is not None:
                     position_attributed.append(piece)
+                if tail is not None:
+                    emit_ghazals(run[tail:], run_collections[tail:], run_indices[tail:])
             consumed.update(range(start, index))
             title_candidate = ""
             title_candidate_index = -1

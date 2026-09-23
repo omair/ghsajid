@@ -443,6 +443,10 @@ JILD_1_COLLECTIONS = (
 # above it (segment._titles_between_nazms): حقیقت's مناجات had run on through
 # five more نظمیں (71 -> 76), and نیند میں چلتے ہوئے gave up خواب کے درمیاں
 # and مَیں دور نکل آیا ہوں from the poems they had been read into (72 -> 74).
+#
+# Then a نظم's run stopped swallowing the ghazals it runs straight on into
+# (segment._ghazal_tail): مناجات gave up the eight ghazal-form poems after it
+# — a دعا, نعتیں, a سلام — and حقیقت went 76 -> 84, against 82 declared.
 JILD_2_COLLECTIONS = {
     "نیند میں چلتے ہوئے": 74,
     "چہار دریا": 50,
@@ -452,7 +456,7 @@ JILD_2_COLLECTIONS = {
     # report: a ghazal on the radif اد is split in two. The other, the
     # book's dedication page counting as a poem, is gone.
     "اِعادہ": 101,
-    "حقیقت": 76,
+    "حقیقت": 84,
     "گُلِ سیمیا": 127,
 }
 

@@ -1327,3 +1327,41 @@ class TestTitleBetweenNazms(unittest.TestCase):
             + self.FIRST + [para("(۲)", 1)] + self.SECOND
         )
         self.assertEqual(len([p for p in pieces if p.kind == "nazms"]), 1)
+
+
+class TestGhazalsAfterANazm(unittest.TestCase):
+    """حقیقت's منظومات open on مناجات, a نظم, and then run eight ghazal-form
+    poems — a دعا, نعتیں, a سلام — with no title or colophon between them.
+
+    The run was judged once, as a whole: sixteen lines that never pair made
+    it a نظم, so the shers after them were never split by rhyme and nine
+    poems went out as one.
+    """
+
+    NAZM = [
+        para("صبحِ اُمّید کے ستارہ ساز", 51), para("اے مری سرِّ نور کے ہم راز", 51),
+        para("تُو ہے آبادیٔ شبِ دِیروز", 51), para("تُو ہے میرے چراغ کی پرواز", 57),
+        para("اِس قدر ہو مرا جنوں طنّاز", 1),
+    ]
+
+    def _book(self, after_nazm):
+        return (
+            FRONT + GHAZAL + [para("۰۰۰", 1), para("مناجات", 1)]
+            + self.NAZM + after_nazm
+        )
+
+    def test_the_shers_after_a_nazm_are_ghazals(self):
+        pieces = segment(self._book(_clean_shers(1, 5)))
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertEqual(nazms[0].title, "مناجات")
+        self.assertEqual(len(nazms[0].body.split("\n")), len(self.NAZM))
+        ghazal_text = "\n".join(p.body for p in pieces if p.kind == "ghazals")
+        self.assertIn("پہلا مصرع نمبر 5 یہاں پڑا اول", ghazal_text)
+
+    def test_a_nazm_closing_on_one_couplet_stays_whole(self):
+        # One sher is not a ghazal: a نظم may well close on a couplet.
+        pieces = segment(self._book(_clean_shers(1, 1)))
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertIn("دوسرا مصرع نمبر 1 یہاں پڑا دوم", nazms[0].body)
