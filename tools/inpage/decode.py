@@ -30,6 +30,7 @@ import struct
 import unicodedata
 
 from .codepage import decode_byte
+from .marks import reattach
 from .models import Paragraph
 
 TEXT_FONT = 0x04
@@ -154,8 +155,14 @@ def _walk(data: bytes):
     yield 0, pairs
 
 
-def decode(data: bytes) -> list[Paragraph]:
-    """Decode `data` into paragraphs, dropping empty ones."""
+def decode(data: bytes, dropped_marks: list[str] | None = None) -> list[Paragraph]:
+    """Decode `data` into paragraphs, dropping empty ones.
+
+    Diacritics the typist floated in front of their word are put back on it
+    (see `marks.reattach`) here, in the one function every caller goes
+    through, so a test, a gate and the pipeline all read the same text. Any
+    mark that could not be placed is appended to `dropped_marks`.
+    """
     paragraphs: list[Paragraph] = []
     for geometry, pairs in _walk(data):
         codes = _text_codes(pairs)
@@ -182,7 +189,10 @@ def decode(data: bytes) -> list[Paragraph]:
             text=text, geometry=geometry, raw=raw, codes=codes,
         ))
 
-    return [p for p in paragraphs if p.text]
+    fixed, dropped = reattach([p for p in paragraphs if p.text])
+    if dropped_marks is not None:
+        dropped_marks.extend(dropped)
+    return fixed
 
 
 def all_codes(data: bytes) -> list[int]:

@@ -645,6 +645,27 @@ def conservation_errors(
     return errors
 
 
+# A combining mark at the start of a word belongs to no letter — it is a mark
+# on a space. `marks.reattach` puts every one it finds back on its word; this
+# gate proves none reached a staged piece, whatever the path.
+FLOATING_MARK = re.compile(r"(?:^|\s)[\u064B-\u0652\u0670]")
+
+
+def floating_mark_errors(segments: list[Segment]) -> list[str]:
+    """Gate F — no staged piece carries a mark with no letter under it."""
+    errors = []
+    for segment in segments:
+        for field, text in (("title", segment.title), ("body", segment.body),
+                            ("dedication", segment.dedication)):
+            found = len(FLOATING_MARK.findall(text))
+            if found:
+                errors.append(
+                    f"{segment.kind}/{segment.title[:30]}: {found} floating "
+                    f"mark(s) in its {field}"
+                )
+    return errors
+
+
 def verse_errors(segments: list[Segment]) -> list[str]:
     """Gate E — every sher kept both of its misra."""
     errors = []

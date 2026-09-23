@@ -253,6 +253,87 @@ class TestPromote(unittest.TestCase):
         self.assertTrue(any("text differs from the archive" in p for p in problems))
         self.assertEqual(existing.read_bytes(), before)
 
+    # The published text of an already-promoted book can be wrong in its marks
+    # only: `marks.reattach` came after جلد ۱ went live. A re-run must correct
+    # those pages where they stand. Moving a mark changes the slug —
+    # umaharam-aa-gia-hai becomes muharam-aa-gia-hai — so the piece is found
+    # by its letters, and it keeps the URL it already has.
+    FLOATING = Segment(kind="ghazals", title="ُمحرّم آ گیا", body="ُمحرّم آ گیا\nدوم", order=1)
+    PLACED = Segment(kind="ghazals", title="مُحرّم آ گیا", body="مُحرّم آ گیا\nدوم", order=1)
+
+    def test_refreshes_its_own_piece_when_only_the_marks_moved(self):
+        self._stage_approved("tajawuz", [self.PLACED])
+        existing = write_segment(self.FLOATING, "tajawuz", self.content)
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [existing])
+        self.assertTrue(any("refreshed" in p for p in problems))
+        text = existing.read_text(encoding="utf-8")
+        self.assertIn("مُحرّم آ گیا\nدوم", text)
+        self.assertIn('title: "مُحرّم آ گیا"', text)
+        self.assertIn(f'slug: "{existing.stem}"', text)
+        self.assertEqual(sorted(p.name for p in (self.content / "ghazals").iterdir()),
+                         [existing.name])
+
+    def test_finds_its_piece_when_a_split_word_was_rejoined(self):
+        # `ا ّکٹھی` becomes اکٹھّی: the letters are the same, but a space went
+        # with the mark. Matching on spacing published it a second time.
+        floating = Segment(kind="ghazals", title="ا ّکٹھی ہو چکی", body="ا ّکٹھی ہو چکی\nدوم", order=1)
+        placed = Segment(kind="ghazals", title="اکٹھّی ہو چکی", body="اکٹھّی ہو چکی\nدوم", order=1)
+        self._stage_approved("tajawuz", [placed])
+        existing = write_segment(floating, "tajawuz", self.content)
+
+        written, _ = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [existing])
+        self.assertIn("اکٹھّی ہو چکی\nدوم", existing.read_text(encoding="utf-8"))
+        self.assertEqual(len(list((self.content / "ghazals").iterdir())), 1)
+
+    def test_a_moved_line_break_is_a_disagreement_not_a_refresh(self):
+        # Same letters, different lines: a misra re-paired across a sher.
+        # That is the book and the site disagreeing about the poem's shape,
+        # which only a human may settle — never a silent refresh.
+        archived = Segment(kind="ghazals", title="اول دوم", body="اول دوم\nسوم\nچہارم", order=1)
+        staged = Segment(kind="ghazals", title="اول دوم", body="اول\nدوم سوم\nچہارم", order=1)
+        self._stage_approved("tajawuz", [staged])
+        existing = write_segment(archived, "tajawuz", self.content)
+        before = existing.read_bytes()
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [])
+        self.assertTrue(any("text differs from the archive" in p for p in problems))
+        self.assertEqual(existing.read_bytes(), before)
+
+    def test_never_refreshes_a_piece_another_source_published(self):
+        self._stage_approved("tajawuz", [self.PLACED])
+        existing = write_segment(self.FLOATING, "bagh-e-nishat-ki-taraf", self.content)
+        before = existing.read_bytes()
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [])
+        self.assertTrue(any("already in the archive" in p for p in problems))
+        self.assertEqual(existing.read_bytes(), before)
+        # Found by its letters, so no second copy under the new slug either.
+        self.assertEqual(len(list((self.content / "ghazals").iterdir())), 1)
+
+    def test_never_refreshes_a_human_piece(self):
+        self._stage_approved("tajawuz", [self.PLACED])
+        existing = write_segment(self.FLOATING, "tajawuz", self.content)
+        existing.write_text(
+            existing.read_text(encoding="utf-8").replace('origin: "tool"', 'origin: "human"'),
+            encoding="utf-8",
+        )
+        before = existing.read_bytes()
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [])
+        self.assertTrue(any("human-authored" in p for p in problems))
+        self.assertEqual(existing.read_bytes(), before)
+
     def test_copies_book_record_when_absent(self):
         segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
         book = Book(title="تجاوز", slug="tajawuz", contents=[segment])
