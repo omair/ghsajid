@@ -918,8 +918,11 @@ class TestDeclaredCollectionCounts(unittest.TestCase):
                 # اِعادہ's own 2017 edition is an InPage 3 document, which
                 # keeps its digits — so its فہرست survives decoding and
                 # numbers its poems 1 to 100. The count came out of the file,
-                # with no photograph needed.
-                "kulliyat-jild-2": {"اِعادہ": 100},
+                # with no photograph needed. حقیقت and گُلِ سیمیا come from
+                # the کلیات's own فہرست, whose entry numbers survive: 1-82
+                # poems plus a critic's flap at 83, and an unnumbered حمد
+                # before 1-124.
+                "kulliyat-jild-2": {"اِعادہ": 100, "حقیقت": 82, "گُلِ سیمیا": 125},
             },
         )
 

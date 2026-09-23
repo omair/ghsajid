@@ -193,6 +193,7 @@ class TestKulliyatGroundTruth(unittest.TestCase):
                     conservation_errors(
                         paragraphs, segments,
                         SECTION_NAMES_BY_BOOK.get(slug, ()),
+                        GATHERED_COLLECTIONS.get(slug, {}),
                     ),
                     [],
                 )
@@ -432,17 +433,33 @@ JILD_1_COLLECTIONS = (
 # these six. What IS checked for this volume is the segmentation ground
 # truth: its share of the 11 WordPress ghazals must still be one piece each
 # (TestKulliyatGroundTruth), and that holds.
+#
+# Each collection then lost its dedication page, which had been counted as a
+# poem: segment._dedication_pages reads it as a flagged title page. ہست و بُود
+# and حقیقت lost two, their dedication — or a foreword's title — having been
+# split across two pieces.
+#
+# Then a title set flush straight after a flush line began to end the poem
+# above it (segment._titles_between_nazms): حقیقت's مناجات had run on through
+# five more نظمیں (71 -> 76), and نیند میں چلتے ہوئے gave up خواب کے درمیاں
+# and مَیں دور نکل آیا ہوں from the poems they had been read into (72 -> 74).
+#
+# Then a نظم's run stopped swallowing the ghazals it runs straight on into
+# (segment._ghazal_tail): مناجات gave up the eight ghazal-form poems after it
+# — a دعا, نعتیں, a سلام — and حقیقت went 76 -> 84, against 82 declared.
 JILD_2_COLLECTIONS = {
-    "نیند میں چلتے ہوئے": 72,
-    "چہار دریا": 51,
-    "ہست و بُود": 98,
-    # 102 against the 100 its own 2017 edition declares — see
-    # DECLARED_COLLECTION_COUNTS. Two known causes remain, both recorded in
-    # the report: the book's dedication page counts as a poem, and one ghazal
-    # on the radif اد is split in two.
-    "اِعادہ": 102,
-    "حقیقت": 73,
-    "گُلِ سیمیا": 128,
+    "نیند میں چلتے ہوئے": 74,
+    "چہار دریا": 50,
+    "ہست و بُود": 96,
+    # Exactly the 100 its own 2017 edition declares — see
+    # DECLARED_COLLECTION_COUNTS. It read 102: the book's dedication page
+    # counted as a poem (now a flagged title page), and the آزاد ghazal split
+    # at بعد, heard baad but spelled with ع (now segment.AIN_AS_ALIF).
+    "اِعادہ": 100,
+    "حقیقت": 84,
+    # 126: مجید امجد's line under the باڑ ghazal is a credited quotation,
+    # no longer a one-sher ghazal of its own (classify.CREDITED_QUOTE).
+    "گُلِ سیمیا": 126,
 }
 
 
@@ -527,7 +544,12 @@ class TestKulliyatJild1Collections(unittest.TestCase):
         paragraphs = decode(read_text_stream(KULLIYAT["kulliyat-jild-1"]))
         header_only = _distribution(segment(paragraphs))
         self.assertEqual(header_only["موسم"], 0)
-        self.assertEqual(header_only["عناصر"], 243)
+        # عناصر's own فہرست declares 100; read by headers alone it swallows
+        # موسم's 130 as well. The exact figure (243 when this was written)
+        # moves with every reading a table-less volume gets — a dedication
+        # page, a title between نظمیں — none of which the pipeline applies
+        # here, since it passes the table. What must hold is the swallowing.
+        self.assertGreater(header_only["عناصر"], 200)
 
     def test_every_title_page_is_found_and_named(self):
         self.assertEqual(

@@ -52,6 +52,13 @@ RHYME_FOLD = str.maketrans(
     {"آ": "ا", "ۂ": "ہ", "ۃ": "ہ", "ؤ": "و", "ۓ": "ے", "ق": "ک"}
 )
 FINAL_HE = re.compile(r"ہ(?=\s|$)")
+# ع closing a syllable after a consonant is heard as the long vowel ا:
+# بعد is baad, and rhymes with آزاد, یاد, فریاد, داد. اِعادہ's آزاد ghazal
+# came out as two pieces for want of it, against the standalone edition that
+# prints it as one. Kept to what was measured — word-final (شمع, جمع) and
+# before a final د (بعد) — because the spelling alone cannot tell بعد from
+# شعر, she'r, whose ع is no ا at all.
+AIN_AS_ALIF = re.compile(r"(?<=[^\sا])ع(?=د?(?:\s|$))")
 
 # A rhyme is compared as characters, not words: the qafia is a *partial* word
 # (نگ سے across سنگ/رنگ/ترنگ, یں تھا across زمیں/مبیں/یقیں), and it is exactly
@@ -139,6 +146,33 @@ def _is_ghazal_shaped(run: list[Paragraph]) -> bool:
     shers = pair_shers(run)
     clean = sum(1 for _, second in shers if second)
     return clean / len(shers) >= GHAZAL_SHAPE_THRESHOLD
+
+
+# The fewest shers a نظم's tail must hold, every one pairing cleanly, before it
+# is read as ghazals of their own. A نظم may close on a couplet or two; the
+# shortest ghazal-form poem after حقیقت's مناجات runs six.
+GHAZAL_TAIL_MIN_SHERS = 4
+
+
+def _ghazal_tail(run: list[Paragraph]) -> int | None:
+    """Where a نظم-shaped run turns into ghazals, or None.
+
+    حقیقت's منظومات open on مناجات — sixteen lines that never pair — and run
+    straight on into eight ghazal-form poems, with no title or colophon
+    between them. `_is_ghazal_shaped` judges the run once, as a whole, so
+    the نظم's lines made it all one نظم and the shers after them were never
+    split by rhyme. This finds the earliest line, after a flush-set close,
+    from which every line to the end pairs into a sher, at least
+    GHAZAL_TAIL_MIN_SHERS of them.
+    """
+    for start in range(1, len(run) - 2 * GHAZAL_TAIL_MIN_SHERS + 1):
+        if (run[start - 1].geometry != SECOND_MISRA_GEOMETRY
+                or run[start].geometry == SECOND_MISRA_GEOMETRY):
+            continue
+        shers = pair_shers(run[start:])
+        if len(shers) >= GHAZAL_TAIL_MIN_SHERS and all(second for _, second in shers):
+            return start
+    return None
 
 
 def _ghazal_body(shers: list[tuple[str, str]]) -> str:
@@ -488,7 +522,15 @@ def segment(
     # alarm. Reconciled against `consumed` at the end.
     pending_drops: list[tuple[int, str]] = []
     headings = heading_map(sections)
-    kinds = classify(paragraphs, sections)
+    kinds = reading(paragraphs, sections, gathered_collections)
+    # A volume with a gathered-collections table already has its title pages
+    # found for it — جلد ۱'s, from its photographed فہرست — and was
+    # published that way; these readings are for a volume without one.
+    dedication_pages: dict[int, int] = {}
+    essay_heads: set[int] = set()
+    if not gathered_collections:
+        dedication_pages = _dedication_pages(paragraphs, kinds)
+        essay_heads = _essay_heads(paragraphs, kinds, dedication_pages)
     collections = collections_at(paragraphs, kinds)
     # The book's very first running header, if it has one at all — see
     # `_position_collection`. تجاوز, باغِ نشاط and کلیات جلد ۱ have none, so
@@ -525,6 +567,11 @@ def segment(
     pieces_before_first_heading: int | None = None
     title_candidate = ""
     title_candidate_index = -1
+    # Short lines straight after a pending title, before any verse: the
+    # نظم opening on lines too short to read as verse — see the UNKNOWN
+    # branch. Indices, so they can be consumed or reported like the title.
+    opening: list[int] = []
+    chain_end = -1
     # Every paragraph index whose text reached a piece — body, title or
     # written_note. What is left over is reported through `unreached`.
     consumed: set[int] = set()
@@ -569,10 +616,79 @@ def segment(
         pieces.append(piece)
         return piece
 
+    def emit_ghazals(
+        run: list[Paragraph], run_collections: list[str], run_indices: list[int],
+    ) -> None:
+        cursor = 0
+        # Orphans are rejoined BEFORE the run is split into ghazals,
+        # so a maqtaa whose second misra lost its geometry marker is
+        # one sher everywhere downstream: `split_ghazals` no longer
+        # has to read that bare second misra as a candidate matlaa,
+        # the ghazal's rhyme is measured with it included, and the
+        # line-count cursor below counts it as the two lines it is.
+        # Where the source states its own boundaries there is nothing
+        # for rhyme to find: اِعادہ's ornament already says where each
+        # of its hundred poems ends, and splitting again on rhyme took
+        # it to 204.
+        shers = merge_orphan_shers(pair_shers(run))
+        groups = [shers] if explicit_pieces else split_ghazals(shers)
+        for group in groups:
+            # `group_end` counts the lines the SOURCE holds, so it is
+            # taken before the dedication is lifted out of the body —
+            # the cursor walks the run's own lines and must not skip
+            # one just because it stopped being verse.
+            group_end = cursor + sum(
+                2 if second else 1 for _, second in group
+            )
+            group, dedication = _lift_dedication(group)
+            flags = ["half-sher"] if any(not s[1] for s in group) else []
+            # Backfilled from the book's first header only when
+            # THIS group's own last line still precedes it — a
+            # group whose text runs past the header keeps its
+            # natural collection (see `_position_collection`).
+            piece_collection, attributed = _position_collection(
+                run_collections[cursor], run_indices[group_end - 1],
+                first_header_index, first_header_name,
+            )
+            cursor = group_end
+            piece = add(
+                "ghazals", group[0][0], _ghazal_body(group), flags,
+                piece_collection,
+            )
+            piece.dedication = dedication
+            if attributed and position_attributed is not None:
+                position_attributed.append(piece)
+
     index = 0
     while index < len(paragraphs):
         kind = kinds[index]
         para = paragraphs[index]
+
+        if index in dedication_pages:
+            # A gathered collection's dedication page: its own piece, flagged
+            # like جلد ۱'s title pages so it stays in staging and the report
+            # but is never published as a poem.
+            end = dedication_pages[index]
+            lines = [
+                paragraphs[i].text for i in range(index, end)
+                if kinds[i] != RUNNING_HEADER
+            ]
+            if title_candidate:
+                pending_drops.append((title_candidate_index, title_candidate))
+            pending_drops.extend((i, paragraphs[i].text) for i in opening)
+            title_candidate, title_candidate_index, opening = "", -1, []
+            add("nazms", lines[0][:MAX_TITLE_LENGTH], "\n".join(lines),
+                [TITLE_PAGE_FLAG], collections[index])
+            consumed.update(range(index, end))
+            boundary = emitted_end = end
+            index = end
+            continue
+
+        if index in essay_heads:
+            # The title or byline of the essay just below; its region, which
+            # starts at the boundary, takes it in. Not a title, not verse.
+            index += 1
+            continue
 
         if kind == RUNNING_HEADER:
             # Page furniture: it names the collection (already captured for
@@ -625,17 +741,48 @@ def segment(
             # with the maqtaa's closing misra and tore اِعادہ's
             # باغِ سبز مرا ghazal in two — so it arrives here instead, right
             # after the piece it was set under.
-            if pieces and DEDICATION.match(para.text.strip()):
+            # A credited quotation (see classify.CREDITED_QUOTE) goes the
+            # same way: printed under the poem that answers it.
+            if pieces and (DEDICATION.match(para.text.strip())
+                           or CREDITED_QUOTE.match(para.text.strip())):
                 pieces[-1].dedication = para.text.strip()
                 consumed.add(index)
+                index += 1
+                continue
+            # The line right after a pending title, before any verse, is the
+            # poem beginning, not a newer title: کلیات جلد ۲ prints a نظم's
+            # title and then opens the نظم on short lines — صُبح ہونے لگی /
+            # نیند آنے لگی — that fall under the verse length. Replacing the
+            # title with each of them titled the poem by its second line and
+            # dropped the first. So the FIRST of a contiguous run is the
+            # title and the rest open the body.
+            #
+            # Two things are NOT an opening line. A line with no letters —
+            # the `(` left of a part number (۱) whose digit InPage stripped —
+            # is neither title nor verse: reported, skipped, and the run goes
+            # on past it. And a line set flush like a title (geometry 1) is a
+            # new title — منظومات, a section's label, then مناجات, the
+            # poem's — where every measured opening line has another setting.
+            contiguous = title_candidate and index == chain_end + 1
+            if contiguous and not any(ch.isalpha() for ch in para.text):
+                pending_drops.append((index, para.text))
+                chain_end = index
+                index += 1
+                continue
+            if contiguous and para.geometry != SECOND_MISRA_GEOMETRY:
+                opening.append(index)
+                chain_end = index
                 index += 1
                 continue
             # A candidate still pending when a new one arrives never reached
             # a piece — see the docstring's note on dropped_unknowns.
             if title_candidate:
                 pending_drops.append((title_candidate_index, title_candidate))
+            pending_drops.extend((i, paragraphs[i].text) for i in opening)
+            opening = []
             title_candidate = para.text
             title_candidate_index = index
+            chain_end = index
             index += 1
             continue
 
@@ -664,6 +811,8 @@ def segment(
             )
             if title_candidate:
                 pending_drops.append((title_candidate_index, title_candidate))
+            pending_drops.extend((i, paragraphs[i].text) for i in opening)
+            opening = []
             title_candidate = ""
             title_candidate_index = -1
             emitted_end = end
@@ -723,62 +872,38 @@ def segment(
                     pending_drops.append(
                         (title_candidate_index, title_candidate)
                     )
-                cursor = 0
-                # Orphans are rejoined BEFORE the run is split into ghazals,
-                # so a maqtaa whose second misra lost its geometry marker is
-                # one sher everywhere downstream: `split_ghazals` no longer
-                # has to read that bare second misra as a candidate matlaa,
-                # the ghazal's rhyme is measured with it included, and the
-                # line-count cursor below counts it as the two lines it is.
-                # Where the source states its own boundaries there is nothing
-                # for rhyme to find: اِعادہ's ornament already says where each
-                # of its hundred poems ends, and splitting again on rhyme took
-                # it to 204.
-                shers = merge_orphan_shers(pair_shers(run))
-                groups = [shers] if explicit_pieces else split_ghazals(shers)
-                for group in groups:
-                    # `group_end` counts the lines the SOURCE holds, so it is
-                    # taken before the dedication is lifted out of the body —
-                    # the cursor walks the run's own lines and must not skip
-                    # one just because it stopped being verse.
-                    group_end = cursor + sum(
-                        2 if second else 1 for _, second in group
-                    )
-                    group, dedication = _lift_dedication(group)
-                    flags = ["half-sher"] if any(not s[1] for s in group) else []
-                    # Backfilled from the book's first header only when
-                    # THIS group's own last line still precedes it — a
-                    # group whose text runs past the header keeps its
-                    # natural collection (see `_position_collection`).
-                    piece_collection, attributed = _position_collection(
-                        run_collections[cursor], run_indices[group_end - 1],
-                        first_header_index, first_header_name,
-                    )
-                    cursor = group_end
-                    piece = add(
-                        "ghazals", group[0][0], _ghazal_body(group), flags,
-                        piece_collection,
-                    )
-                    piece.dedication = dedication
-                    if attributed and position_attributed is not None:
-                        position_attributed.append(piece)
+                pending_drops.extend((i, paragraphs[i].text) for i in opening)
+                emit_ghazals(run, run_collections, run_indices)
             else:
+                # Ghazals the نظم runs straight on into — see `_ghazal_tail`.
+                # Only for a volume without a gathered-collections table, like
+                # this file's other readings, and never where the source marks
+                # its own boundaries.
+                tail = None
+                if not gathered_collections and not explicit_pieces:
+                    tail = _ghazal_tail(run)
+                end = tail if tail is not None else len(run)
                 title = title_candidate or run[0].text
                 if title_candidate:
                     consumed.add(title_candidate_index)
+                consumed.update(opening)
+                nazm = [paragraphs[i] for i in opening] + run[:end]
                 piece_collection, attributed = _position_collection(
-                    run_collections[0], run_indices[-1],
+                    run_collections[0], run_indices[end - 1],
                     first_header_index, first_header_name,
                 )
                 piece = add(
-                    "nazms", title, "\n".join(p.text for p in run), [],
+                    "nazms", title, "\n".join(p.text for p in nazm), [],
                     piece_collection,
                 )
                 if attributed and position_attributed is not None:
                     position_attributed.append(piece)
+                if tail is not None:
+                    emit_ghazals(run[tail:], run_collections[tail:], run_indices[tail:])
             consumed.update(range(start, index))
             title_candidate = ""
             title_candidate_index = -1
+            opening = []
             emitted_end = index
             continue
 
@@ -790,6 +915,7 @@ def segment(
     # after the last UNKNOWN) never reached a piece either.
     if title_candidate:
         pending_drops.append((title_candidate_index, title_candidate))
+    pending_drops.extend((i, paragraphs[i].text) for i in opening)
 
     if pieces_before_first_heading is not None:
         for piece in pieces[:pieces_before_first_heading]:
@@ -847,6 +973,155 @@ def segment_book(book_slug: str, paragraphs: list[Paragraph], **kwargs):
     )
 
 
+# A collection's dedication page closes on "… کے نام" (to …) or
+# "… کے لیے" (for …): زُبیر ساجد کے لیے, اپنے پوتے / محمّد عیسیٰ شہیر / کے نام.
+DEDICATION_CLOSE = re.compile(r"(?:^|\s)کے (?:نام|لیے)\s*$")
+# The longest dedication page in کلیات جلد ۲ runs six lines — (دیوان) /
+# ثروت حُسین / محمّد اظہار الحق / اور / خالد اقبال یاسر / کے نام.
+DEDICATION_MAX_LINES = 8
+
+
+def _dedication_pages(paragraphs: list[Paragraph], kinds: list[str]) -> dict[int, int]:
+    """`{start: end}` of each gathered collection's dedication page.
+
+    Anchored on a collection starting — a running header naming a different
+    collection from the one before it — so a poem that merely ends "… کے نام"
+    is never read as one. The page is the short lines from there to the
+    first that closes a dedication, page headers skipped; anything that is
+    plainly not a dedication (prose, a separator, a colophon, a heading)
+    first means there is none. Only a book with running headers has any:
+    تجاوز, باغِ نشاط and کلیات جلد ۱ have none, so this never fires for them.
+    """
+    pages: dict[int, int] = {}
+    previous = None
+    for header, kind in enumerate(kinds):
+        if kind != RUNNING_HEADER:
+            continue
+        name = skeleton(paragraphs[header].text)
+        if name == previous:
+            continue
+        previous = name
+        lines = 0
+        index = header + 1
+        while index < len(kinds) and lines < DEDICATION_MAX_LINES:
+            if kinds[index] == RUNNING_HEADER:
+                index += 1
+                continue
+            if kinds[index] in (PROSE, SEPARATOR, COLOPHON, TOC, HEADING):
+                break
+            lines += 1
+            if DEDICATION_CLOSE.search(paragraphs[index].text.strip()):
+                pages[header + 1] = index + 1
+                break
+            index += 1
+    return pages
+
+
+# A نظم's title between two نظمیں that no colophon separates. Measured in
+# کلیات جلد ۲: every such title is set flush (geometry 1) straight after
+# another flush line — the last line of the poem before — and runs 10-20
+# characters. Two second misras never follow one another, and a misra runs
+# 28-42 characters, so neither a ghazal nor a sher is ever read this way.
+NAZM_TITLE_MAX_CHARS = 30
+
+
+def _titles_between_nazms(paragraphs: list[Paragraph], kinds: list[str]) -> list[int]:
+    """Indices of titles classify read as a line of the poem before them.
+
+    حقیقت's thirteen نظمیں ran into one 234-line piece because nothing
+    closed each one: ریٹائرمنٹ sat between رات کی بات تو رات کی بات تھی!
+    and the next poem's first line, verse on both sides. Two flush-set lines
+    are excluded as what they are in this book: a bracketed line is a part
+    number (۲) or a dedication (عمیر ساجد کے لیے) inside one poem, and a line
+    closing "… کے نام" or "… کے لیے" is a dedication.
+    """
+    titles = []
+    for index, para in enumerate(paragraphs):
+        text = para.text.strip()
+        if (kinds[index] != VERSE or para.geometry != SECOND_MISRA_GEOMETRY
+                or len(text) > NAZM_TITLE_MAX_CHARS
+                or text.startswith("(") or DEDICATION_CLOSE.search(text)):
+            continue
+        previous = index - 1
+        while previous >= 0 and kinds[previous] == RUNNING_HEADER:
+            previous -= 1
+        if (previous >= 0 and kinds[previous] == VERSE
+                and paragraphs[previous].geometry == SECOND_MISRA_GEOMETRY):
+            titles.append(index)
+    return titles
+
+
+def reading(
+    paragraphs: list[Paragraph],
+    sections: Iterable[str] = (),
+    gathered_collections: dict | None = None,
+) -> list[str]:
+    """One kind per paragraph, exactly as segmentation reads the book.
+
+    `classify`, plus the one correction segmentation makes on top of it: a
+    title between two نظمیں is read as unknown, not verse, so it ends the
+    poem above it and titles the next (see `_titles_between_nazms`). Only
+    for a volume without a gathered-collections table: جلد ۱ has one and
+    was published without this correction. The conservation gate must count verse by THIS
+    reading, not classify's: otherwise a line segmentation rightly made a
+    title is reported as verse it lost.
+    """
+    kinds = classify(paragraphs, sections)
+    if not gathered_collections:
+        for index in _titles_between_nazms(paragraphs, kinds):
+            kinds[index] = UNKNOWN
+    return kinds
+
+
+# An essay's heading is its title and, sometimes, its author's name — at most
+# three short lines between a boundary and the prose. A poem is never that
+# short and never sits directly against prose with nothing between them, so
+# the rule cannot take one: the lines must reach back to a boundary.
+ESSAY_HEAD_MAX_LINES = 3
+ESSAY_HEAD_MAX_CHARS = 60
+
+
+def _essay_heads(
+    paragraphs: list[Paragraph], kinds: list[str], dedication_pages: dict[int, int],
+) -> set[int]:
+    """Indices of the short heading lines that open an essay.
+
+    کلیات جلد ۲ sets a foreword's title as a short line — دیباچہ, حقیقت اور
+    تلاش کا سفر, جدید اُسلوب کا شاعر… — that classify reads as verse or as
+    unknown. Left so, it became a نظم of its own, or the title of the next
+    one, and the essay went out titled by its first sentence. These lines are
+    kept out of any poem so the essay's region, which starts at the boundary,
+    takes them in.
+    """
+    after_dedication = set(dedication_pages.values())
+    heads: set[int] = set()
+    for prose, kind in enumerate(kinds):
+        if kind != PROSE:
+            continue
+        found: list[int] = []
+        index = prose - 1
+        while index >= 0:
+            if kinds[index] == RUNNING_HEADER:
+                index -= 1
+                continue
+            if kinds[index] in (SEPARATOR, HEADING) or index + 1 in after_dedication:
+                heads.update(found)
+                break
+            # A verse line set off the right edge is a first misra: the lines
+            # are a couplet — جلد ۱ sets an epigraph above its forewords —
+            # and a couplet is a poem, however short. Every title or byline
+            # classify reads as verse is set flush (geometry 1).
+            first_misra = (kinds[index] == VERSE
+                           and paragraphs[index].geometry != SECOND_MISRA_GEOMETRY)
+            if (kinds[index] not in (VERSE, UNKNOWN) or first_misra
+                    or len(paragraphs[index].text.strip()) > ESSAY_HEAD_MAX_CHARS
+                    or len(found) == ESSAY_HEAD_MAX_LINES):
+                break
+            found.append(index)
+            index -= 1
+    return heads
+
+
 def _essay_region(
     kinds: list[str],
     prose_index: int,
@@ -896,7 +1171,7 @@ def _attribution(line: str) -> tuple[str, str] | None:
     return match.group("who").strip(), match.group("book").strip()
 
 
-from .classify import DEDICATION  # noqa: E402  (kept beside its use)
+from .classify import CREDITED_QUOTE, DEDICATION  # noqa: E402  (kept beside its use)
 
 
 def _lift_dedication(
@@ -1150,7 +1425,8 @@ def merge_orphan_shers(
 
 def _rhyme_key(text: str) -> str:
     """The form a rhyme is compared in: letters only, sound-folded."""
-    return FINAL_HE.sub("ا", skeleton(text).translate(RHYME_FOLD))
+    folded = skeleton(text).translate(RHYME_FOLD)
+    return AIN_AS_ALIF.sub("ا", FINAL_HE.sub("ا", folded))
 
 
 def _common_suffix(left: str, right: str) -> str:

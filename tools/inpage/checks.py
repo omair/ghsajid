@@ -33,6 +33,7 @@ from .groundtruth import (
 )
 from .models import VERSE_KINDS, Paragraph, Segment
 from .printed_index import DECLARED_POEMS
+from .segment import reading
 
 WORD = re.compile(r"[^\s]+")
 
@@ -467,10 +468,24 @@ DECLARED_COLLECTION_COUNTS: dict[str, dict[str, int]] = {
     # decode and numbers its poems 1 to 100 with no gaps. No photograph
     # needed: the count came out of the file.
     #
-    # The volume's other five collections declare nothing anywhere, in the
-    # کلیات or in the standalone books that exist for two of them (both
-    # InPage 1, digits stripped). Nothing is asserted for those.
-    "kulliyat-jild-2": {"اِعادہ": 100},
+    # CORRECTION, 2026-09-23: this said the other five collections declare
+    # nothing anywhere. Two do, in the volume's own فہرست (¶98-208): the
+    # entry titles are lost, but their NUMBERS survive, gapless and without a
+    # duplicate — حقیقت 1-83, گُلِ سیمیا 1-124. حقیقت's 1-13 precede its
+    # غزلیں sub-heading (منظومات, its نظمیں) and 14-82 follow it; entry 83
+    # is the only one in the فہرست still fused to a name, ۸۳۔غافر شہزاد —
+    # the flap by غافر شہزاد, criticism, not a poem. So 82 for حقیقت.
+    #
+    # گُلِ سیمیا is 125, not 124: its فہرست lists one poem BEFORE its غزلیں
+    # heading and the numbering — ¶153, وہ اگر اذنِ ہم نوائی نہ دے, between
+    # the foreword (طارق ہاشمی) and غزلیں — which is the collection's first
+    # poem in the body, a حمد, indexed apart and unnumbered exactly as جلد ۱
+    # indexes موسم's حمدیں.
+    #
+    # نیند میں چلتے ہوئے، چہار دریا and ہست و بُود have their numbers
+    # stripped in the کلیات, and their standalone editions are InPage 1 too.
+    # Nothing is asserted for those three.
+    "kulliyat-jild-2": {"اِعادہ": 100, "حقیقت": 82, "گُلِ سیمیا": 125},
 }
 
 
@@ -571,6 +586,7 @@ def conservation_errors(
     paragraphs: list[Paragraph],
     segments: list[Segment],
     sections: Iterable[str] = (),
+    gathered_collections: dict | None = None,
 ) -> list[str]:
     """No verse text is missing or duplicated corpus-wide.
 
@@ -597,11 +613,13 @@ def conservation_errors(
     that line twice, so emitting it twice is conservation, not duplication.
     Emitting it more often than the source prints it still fails.
     """
-    # Classified with the SAME section names the segmentation used. Without
-    # them موسم's سعیر / حمدِ سعیر classify as verse here and as headings
-    # there, so sixteen paragraphs that correctly reach no body would be
-    # reported as verse this pipeline had lost.
-    kinds = classify(paragraphs, sections)
+    # Read EXACTLY as the segmentation read it — same section names, same
+    # gathered-collections table. Without the section names موسم's سعیر /
+    # حمدِ سعیر classify as verse here and as headings there, so sixteen
+    # paragraphs that correctly reach no body would be reported as verse this
+    # pipeline had lost; without the table, a title segmentation found
+    # between two نظمیں — ریٹائرمنٹ — is reported the same way.
+    kinds = reading(paragraphs, sections, gathered_collections)
     expected = collections.Counter(
         para.text.strip()
         for para, kind in zip(paragraphs, kinds)

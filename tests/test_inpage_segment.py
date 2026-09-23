@@ -7,7 +7,7 @@ from tools.inpage.flags import TITLE_PAGE_FLAG
 from tools.inpage.models import Paragraph, Segment
 from tools.inpage.segment import (
     KULLIYAT_JILD_1_COLLECTIONS, MAX_TITLE_LENGTH, _is_ghazal_shaped,
-    _position_collection,
+    _position_collection, _rhyme_key,
     attribute_gathered_collections, collection_boundary_dedication, is_matla,
     merge_orphan_shers, pair_shers, run_rhyme, segment, split_ghazals,
 )
@@ -203,6 +203,30 @@ class TestRadifAwareMatla(unittest.TestCase):
         self.assertTrue(is_matla(shers[0][0], shers[0][1], run_rhyme(shers, 0)))
 
 
+class TestAinHeardAsAlif(unittest.TestCase):
+    """اِعادہ's آزاد ghazal came out as two pieces, against the standalone
+    edition that prints it as one: آزاد, یاد, بغداد, داد, then بعد — heard
+    baad, spelled with ع — and the shared rhyme fell from اد to د."""
+
+    SHERS = [
+        ("فکرِ سُود و زَیاں سے ہُوں آزاد", "ہے گلِ نغمہ پر مری بُنیاد"),
+        ("آگ بہنے لگی رَگ و پَے میں", "رنگ لانے لگی کِسی کی یاد"),
+        ("نِیند جب ساتھ دے نہیں پاتی", "یاد آتی ہے راحتِ بغداد"),
+        ("گفتگو سے غرض نہیں مُجھ کو", "مانگتا ہُوں مَیں اپنی چُپ کی داد"),
+        ("مُنتظر کِس کے ہیں زمان و مکاں", "کون آئے گا اب ہمارے بعد"),
+        ("رنگ بھرنے کو باغِ دُنیا میں", "گُھومتا ہے وہی بُتِ شمشاد"),
+        ("آ گیا پِھر کِسی پہ دِل ساجدؔ", "آ پڑی سر پہ اک نئی اُفتاد"),
+    ]
+
+    def test_the_ghazal_stays_whole(self):
+        self.assertEqual(len(split_ghazals(self.SHERS)), 1)
+
+    def test_an_ain_inside_a_word_is_left_alone(self):
+        # شعر is not شار: ع folds only where it closes a syllable at the
+        # end of the word, as in بعد, شمع, جمع.
+        self.assertNotEqual(_rhyme_key("شعر"), _rhyme_key("شار"))
+
+
 class TestSplitGhazalsOnRealText(unittest.TestCase):
     def test_a_husn_e_matla_stays_inside_its_ghazal(self):
         # تجاوز's قیامت ہے ghazal opens twice — a matlaa and a husn-e-matlaa,
@@ -282,19 +306,75 @@ class TestSegmentBook(unittest.TestCase):
         self.assertEqual(len(nazms), 1)
         self.assertEqual(nazms[0].title, "یاد")
 
+    def test_short_opening_lines_after_the_title_are_the_poems_own(self):
+        # کلیات جلد ۲ ¶368-372: a colophon, then the title صُبح ہونے لگی,
+        # then the نظم opening on its own title and a second short line —
+        # صُبح ہونے لگی / نیند آنے لگی — before the first line long enough
+        # to read as verse. Every candidate but the last used to be dropped,
+        # so the poem lost its first two lines and was titled by its second.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۸ ، مئی ۲۰۱۰ئ۔ لاہور", 1), para("صُبح ہونے لگی", 1),
+               para("صُبح ہونے لگی", 25), para("نیند آنے لگی", 65)]
+            + self.NAZM
+        )
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertEqual(nazms[0].title, "صُبح ہونے لگی")
+        self.assertEqual(
+            nazms[0].body.split("\n")[:3],
+            ["صُبح ہونے لگی", "نیند آنے لگی", "مَیں چل رہا تھا"],
+        )
+
+    def test_a_second_line_set_like_a_title_is_the_title(self):
+        # ¶7807-7809: منظومات, the section's label, then مناجات, the نظم's
+        # title — both set flush (geometry 1), which an opening line never
+        # is. The later one is the title; the label stays out of the poem.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۰۰۰", 1), para("منظومات", 1), para("مناجات", 1)]
+            + self.NAZM
+        )
+        nazm = [p for p in pieces if p.kind == "nazms"][0]
+        self.assertEqual(nazm.title, "مناجات")
+        self.assertEqual(nazm.body.split("\n")[0], "مَیں چل رہا تھا")
+
+    def test_a_line_with_no_letters_is_neither_title_nor_verse(self):
+        # ¶1465-1467: مُلتان میں, then `(` — the part number (۱) with its
+        # digit stripped — then the نظم. The bracket is no line of the poem.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("، دسمبر ئ۔ ملتان", 1), para("مُلتان میں", 1), para("(", 49)]
+            + self.NAZM
+        )
+        nazm = [p for p in pieces if p.kind == "nazms"][0]
+        self.assertEqual(nazm.title, "مُلتان میں")
+        self.assertEqual(nazm.body.split("\n")[0], "مَیں چل رہا تھا")
+
     def test_a_short_line_enclosed_by_verse_joins_the_poem(self):
         # The cost of that rule, stated rather than left to be discovered: a
-        # title printed with verse on BOTH sides is indistinguishable from a
-        # line of free verse — کلیات جلد ۲ prints سٹَیٹَس کُو (11 chars, ¶802)
-        # and دِیمک (5, ¶846) exactly like it prints سُکڑ کر (7, ¶883), which
-        # is a line of the نظم around it. classify() reads the enclosed
-        # position as verse, so the run is not broken here and the two poems
-        # become one piece carrying the title as a line. Nothing is lost —
-        # conservation holds and the text still reaches a reviewer — but the
-        # boundary is not found, and this locks which way the trade was made.
+        # title printed with verse on BOTH sides is mostly indistinguishable
+        # from a line of free verse — کلیات جلد ۲ prints دِیمک (5 chars,
+        # ¶846, after مبارک ہو! at geometry 36) much as it prints سُکڑ کر
+        # (7, ¶883), a line of the نظم around it. classify() reads the
+        # enclosed position as verse, so the run is not broken here and the
+        # two poems become one piece carrying the title as a line. Nothing is
+        # lost — conservation holds and the text still reaches a reviewer —
+        # but the boundary is not found, and this locks which way the trade
+        # was made. (The one setting that DOES give a title away — flush,
+        # straight after a flush line — is TestTitleBetweenNazms.)
+        before = [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("خواب", 1)]
+        pieces = segment(FRONT + GHAZAL + before + self.NAZM + [para("یاد", 1)] + self.NAZM)
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertIn("یاد", nazms[0].body.split("\n"))
+
+    def test_a_title_after_a_flush_misra_is_found(self):
+        # The same fixture's old shape: a ghazal's closing misra is set flush,
+        # and a short flush line straight after it cannot be another misra.
         pieces = segment(FRONT + GHAZAL + [para("یاد", 1)] + self.NAZM)
-        self.assertEqual(len(pieces), 1)
-        self.assertIn("یاد", pieces[0].body.split("\n"))
+        self.assertEqual([p.kind for p in pieces], ["ghazals", "nazms"])
+        self.assertEqual(pieces[1].title, "یاد")
 
     def test_prose_becomes_a_review(self):
         pieces = segment(FRONT + GHAZAL + [para("ا" * 300, 67)])
@@ -1140,3 +1220,210 @@ class TestTitlePageSplitFromItsForeword(unittest.TestCase):
             frozenset({"دیباچہ"}),
         )
         self.assertEqual(len(made), 1)
+
+
+class TestCollectionOpening(unittest.TestCase):
+    """کلیات جلد ۲ opens each gathered collection on a dedication page, then
+    the foreword's title and byline, then the foreword.
+
+    The dedication came through as a small نظم that swallowed the title and
+    byline too — ہست و بُود's `کے نام` piece held دیباچہ and ڈاکٹر ناصر عبّاس
+    نیّر — and would have been published as a poem, while the essay it
+    belonged to went out titled by its first sentence.
+    """
+
+    HEADER = "ہست و بُود"
+    PROSE = "ا" * 300
+
+    def _book(self, opening):
+        from tools.inpage.classify import RUNNING_HEADER_MIN
+        trailer = [para(self.HEADER, 60)] * RUNNING_HEADER_MIN
+        return FRONT + GHAZAL + [para(self.HEADER, 1)] + opening + trailer
+
+    def _text_of(self, piece):
+        return piece.title + "\n" + piece.body
+
+    def test_the_dedication_is_its_own_unpublishable_page(self):
+        # ¶3984-3991, verbatim but for the prose.
+        pieces = segment(self._book([
+            para("اپنے پوتے", 43), para("محمّد عیسیٰ شہیر", 13), para("کے نام", 1),
+            para("دیباچہ", 23), para(self.HEADER, 43),
+            para("ڈاکٹر ناصر عبّاس نیّر", 1), para(self.PROSE, 3653),
+        ]))
+        pages = [p for p in pieces if TITLE_PAGE_FLAG in p.flags]
+        self.assertEqual(len(pages), 1)
+        self.assertIn("محمّد عیسیٰ شہیر", self._text_of(pages[0]))
+        self.assertIn("کے نام", self._text_of(pages[0]))
+
+    def test_the_forewords_title_and_byline_go_to_the_foreword(self):
+        pieces = segment(self._book([
+            para("اپنے پوتے", 43), para("محمّد عیسیٰ شہیر", 13), para("کے نام", 1),
+            para("دیباچہ", 23), para(self.HEADER, 43),
+            para("ڈاکٹر ناصر عبّاس نیّر", 1), para(self.PROSE, 3653),
+        ]))
+        review = next(p for p in pieces if p.kind == "reviews")
+        self.assertIn("دیباچہ", self._text_of(review))
+        self.assertIn("ڈاکٹر ناصر عبّاس نیّر", self._text_of(review))
+        self.assertFalse(
+            [p for p in pieces if p.kind == "nazms" and TITLE_PAGE_FLAG not in p.flags]
+        )
+
+    def test_a_title_set_like_a_misra_is_still_the_forewords(self):
+        # ¶7741-7747: حقیقت's dedication, then its foreword's title set flush
+        # (geometry 1), which classify reads as verse.
+        pieces = segment(self._book([
+            para("مریم شہیر", 7), para("اور", 19), para("ارحا شہیر", 13),
+            para("کے نام", 1), para("حقیقت اور تلاش کا سفر", 1),
+            para(self.PROSE, 1577),
+        ]))
+        review = next(p for p in pieces if p.kind == "reviews")
+        self.assertIn("حقیقت اور تلاش کا سفر", self._text_of(review))
+
+    def test_a_title_after_a_separator_goes_to_its_essay(self):
+        # ¶9167-9169: a separator, the essay's title, the essay.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۰۰۰", 1), para("جدید اُسلوب کا شاعرغلام حُسین ساجدؔ", 1),
+               para(self.PROSE, 483)]
+        )
+        self.assertEqual([p.kind for p in pieces], ["ghazals", "reviews"])
+        self.assertIn("جدید اُسلوب کا شاعرغلام حُسین ساجدؔ", self._text_of(pieces[1]))
+
+    def test_a_poem_that_merely_ends_on_a_dedication_is_left_alone(self):
+        # No collection starts here, so a closing کے نام is the poem's own.
+        nazm = [
+            para("مَیں چل رہا تھا", 47), para("سنہرے تانبے کی طشتری پر", 97),
+            para("کوئی نہیں تھا یہاں", 53), para("سب دوستوں کے نام", 51),
+        ]
+        pieces = segment(
+            FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("یاد", 1)] + nazm
+        )
+        self.assertFalse([p for p in pieces if TITLE_PAGE_FLAG in p.flags])
+
+    def test_an_epigraph_couplet_before_an_essay_stays_a_poem(self):
+        # کلیات جلد ۱ ¶143: a couplet set above the foreword — two short
+        # lines, as short as a title and byline, but paired as misra (the
+        # first set off the right edge, the second flush), which a title
+        # never is. It is verse, and must not be read into the essay.
+        pieces = segment(
+            FRONT + GHAZAL
+            + [para("۰۰۰", 1), para("کبھی باد و آتشِ تیز میں ہے مری نمو", 75),
+               para("کبھی خاک میں، کبھی آب میں، کبھی خواب میں", 1),
+               para(self.PROSE, 900)]
+        )
+        review = next(p for p in pieces if p.kind == "reviews")
+        self.assertNotIn("کبھی باد و آتشِ تیز میں ہے مری نمو", self._text_of(review))
+
+
+class TestTitleBetweenNazms(unittest.TestCase):
+    """حقیقت's thirteen نظمیں ran into one 234-line piece.
+
+    No colophon closes them, so each title sits with verse on both sides and
+    was read as a line of the poem before it. What gives a title away is its
+    setting: flush (geometry 1) straight after another flush line — ¶8019
+    رات کی بات تو رات کی بات تھی! then ¶8020 ریٹائرمنٹ — where two second
+    misras can never follow one another, and too short to be a misra at all.
+    """
+
+    FIRST = [
+        para("نیند کا ڈوریا اب لپٹنے کو ہے", 35), para("خواب چَھٹنے کو ہے", 29),
+        para("رات کی بات ہے", 59), para("رات کی بات تو رات کی بات تھی!", 1),
+    ]
+    SECOND = [
+        para("بہت دیر تک کاغذوں میں رہا ہُوں", 95),
+        para("بہت دیر تک مجھ کو لفظوں کے مِسطر سے ناپا گیا ہے", 65),
+        para("تعفن زدہ کائی کے رنگ جیسے، کسیلے", 87),
+    ]
+
+    def test_a_short_flush_line_after_a_flush_line_is_a_title(self):
+        pieces = segment(
+            FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("رات کی بات ہے", 1)]
+            + self.FIRST + [para("ریٹائرمنٹ", 1)] + self.SECOND
+        )
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual([n.title for n in nazms], ["رات کی بات ہے", "ریٹائرمنٹ"])
+        self.assertEqual(nazms[1].body.split("\n")[0], "بہت دیر تک کاغذوں میں رہا ہُوں")
+
+    def test_a_part_number_does_not_split_its_poem(self):
+        # ¶2222: (۲) — the second part of one نظم, not a poem of its own.
+        pieces = segment(
+            FRONT + GHAZAL + [para("۱۷، مئی ۲۰۱۰ئ۔ لاہور", 1), para("رات کی بات ہے", 1)]
+            + self.FIRST + [para("(۲)", 1)] + self.SECOND
+        )
+        self.assertEqual(len([p for p in pieces if p.kind == "nazms"]), 1)
+
+
+class TestGhazalsAfterANazm(unittest.TestCase):
+    """حقیقت's منظومات open on مناجات, a نظم, and then run eight ghazal-form
+    poems — a دعا, نعتیں, a سلام — with no title or colophon between them.
+
+    The run was judged once, as a whole: sixteen lines that never pair made
+    it a نظم, so the shers after them were never split by rhyme and nine
+    poems went out as one.
+    """
+
+    NAZM = [
+        para("صبحِ اُمّید کے ستارہ ساز", 51), para("اے مری سرِّ نور کے ہم راز", 51),
+        para("تُو ہے آبادیٔ شبِ دِیروز", 51), para("تُو ہے میرے چراغ کی پرواز", 57),
+        para("اِس قدر ہو مرا جنوں طنّاز", 1),
+    ]
+
+    def _book(self, after_nazm):
+        return (
+            FRONT + GHAZAL + [para("۰۰۰", 1), para("مناجات", 1)]
+            + self.NAZM + after_nazm
+        )
+
+    def test_the_shers_after_a_nazm_are_ghazals(self):
+        pieces = segment(self._book(_clean_shers(1, 5)))
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertEqual(nazms[0].title, "مناجات")
+        self.assertEqual(len(nazms[0].body.split("\n")), len(self.NAZM))
+        ghazal_text = "\n".join(p.body for p in pieces if p.kind == "ghazals")
+        self.assertIn("پہلا مصرع نمبر 5 یہاں پڑا اول", ghazal_text)
+
+    def test_a_nazm_closing_on_one_couplet_stays_whole(self):
+        # One sher is not a ghazal: a نظم may well close on a couplet.
+        pieces = segment(self._book(_clean_shers(1, 1)))
+        nazms = [p for p in pieces if p.kind == "nazms"]
+        self.assertEqual(len(nazms), 1)
+        self.assertIn("دوسرا مصرع نمبر 1 یہاں پڑا دوم", nazms[0].body)
+
+
+class TestCreditedQuotation(unittest.TestCase):
+    """گُلِ سیمیا's باڑ ghazal answers a line of مجید امجد's, and prints it
+    under the poem with his name: پھول لوہے کی باڑ پر بھی کِھلا (مجیدامجد).
+
+    Read as verse, the quotation paired with the maqtaa's closing misra,
+    left its opening misra stranded — a half sher — and went out as a
+    one-sher ghazal of its own, one of گُلِ سیمیا's two poems too many.
+    """
+
+    GHAZAL = [
+        para("کِھنچی ہوئی ہے مِرے سامنے انوکھی باڑ", 73),
+        para("کہ میرے ساتھ کھڑی ہے مِری صدا کی باڑ", 1),
+        para("یہ بات کون بتائے مجید امجد کو", 81),
+        para("کہ جس میں پھول نہ آئیں وہی ہے اچھّی باڑ", 1),
+        para("چراغِ صبح سے نسبت ہے اب اُسے ساجدؔ", 75),
+        para("کبھی تھی آبِ رُخِ آئنہ کی پیاسی باڑ", 53),
+    ]
+    QUOTE = "پھول لوہے کی باڑ پر بھی کِھلا    (مجیدامجد)"
+
+    def test_the_quotation_goes_under_the_poem_it_answers(self):
+        # Clean shers before it, as in the book, where the باڑ ghazal sits in
+        # a long run of ghazals — enough that the maqtaa's unmarked closing
+        # misra leaves the run clearly ghazal-shaped (GHAZAL_SHAPE_THRESHOLD).
+        pieces = segment(FRONT + _clean_shers(1, 20) + self.GHAZAL + [para(self.QUOTE, 1)])
+        barh = next(p for p in pieces if p.title == "کِھنچی ہوئی ہے مِرے سامنے انوکھی باڑ")
+        self.assertEqual(barh.dedication, self.QUOTE.strip())
+        self.assertNotIn("پھول لوہے کی باڑ", barh.body)
+        self.assertIn("کبھی تھی آبِ رُخِ آئنہ کی پیاسی باڑ", barh.body)
+        self.assertNotIn("half-sher", barh.flags)
+        self.assertFalse([p for p in pieces if "پھول لوہے کی باڑ" in p.title])
+
+    def test_an_aside_inside_a_line_is_still_verse(self):
+        # ¶1502, a line of a نظم: the bracket sits one space away and holds
+        # words, not a name. It stays a line of its poem.
+        from tools.inpage.classify import CREDITED_QUOTE
+        self.assertIsNone(CREDITED_QUOTE.match("بہت نیک نیّتی سے (مگر کسی بھول پن میں)"))
