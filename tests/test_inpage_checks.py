@@ -920,8 +920,9 @@ class TestDeclaredCollectionCounts(unittest.TestCase):
                 # numbers its poems 1 to 100. The count came out of the file,
                 # with no photograph needed. حقیقت and گُلِ سیمیا come from
                 # the کلیات's own فہرست, whose entry numbers survive: 1-82
-                # poems plus a critic's flap at 83, and 1-124.
-                "kulliyat-jild-2": {"اِعادہ": 100, "حقیقت": 82, "گُلِ سیمیا": 124},
+                # poems plus a critic's flap at 83, and an unnumbered حمد
+                # before 1-124.
+                "kulliyat-jild-2": {"اِعادہ": 100, "حقیقت": 82, "گُلِ سیمیا": 125},
             },
         )
 

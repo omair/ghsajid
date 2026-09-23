@@ -474,12 +474,18 @@ DECLARED_COLLECTION_COUNTS: dict[str, dict[str, int]] = {
     # duplicate — حقیقت 1-83, گُلِ سیمیا 1-124. حقیقت's 1-13 precede its
     # غزلیں sub-heading (منظومات, its نظمیں) and 14-82 follow it; entry 83
     # is the only one in the فہرست still fused to a name, ۸۳۔غافر شہزاد —
-    # the flap by غافر شہزاد, criticism, not a poem. So 82 and 124.
+    # the flap by غافر شہزاد, criticism, not a poem. So 82 for حقیقت.
+    #
+    # گُلِ سیمیا is 125, not 124: its فہرست lists one poem BEFORE its غزلیں
+    # heading and the numbering — ¶153, وہ اگر اذنِ ہم نوائی نہ دے, between
+    # the foreword (طارق ہاشمی) and غزلیں — which is the collection's first
+    # poem in the body, a حمد, indexed apart and unnumbered exactly as جلد ۱
+    # indexes موسم's حمدیں.
     #
     # نیند میں چلتے ہوئے، چہار دریا and ہست و بُود have their numbers
     # stripped in the کلیات, and their standalone editions are InPage 1 too.
     # Nothing is asserted for those three.
-    "kulliyat-jild-2": {"اِعادہ": 100, "حقیقت": 82, "گُلِ سیمیا": 124},
+    "kulliyat-jild-2": {"اِعادہ": 100, "حقیقت": 82, "گُلِ سیمیا": 125},
 }
 
 
