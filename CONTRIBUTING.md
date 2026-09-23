@@ -98,9 +98,11 @@ npm run build
 
 `content/` was generated once from a WordPress export by `tools/migrate/`
 (standard-library Python only). It's kept as the record of how the corpus was
-derived. If you touch it, run its tests:
+derived. If you touch it, or the InPage tooling in `tools/inpage/`, run the
+tests. The InPage tests need one third-party package, so install it first:
 
 ```bash
+python3 -m pip install --user -r requirements.txt
 python3 -m unittest discover -s tests -t . -v
 ```
 
