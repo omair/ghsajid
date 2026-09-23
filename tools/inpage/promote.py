@@ -156,6 +156,15 @@ def promote(book_slug: str, staging: Path, content: Path) -> tuple[list[Path], l
                 f"{segment.order} ({segment.kind}) {slug!r}"
             )
             continue
+        # A title with no letters slugifies to nothing, and a collision then
+        # names the file `-2.md`: a page with no name. جلد ۲ staged two that
+        # way, titled `(` — a part number whose digit InPage stripped.
+        if not slug.strip("-") or slug.startswith("-"):
+            problems.append(
+                f"title {segment.title!r} makes no slug, not published: order "
+                f"{segment.order} ({segment.kind}) — give it a real title"
+            )
+            continue
         if segment.kind not in KNOWN_KINDS:
             problems.append(
                 f"unexpected kind {segment.kind!r} for piece {slug!r}, skipped "

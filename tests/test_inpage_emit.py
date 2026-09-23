@@ -334,6 +334,19 @@ class TestPromote(unittest.TestCase):
         self.assertTrue(any("human-authored" in p for p in problems))
         self.assertEqual(existing.read_bytes(), before)
 
+    def test_refuses_a_piece_whose_title_makes_no_slug(self):
+        # جلد ۲ once titled two نظمیں `(` — a part number with its digit
+        # stripped — and they were staged as `-2.md` and `-3.md`: pages with
+        # no name, published as readily as any other.
+        first = Segment(kind="nazms", title="(", body="اول\nدوم", order=1)
+        second = Segment(kind="nazms", title="(", body="سوم\nچہارم", order=2)
+        self._stage_approved("tajawuz", [first, second])
+
+        written, problems = promote("tajawuz", self.staging, self.content)
+
+        self.assertEqual(written, [])
+        self.assertEqual(len([p for p in problems if "no slug" in p]), 2)
+
     def test_copies_book_record_when_absent(self):
         segment = Segment(kind="ghazals", title="پہلی نظم", body="اول\nدوم", order=1)
         book = Book(title="تجاوز", slug="tajawuz", contents=[segment])
